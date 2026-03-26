@@ -7,14 +7,15 @@ import (
 )
 
 func main() {
-	// テスト用のS式
 	code := "(_.set @y (_.add @y 10.5))"
-	fmt.Printf("Input: %s\n", code)
-
-	// パース実行
 	ast := script.Parse(code)
 
-	// 結果の表示
-	// %#v を使うと構造体の型情報付きで詳細に表示されます
-	fmt.Printf("Parsed AST: %#v\n", ast)
+	// コンパイル
+	insts := script.Compile(ast)
+
+	fmt.Println("--- Compiled Instructions ---")
+	for i, ins := range insts {
+		// OpCode をとりあえず数値で表示
+		fmt.Printf("%03d: Op=%d, Val.Str=%s, Val.Num=%g\n", i, ins.Op, ins.Val.Str, ins.Val.Number)
+	}
 }
