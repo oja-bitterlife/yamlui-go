@@ -5,26 +5,26 @@ import (
 	"strings"
 )
 
-// 仮想マシンの構造体
+// **********************************************************************
+// 評価器(VM)の実装
+// ==================================================
+// 外部との連携用データ構造体
 type VM struct {
-	registry map[string]Value
-	vars     map[string]Value
-	cmds     map[string]func(args []Value) (Value, error)
+	vars map[string]Value
+	cmds map[string]func(args []Value) (Value, error)
 }
 
 // VMの初期化
 func NewVM() *VM {
 	return &VM{
-		registry: make(map[string]Value),
-		vars:     make(map[string]Value),
-		cmds:     make(map[string]func(args []Value) (Value, error))}
+		vars: make(map[string]Value),
+		cmds: make(map[string]func(args []Value) (Value, error))}
 }
 
 // ソースコードを実行する関数
 func (vm *VM) Run(src string) (Value, error) {
 	// ソースコードをパース
-	p := NewParser(src)
-	v, err := p.Parse()
+	v, err := parse(src)
 	if err != nil {
 		return Value{}, err
 	}
@@ -47,7 +47,7 @@ func (vm *VM) Run(src string) (Value, error) {
 
 // ==================================================
 // ユーティリティ
-func (vm *VM) evalArgs(args []Value) ([]Value, error) {
+func (vm *VM) EvalArgs(args []Value) ([]Value, error) {
 	results := make([]Value, len(args))
 	for i, arg := range args {
 		v, err := vm.Eval(arg)
@@ -70,7 +70,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeProperty:
 		return vm.vars[v.Str], nil // 変数の値を返す
 	case TypeList:
-		return vm.EvalList(v.List) // ここで再帰
+		return vm.evalList(v.List) // ここで再帰
 	default:
 		return Value{}, errors.New("unknown value type")
 	}
@@ -78,7 +78,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 
 // ==================================================
 // リストを評価する関数
-func (vm *VM) EvalList(list []Value) (Value, error) {
+func (vm *VM) evalList(list []Value) (Value, error) {
 	if len(list) == 0 {
 		return Value{}, nil
 	}
@@ -101,12 +101,12 @@ func (vm *VM) EvalList(list []Value) (Value, error) {
 		args[i-1] = arg
 	}
 
-	return vm.Apply(cmd, args)
+	return vm.applyCmd(cmd, args)
 }
 
 // ==================================================
 // コマンド(リストの先頭)を適用する関数
-func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
+func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 	cleanCmd := strings.TrimPrefix(cmd, "!")
 
 	// 組み込みコマンドはここで直接処理する
@@ -115,17 +115,17 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 		if cmd != cleanCmd {
 			return Value{}, errors.New("set command cannot be used with '!' prefix")
 		}
-		return vm.SetVar(args)
+		return vm.setVar(args)
 	case "switch":
 		if cmd != cleanCmd {
 			return Value{}, errors.New("set command cannot be used with '!' prefix")
 		}
-		return vm.Switch(args)
+		return vm.switch_(args)
 	case "repeat":
 		if cmd != cleanCmd {
 			return Value{}, errors.New("set command cannot be used with '!' prefix")
 		}
-		return vm.Repeat(args)
+		return vm.repeat(args)
 	}
 
 	// コマンドに応じた処理を実装
@@ -142,7 +142,7 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 // ==================================================
 // set
 // 変数に値をセットする
-func (vm *VM) SetVar(args []Value) (Value, error) {
+func (vm *VM) setVar(args []Value) (Value, error) {
 	if len(args) < 2 {
 		return Value{}, errors.New("set requires variable and value")
 	}
@@ -163,7 +163,7 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 		final = val
 	} else {
 		// 可変長の場合
-		results, err := vm.evalArgs(args[1:])
+		results, err := vm.EvalArgs(args[1:])
 		if err != nil {
 			return Value{}, err
 		}
@@ -177,7 +177,7 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 // ==================================================
 // switch
 // 最初の引数を評価して、その値に応じたケースを実行する
-func (vm *VM) Switch(args []Value) (Value, error) {
+func (vm *VM) switch_(args []Value) (Value, error) {
 	if len(args) < 2 {
 		return Value{}, errors.New("switch requires an expression and cases")
 	}
@@ -205,7 +205,7 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 
 	// caseNoの範囲をチェック
 	if caseNo < 1 || caseNo >= len(args) {
-		return Value{}, errors.New("case number out of range")
+		return Value{}, errors.New("case number out of range: " + Itoa(caseNo))
 	}
 
 	// switch先を評価する
@@ -215,7 +215,7 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 // ==================================================
 // repeat
 // 繰り返し処理。引数は、カウンタ変数、繰り返し回数、ブロック
-func (vm *VM) Repeat(args []Value) (Value, error) {
+func (vm *VM) repeat(args []Value) (Value, error) {
 	if len(args) < 2 {
 		return Value{}, errors.New("repeat requires count and block")
 	}

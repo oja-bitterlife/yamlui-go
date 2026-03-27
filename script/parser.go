@@ -5,20 +5,18 @@ import (
 	"strconv"
 )
 
-type Parser struct {
-	tn *Tokenizer
-}
+// **********************************************************************
+// スクリプトの構文解析
+// ==================================================
+// parse. スクリプト全体を解析して、Valueのツリー構造を作る
+func parse(src string) (Value, error) {
+	tn := NewTokenizer(src)
 
-func NewParser(src string) *Parser {
-	return &Parser{tn: NewTokenizer(src)}
-}
-
-func (p *Parser) Parse() (Value, error) {
 	root := Value{Type: TypeList, List: []Value{}}
 
 	// 明示的な ( がなくても、EOFまでトークンを読み続ける
 	for {
-		token, err := p.tn.Next()
+		token, err := tn.Next()
 
 		// エラー
 		if err != nil {
@@ -30,7 +28,7 @@ func (p *Parser) Parse() (Value, error) {
 		}
 
 		// トークンを解析して root.List に append していく
-		val, err := p.parseToken(token)
+		val, err := parseToken(tn, token)
 		if err != nil {
 			return Value{}, err
 		}
@@ -42,11 +40,12 @@ func (p *Parser) Parse() (Value, error) {
 	return root, nil
 }
 
-// トークンを解析してValueに変換する
-func (p *Parser) parseToken(token []byte) (Value, error) {
+// ==================================================
+// parseToken. トークンを解析してValueに変換する
+func parseToken(tn *Tokenizer, token []byte) (Value, error) {
 	switch token[0] {
 	case '(':
-		return p.parseList()
+		return parseList(tn)
 	case ')':
 		return Value{}, errors.New("unexpected ')'")
 	case '"':
@@ -67,11 +66,12 @@ func (p *Parser) parseToken(token []byte) (Value, error) {
 	}
 }
 
-// ()で囲まれたリストを解析する
-func (p *Parser) parseList() (Value, error) {
+// ==================================================
+// parseList. ()で囲まれたリストを解析する
+func parseList(tn *Tokenizer) (Value, error) {
 	var list []Value
 	for {
-		token, err := p.tn.Next()
+		token, err := tn.Next()
 
 		// エラーチェック
 		if err != nil {
@@ -87,7 +87,7 @@ func (p *Parser) parseList() (Value, error) {
 		}
 
 		// 内容を再帰的に解析
-		val, err := p.parseToken(token)
+		val, err := parseToken(tn, token)
 		if err != nil {
 			return Value{}, err
 		}

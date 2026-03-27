@@ -5,13 +5,13 @@ package script
 import "fmt"
 
 func (v Value) Dump() {
-	fmt.Printf("%s\n", v._toStr())
+	fmt.Printf("%s\n", v.toStr())
 }
 
 func (v Value) ToStr() string {
-	return v._toStr()
+	return v.toStr()
 }
-func (v Value) _toStr() string {
+func (v Value) toStr() string {
 	switch v.Type {
 	case TypeNumber:
 		return fmt.Sprintf("[Number] %v", v.Num)
@@ -22,7 +22,7 @@ func (v Value) _toStr() string {
 	case TypeList:
 		str := "[List] ("
 		for _, child := range v.List {
-			str += child._toStr()
+			str += child.toStr()
 		}
 		str += ")"
 		return str

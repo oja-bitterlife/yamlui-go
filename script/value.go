@@ -1,5 +1,6 @@
 package script
 
+// ==================================================
 // 値の型定義
 type ValueType int
 
@@ -15,6 +16,7 @@ const (
 	TypeRepeat // repeat文
 )
 
+// ==================================================
 // Listに格納する型付きの値。リフレクションを避けるため全部入り
 type Value struct {
 	// 型情報
@@ -29,6 +31,7 @@ type Value struct {
 	List []Value
 }
 
+// ==================================================
 // 値の生成関数
 func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
 func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
