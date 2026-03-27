@@ -13,9 +13,9 @@ func main() {
 	(set @count 3)
 (repeat @i @count
   (switch @i
-    (& "First!")
-    (& "Second!")
-    (& "Third!")
+    "First!"
+    "Second!"
+    "Third!"
   )
 )
 `

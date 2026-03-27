@@ -69,13 +69,6 @@ func (vm *VM) Eval(v Value) (Value, error) {
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
 		return vm.vars[v.Str], nil // 変数の値を返す
-	case TypeQuote:
-		if len(v.List) == 1 {
-			return v.List[0], nil // 引数が1つだけならその値を返す
-		}
-		res := v
-		res.Type = TypeList // Quoteの中身をリストとして返す
-		return res, nil
 	case TypeList:
 		return vm.EvalList(v.List) // ここで再帰
 	default:
@@ -133,11 +126,6 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 			return Value{}, errors.New("set command cannot be used with '!' prefix")
 		}
 		return vm.Repeat(args)
-	case "&":
-		if cmd != cleanCmd {
-			return Value{}, errors.New("set command cannot be used with '!' prefix")
-		}
-		return vm.Quote(args)
 	}
 
 	// コマンドに応じた処理を実装
@@ -262,14 +250,4 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 	}
 
 	return lastVal, nil
-}
-
-// ==================================================
-// quote
-// 引数を評価せずにそのまま返す。可変長引数もサポート
-func (vm *VM) Quote(args []Value) (Value, error) {
-	if len(args) == 1 {
-		return NewQuote(args), nil
-	}
-	return NewQuote(args), nil
 }

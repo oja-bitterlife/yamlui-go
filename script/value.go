@@ -9,7 +9,6 @@ const (
 	TypeString
 	TypeProperty // @i などの参照（未評価）
 	TypeList     // (op arg1 arg2)
-	TypeQuote    // リテラル
 
 	// 制御構造の型
 	TypeSwitch // switch文
@@ -36,4 +35,3 @@ func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
 func NewProperty(s string) Value { return Value{Type: TypeProperty, Str: s} }
 func NewList(v []Value) Value    { return Value{Type: TypeList, List: v} }
-func NewQuote(v []Value) Value   { return Value{Type: TypeQuote, List: v} }
