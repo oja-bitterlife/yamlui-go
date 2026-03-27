@@ -68,8 +68,11 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 		return Value{}, fmt.Errorf("unknown command: %s", cmd)
 	}
 
-	if cmd == "set" {
+	switch cmd {
+	case "set":
 		return vm.SetVar(args)
+	case "switch":
+		return vm.Switch(args)
 	}
 
 	return fn(args)
@@ -110,4 +113,41 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 
 	vm.vars[target] = final
 	return final, nil
+}
+
+// ==================================================
+// switch
+func (vm *VM) Switch(args []Value) (Value, error) {
+	if len(args) < 2 {
+		return Value{}, fmt.Errorf("switch requires an expression and cases")
+	}
+
+	// 最初の引数は評価する式
+	exprVal, err := vm.Eval(args[0])
+	if err != nil {
+		return Value{}, err
+	}
+
+	// caseNoとして数値にする
+	caseNo := 0
+	switch exprVal.Type {
+	case TypeNumber:
+		caseNo = int(exprVal.Num) + 1
+	case TypeBool:
+		if exprVal.Bool {
+			caseNo = 1
+		} else {
+			caseNo = 2
+		}
+	default:
+		return Value{}, fmt.Errorf("switch expression must be a number or bool")
+	}
+
+	// caseNoの範囲をチェック
+	if caseNo < 1 || caseNo >= len(args) {
+		return Value{}, fmt.Errorf("case number out of range")
+	}
+
+	// switch先を評価する
+	return vm.Eval(args[caseNo])
 }
