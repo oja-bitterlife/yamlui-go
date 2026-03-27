@@ -45,6 +45,20 @@ func (vm *VM) Run(src string) (Value, error) {
 	return lastVal, nil
 }
 
+// ==================================================
+// ユーティリティ
+func (vm *VM) evalArgs(args []Value) ([]Value, error) {
+	results := make([]Value, len(args))
+	for i, arg := range args {
+		v, err := vm.Eval(arg)
+		if err != nil {
+			return nil, err
+		}
+		results[i] = v
+	}
+	return results, nil
+}
+
 // **********************************************************************
 // 評価関数
 // ==================================================
@@ -161,13 +175,9 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 		final = val
 	} else {
 		// 可変長の場合
-		results := make([]Value, 0, len(args)-1)
-		for i := 1; i < len(args); i++ {
-			val, err := vm.Eval(args[i])
-			if err != nil {
-				return Value{}, err
-			}
-			results = append(results, val)
+		results, err := vm.evalArgs(args[1:])
+		if err != nil {
+			return Value{}, err
 		}
 		final = NewList(results)
 	}
