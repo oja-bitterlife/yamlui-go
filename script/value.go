@@ -9,6 +9,7 @@ const (
 	TypeString
 	TypeProperty // @i などの参照（未評価）
 	TypeList     // (op arg1 arg2)
+	TypeQuote    // リテラル
 
 	// 制御構造の型
 	TypeSwitch // switch文
@@ -34,5 +35,6 @@ type Value struct {
 func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
 func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
-func NewProperty(v string) Value { return Value{Type: TypeProperty, Prop: v} }
+func NewProperty(s string) Value { return Value{Type: TypeProperty, Prop: s} }
 func NewList(v []Value) Value    { return Value{Type: TypeList, List: v} }
+func NewQuote(v []Value) Value   { return Value{Type: TypeQuote, List: v} }

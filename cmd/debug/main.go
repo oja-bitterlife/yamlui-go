@@ -8,13 +8,23 @@ import (
 
 func main() {
 	// code := "(_.set @y (_.add @y 10.5))"
-	src := `set @msg 'Hello "Ozaki"\'s World'`
+	// src := `set @msg 'Hello "Ozaki"\'s World'`
+	src := `
+	(set @count 3)
+(repeat @i @count
+  (switch @i
+    (& "First!")
+    (& "Second!")
+    (& "Third!")
+  )
+)
+`
 
-	p := script.NewParser(src)
-	v, err := p.Parse()
+	vm := script.NewVM()
+	_, err := vm.Run(src)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
-	v.Dump(0)
+	// v.Dump()
 }

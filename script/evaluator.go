@@ -1,6 +1,9 @@
 package script
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 // 仮想マシンの構造体
 type VM struct {
@@ -14,20 +17,50 @@ func NewVM() *VM {
 	return &VM{registry: make(map[string]Value)}
 }
 
+// ソースコードを実行する関数
+func (vm *VM) Run(src string) (Value, error) {
+	// ソースコードをパース
+	p := NewParser(src)
+	v, err := p.Parse()
+	if err != nil {
+		return Value{}, err
+	}
+
+	// Listが空の場合はエラー
+	if len(v.List) == 0 {
+		return Value{}, errors.New("no commands to execute")
+	}
+
+	// リスト(root)に入ってやってくる
+	var lastVal Value
+	for i, v := range v.List {
+		_, err := vm.Eval(v.List[i])
+		if err != nil {
+			return Value{}, err
+		}
+		lastVal = v.List[i]
+	}
+	return lastVal, nil
+}
+
 // **********************************************************************
 // 評価関数
 // ==================================================
 // Valueを評価して、最終的な値を返す関数
 func (vm *VM) Eval(v Value) (Value, error) {
 	switch v.Type {
-	case TypeNumber, TypeString:
+	case TypeNumber, TypeString, TypeBool:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
 		return vm.vars[v.Prop], nil // 変数の値を返す
+	case TypeQuote:
+		res := v            // 値をコピー
+		res.Type = TypeList // ただのリストとして返す
+		return res, nil
 	case TypeList:
 		return vm.EvalList(v.List) // ここで再帰
 	default:
-		return Value{}, nil
+		return Value{}, errors.New("unknown value type")
 	}
 }
 
@@ -45,7 +78,6 @@ func (vm *VM) EvalList(list []Value) (Value, error) {
 	// 引数をすべて評価
 	for i := 1; i < len(list); i++ {
 		// リスト（ネストした式）だけは評価して結果を積む
-		// それ以外（@y や 10）はそのまま積む
 		if list[i].Type == TypeList {
 			arg, err := vm.Eval(list[i])
 			if err != nil {
@@ -56,18 +88,13 @@ func (vm *VM) EvalList(list []Value) (Value, error) {
 			args[i-1] = list[i]
 		}
 	}
+
 	return vm.Apply(cmd, args)
 }
 
 // ==================================================
 // コマンド(リストの先頭)を適用する関数
 func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
-	// コマンドに応じた処理を実装
-	fn, ok := vm.cmds[cmd]
-	if !ok {
-		return Value{}, errors.New("unknown command: " + cmd)
-	}
-
 	// 組み込みコマンドはここで直接処理する
 	switch cmd {
 	case "set":
@@ -76,6 +103,14 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 		return vm.Switch(args)
 	case "repeat":
 		return vm.Repeat(args)
+	case "&":
+		return vm.Quote(args)
+	}
+
+	// コマンドに応じた処理を実装
+	fn, ok := vm.cmds[cmd]
+	if !ok {
+		return Value{}, errors.New("unknown command: " + cmd)
 	}
 
 	return fn(args)
@@ -85,6 +120,7 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 // Builint-in コマンドの実装
 // ==================================================
 // set
+// 変数に値をセットする
 func (vm *VM) SetVar(args []Value) (Value, error) {
 	if len(args) < 2 {
 		return Value{}, errors.New("set requires variable and value")
@@ -120,6 +156,7 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 
 // ==================================================
 // switch
+// 最初の引数を評価して、その値に応じたケースを実行する
 func (vm *VM) Switch(args []Value) (Value, error) {
 	if len(args) < 2 {
 		return Value{}, errors.New("switch requires an expression and cases")
@@ -157,6 +194,7 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 
 // ==================================================
 // repeat
+// 繰り返し処理。引数は、カウンタ変数、繰り返し回数、ブロック
 func (vm *VM) Repeat(args []Value) (Value, error) {
 	if len(args) < 2 {
 		return Value{}, errors.New("repeat requires count and block")
@@ -169,7 +207,7 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 	counterName := args[0].Prop
 
 	// 第２引数は繰り返し回数
-	countVal, err := vm.Eval(args[0])
+	countVal, err := vm.Eval(args[1])
 	if err != nil {
 		return Value{}, err
 	}
@@ -177,6 +215,9 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 		return Value{}, errors.New("repeat count must be a number")
 	}
 	count := int(countVal.Num)
+	args[1].Dump()
+	fmt.Printf("vars: %v\n", vm.vars)
+	fmt.Printf("repeat: count=%d\n", count)
 
 	// 繰り返し回数分ループ
 	var lastVal Value
@@ -193,4 +234,14 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 	}
 
 	return lastVal, nil
+}
+
+// ==================================================
+// quote
+// 引数を評価せずにそのまま返す。可変長引数もサポート
+func (vm *VM) Quote(args []Value) (Value, error) {
+	if len(args) == 1 {
+		return args[0], nil
+	}
+	return NewQuote(args), nil
 }

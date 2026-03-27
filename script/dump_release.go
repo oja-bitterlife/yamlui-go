@@ -2,4 +2,4 @@
 
 package script
 
-func (v Value) Dump(indent int) {}
+func (v Value) Dump() {}
