@@ -1,0 +1,42 @@
+version: 3
+
+vars:
+  VERSION: v0.0.1
+  BIN_DIR: "bin"
+
+tasks:
+  build:
+    desc: "Build"
+    sources:
+      - ./script/*.go
+      - ./cmd/**/*.go
+    generates:
+      - "{{.BIN_DIR}}/main"
+    cmds:
+      - mkdir -p {{.BIN_DIR}}
+      - go build -o {{.BIN_DIR}}/main --tags debug ./cmd/debug
+
+  run:
+    desc: "Run"
+    deps:
+      - build
+    cmds:
+      - "{{.BIN_DIR}}/main"
+
+  clean:
+    desc: "Clean"
+    cmds:
+      - "rm -rf {{.BIN_DIR}}/main"
+
+  tag:
+    desc: "タグを更新する"
+    deps:
+      - build
+    cmds:
+      - git tag {{.VERSION}}
+      - git tag
+
+  default:
+    cmds:
+      - task --list
+

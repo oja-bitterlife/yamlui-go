@@ -8,7 +8,7 @@ import (
 
 func main() {
 	// code := "(_.set @y (_.add @y 10.5))"
-	src := `(set @msg 'Hello "Ozaki"\'s World')`
+	src := `set @msg 'Hello "Ozaki"\'s World'`
 
 	p := script.NewParser(src)
 	v, err := p.Parse()
@@ -16,5 +16,5 @@ func main() {
 		fmt.Println("Error:", err)
 		return
 	}
-	fmt.Printf("%+v\n", v)
+	v.Dump(0)
 }

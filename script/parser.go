@@ -13,16 +13,33 @@ func NewParser(src string) *Parser {
 	return &Parser{tn: NewTokenizer(src)}
 }
 
-// Parse はエントリーポイント
 func (p *Parser) Parse() (Value, error) {
-	token, err := p.tn.Next()
-	if err != nil {
-		return Value{}, err
+	root := Value{Type: TypeList, List: []Value{}}
+
+	// 明示的な ( がなくても、EOFまでトークンを読み続ける
+	for {
+		token, err := p.tn.Next()
+
+		// エラー
+		if err != nil {
+			return Value{}, err
+		}
+		// 空トークンは終了
+		if token == nil {
+			break
+		}
+
+		// トークンを解析して root.List に append していく
+		val, err := p.parseToken(token)
+		if err != nil {
+			return Value{}, err
+		}
+		root.List = append(root.List, val)
 	}
-	if token == nil {
-		return Value{}, nil // 終端
-	}
-	return p.parseToken(token)
+
+	// もし root.List の中身が複数あるなら、
+	// VM側で「順番に実行するもの」として扱う
+	return root, nil
 }
 
 // トークンを解析してValueに変換する
