@@ -68,11 +68,14 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 		return Value{}, fmt.Errorf("unknown command: %s", cmd)
 	}
 
+	// 組み込みコマンドはここで直接処理する
 	switch cmd {
 	case "set":
 		return vm.SetVar(args)
 	case "switch":
 		return vm.Switch(args)
+	case "repeat":
+		return vm.Repeat(args)
 	}
 
 	return fn(args)
@@ -129,7 +132,7 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 	}
 
 	// caseNoとして数値にする
-	caseNo := 0
+	var caseNo int
 	switch exprVal.Type {
 	case TypeNumber:
 		caseNo = int(exprVal.Num) + 1
@@ -150,4 +153,44 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 
 	// switch先を評価する
 	return vm.Eval(args[caseNo])
+}
+
+// ==================================================
+// repeat
+func (vm *VM) Repeat(args []Value) (Value, error) {
+	if len(args) < 2 {
+		return Value{}, fmt.Errorf("repeat requires count and block")
+	}
+
+	// 第１引数は繰り返し用のカウンタ変数（例: @i）
+	if args[0].Type != TypeProperty {
+		return Value{}, fmt.Errorf("first argument must be a property (e.g., @i)")
+	}
+	counterName := args[0].Prop
+
+	// 第２引数は繰り返し回数
+	countVal, err := vm.Eval(args[0])
+	if err != nil {
+		return Value{}, err
+	}
+	if countVal.Type != TypeNumber {
+		return Value{}, fmt.Errorf("repeat count must be a number")
+	}
+	count := int(countVal.Num)
+
+	// 繰り返し回数分ループ
+	var lastVal Value
+	for i := range count {
+		// カウンタ変数を現在の値で更新
+		vm.vars[counterName] = Value{Type: TypeNumber, Num: float64(i)}
+
+		// 第3引数：ブロックを評価
+		val, err := vm.Eval(args[2])
+		if err != nil {
+			return Value{}, err
+		}
+		lastVal = val
+	}
+
+	return lastVal, nil
 }
