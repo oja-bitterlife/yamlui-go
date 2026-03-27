@@ -19,7 +19,7 @@ func (v Value) _dump(indent int) {
 	case TypeString:
 		fmt.Printf("%s[String] %q\n", prefix, v.Str)
 	case TypeProperty:
-		fmt.Printf("%s[Property] %s\n", prefix, v.Prop)
+		fmt.Printf("%s[Property] %s\n", prefix, v.Str)
 	case TypeList:
 		fmt.Printf("%s[List] (\n", prefix)
 		for _, child := range v.List {

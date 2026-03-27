@@ -21,10 +21,10 @@ func main() {
 `
 
 	vm := script.NewVM()
-	_, err := vm.Run(src)
+	result, err := vm.Run(src)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
-	// v.Dump()
+	result.Dump()
 }

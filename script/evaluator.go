@@ -2,7 +2,7 @@ package script
 
 import (
 	"errors"
-	"fmt"
+	"strings"
 )
 
 // 仮想マシンの構造体
@@ -14,7 +14,10 @@ type VM struct {
 
 // VMの初期化
 func NewVM() *VM {
-	return &VM{registry: make(map[string]Value)}
+	return &VM{
+		registry: make(map[string]Value),
+		vars:     make(map[string]Value),
+		cmds:     make(map[string]func(args []Value) (Value, error))}
 }
 
 // ソースコードを実行する関数
@@ -51,7 +54,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeNumber, TypeString, TypeBool:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
-		return vm.vars[v.Prop], nil // 変数の値を返す
+		return vm.vars[v.Str], nil // 変数の値を返す
 	case TypeQuote:
 		res := v            // 値をコピー
 		res.Type = TypeList // ただのリストとして返す
@@ -126,7 +129,10 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 	}
 
 	// 第一引数は保存先
-	target := args[0].Prop
+	target := args[0].Str
+	if !strings.HasPrefix(target, "@") {
+		return Value{}, errors.New("first argument of set must be a property (e.g., @x)")
+	}
 
 	// 第二引数以降は、このタイミングで Eval して「値」にする
 	var final Value
@@ -203,7 +209,7 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 	if args[0].Type != TypeProperty {
 		return Value{}, errors.New("first argument must be a property (e.g., @i)")
 	}
-	counterName := args[0].Prop
+	counterName := args[0].Str
 
 	// 第２引数は繰り返し回数
 	countVal, err := vm.Eval(args[1])
@@ -214,9 +220,6 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 		return Value{}, errors.New("repeat count must be a number")
 	}
 	count := int(countVal.Num)
-	args[1].Dump()
-	fmt.Printf("vars: %v\n", vm.vars)
-	fmt.Printf("repeat: count=%d\n", count)
 
 	// 繰り返し回数分ループ
 	var lastVal Value

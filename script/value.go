@@ -25,7 +25,6 @@ type Value struct {
 	Num  float64
 	Bool bool
 	Str  string
-	Prop string
 
 	// リスト構造 (S式や、分解済みの文字列フラグメント)
 	List []Value
@@ -35,6 +34,6 @@ type Value struct {
 func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
 func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
-func NewProperty(s string) Value { return Value{Type: TypeProperty, Prop: s} }
+func NewProperty(s string) Value { return Value{Type: TypeProperty, Str: s} }
 func NewList(v []Value) Value    { return Value{Type: TypeList, List: v} }
 func NewQuote(v []Value) Value   { return Value{Type: TypeQuote, List: v} }
