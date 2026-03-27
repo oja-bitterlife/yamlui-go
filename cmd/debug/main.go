@@ -2,20 +2,32 @@ package main
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 func main() {
 	code := "(_.set @y (_.add @y 10.5))"
-	ast := script.Parse(code)
 
-	// コンパイル
-	insts := script.Compile(ast)
+	tn := script.NewTokenizer(code)
 
-	fmt.Println("--- Compiled Instructions ---")
-	for i, ins := range insts {
-		// OpCode をとりあえず数値で表示
-		fmt.Printf("%03d: Op=%d, Val.Str=%s, Val.Num=%g\n", i, ins.Op, ins.Val.Str, ins.Val.Number)
+	fmt.Println("Tokens:")
+	for {
+		token, err := tn.Next()
+		if err != nil {
+			if err == io.EOF {
+				break // 正常終了
+			}
+			panic(err) // 予期しないエラー
+		}
+
+		if token == nil {
+			break // 安全策
+		}
+
+		// ここで token に応じて Value 構造体を作る
+		fmt.Printf("Token: [%s]\n", token)
 	}
+
 }
