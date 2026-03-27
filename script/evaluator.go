@@ -1,6 +1,6 @@
 package script
 
-import "fmt"
+import "errors"
 
 // 仮想マシンの構造体
 type VM struct {
@@ -65,7 +65,7 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 	// コマンドに応じた処理を実装
 	fn, ok := vm.cmds[cmd]
 	if !ok {
-		return Value{}, fmt.Errorf("unknown command: %s", cmd)
+		return Value{}, errors.New("unknown command: " + cmd)
 	}
 
 	// 組み込みコマンドはここで直接処理する
@@ -87,7 +87,7 @@ func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
 // set
 func (vm *VM) SetVar(args []Value) (Value, error) {
 	if len(args) < 2 {
-		return Value{}, fmt.Errorf("set requires variable and value")
+		return Value{}, errors.New("set requires variable and value")
 	}
 
 	// 第一引数は保存先
@@ -122,7 +122,7 @@ func (vm *VM) SetVar(args []Value) (Value, error) {
 // switch
 func (vm *VM) Switch(args []Value) (Value, error) {
 	if len(args) < 2 {
-		return Value{}, fmt.Errorf("switch requires an expression and cases")
+		return Value{}, errors.New("switch requires an expression and cases")
 	}
 
 	// 最初の引数は評価する式
@@ -143,12 +143,12 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 			caseNo = 2
 		}
 	default:
-		return Value{}, fmt.Errorf("switch expression must be a number or bool")
+		return Value{}, errors.New("switch expression must be a number or bool")
 	}
 
 	// caseNoの範囲をチェック
 	if caseNo < 1 || caseNo >= len(args) {
-		return Value{}, fmt.Errorf("case number out of range")
+		return Value{}, errors.New("case number out of range")
 	}
 
 	// switch先を評価する
@@ -159,12 +159,12 @@ func (vm *VM) Switch(args []Value) (Value, error) {
 // repeat
 func (vm *VM) Repeat(args []Value) (Value, error) {
 	if len(args) < 2 {
-		return Value{}, fmt.Errorf("repeat requires count and block")
+		return Value{}, errors.New("repeat requires count and block")
 	}
 
 	// 第１引数は繰り返し用のカウンタ変数（例: @i）
 	if args[0].Type != TypeProperty {
-		return Value{}, fmt.Errorf("first argument must be a property (e.g., @i)")
+		return Value{}, errors.New("first argument must be a property (e.g., @i)")
 	}
 	counterName := args[0].Prop
 
@@ -174,7 +174,7 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 		return Value{}, err
 	}
 	if countVal.Type != TypeNumber {
-		return Value{}, fmt.Errorf("repeat count must be a number")
+		return Value{}, errors.New("repeat count must be a number")
 	}
 	count := int(countVal.Num)
 

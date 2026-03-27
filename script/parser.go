@@ -1,7 +1,7 @@
 package script
 
 import (
-	"fmt"
+	"errors"
 	"strconv"
 )
 
@@ -48,11 +48,11 @@ func (p *Parser) parseToken(token []byte) (Value, error) {
 	case '(':
 		return p.parseList()
 	case ')':
-		return Value{}, fmt.Errorf("unexpected ')'")
+		return Value{}, errors.New("unexpected ')'")
 	case '"':
 		// 前後の " を除去して文字列に
 		if len(token) < 2 {
-			return Value{}, fmt.Errorf("invalid string")
+			return Value{}, errors.New("invalid string")
 		}
 		return NewString(string(token[1 : len(token)-1])), nil
 	case '@':
@@ -78,7 +78,7 @@ func (p *Parser) parseList() (Value, error) {
 			return Value{}, err
 		}
 		if token == nil {
-			return Value{}, fmt.Errorf("unclosed parenthesis")
+			return Value{}, errors.New("unclosed parenthesis")
 		}
 
 		// 終端
