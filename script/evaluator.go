@@ -33,12 +33,11 @@ func (vm *VM) Run(src string) (Value, error) {
 
 	// リスト(root)に入ってやってくる
 	var lastVal Value
-	for i, v := range v.List {
-		_, err := vm.Eval(v.List[i])
+	for _, v := range v.List {
+		lastVal, err = vm.Eval(v)
 		if err != nil {
 			return Value{}, err
 		}
-		lastVal = v.List[i]
 	}
 	return lastVal, nil
 }
