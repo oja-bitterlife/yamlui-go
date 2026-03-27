@@ -1,7 +1,6 @@
 package script
 
-import "fmt"
-
+// 入力文字列をトークンに分割する
 type Tokenizer struct {
 	src []byte
 	pos int
@@ -11,13 +10,19 @@ func NewTokenizer(src string) *Tokenizer {
 	return &Tokenizer{src: []byte(src), pos: 0}
 }
 
+// **********************************************************************
+// トークン分割
+// ==================================================
+// 特別な文字
 func isSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
 func isDelim(c byte) bool {
-	return c == '(' || c == ')' || c == '{' || c == '}' || c == '"'
+	return c == '(' || c == ')' || c == '{' || c == '}' || c == '"' || c == '\''
 }
 
+// ==================================================
+// トークンを一つずつ返す。最後まで行ってたらnilを返す
 func (tn *Tokenizer) Next() ([]byte, error) {
 	// 空白をスキップ
 	for tn.pos < len(tn.src) && isSpace(tn.src[tn.pos]) {
@@ -27,6 +32,7 @@ func (tn *Tokenizer) Next() ([]byte, error) {
 		return nil, nil
 	}
 
+	// トークンの開始位置を記録
 	start := tn.pos
 	c := tn.src[tn.pos]
 
@@ -35,20 +41,29 @@ func (tn *Tokenizer) Next() ([]byte, error) {
 		tn.pos++
 		return tn.src[start:tn.pos], nil
 
-	case '"': // 引用符
-		tn.pos++ // 開始の"を飛ばす
+	case '"', '\'': // 引用符
+		quote := c // 開始したクォート文字を覚えておく
+		tn.pos++   // 開始の"を飛ばす
+
 		// 終了の"を探す
-		for {
-			if tn.pos >= len(tn.src) {
-				// 終了の"が見つからなかった
-				return nil, fmt.Errorf("unterminated string")
+		for tn.pos < len(tn.src) {
+			// エスケープ処理
+			if tn.src[tn.pos] == '\\' {
+				tn.pos++ // '\' をスキップ
+				if tn.pos < len(tn.src) {
+					tn.pos++ // エスケープされた次の文字（' や "）も無条件でスキップ
+				}
+				continue
 			}
-			if tn.src[tn.pos] == '"' {
-				break
+
+			// 閉じクォートを発見
+			if tn.src[tn.pos] == quote {
+				tn.pos++ // 閉じクォートを含める
+				return tn.src[start:tn.pos], nil
 			}
+
 			tn.pos++
 		}
-		tn.pos++ // 終了の"を飛ばす
 		return tn.src[start:tn.pos], nil
 
 	default: // 一塊の文字列
