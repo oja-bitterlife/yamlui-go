@@ -56,8 +56,11 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeProperty:
 		return vm.vars[v.Str], nil // 変数の値を返す
 	case TypeQuote:
-		res := v            // 値をコピー
-		res.Type = TypeList // ただのリストとして返す
+		if len(v.List) == 1 {
+			return v.List[0], nil // 引数が1つだけならその値を返す
+		}
+		res := v
+		res.Type = TypeList // Quoteの中身をリストとして返す
 		return res, nil
 	case TypeList:
 		return vm.EvalList(v.List) // ここで再帰
@@ -77,18 +80,18 @@ func (vm *VM) EvalList(list []Value) (Value, error) {
 	cmd := list[0].Str
 	args := make([]Value, len(list)-1)
 
-	// 引数をすべて評価
+	// 引数を先に評価
 	for i := 1; i < len(list); i++ {
-		// リスト（ネストした式）だけは評価して結果を積む
-		if list[i].Type == TypeList {
-			arg, err := vm.Eval(list[i])
-			if err != nil {
-				return Value{}, err
-			}
-			args[i-1] = arg
-		} else {
-			args[i-1] = list[i]
+		if !strings.HasPrefix(cmd, "!") {
+			args[i-1] = list[i] // そのまま
+			continue
 		}
+		// Evalして値にする
+		arg, err := vm.Eval(list[i])
+		if err != nil {
+			return Value{}, err
+		}
+		args[i-1] = arg
 	}
 
 	return vm.Apply(cmd, args)
@@ -97,20 +100,34 @@ func (vm *VM) EvalList(list []Value) (Value, error) {
 // ==================================================
 // コマンド(リストの先頭)を適用する関数
 func (vm *VM) Apply(cmd string, args []Value) (Value, error) {
+	cleanCmd := strings.TrimPrefix(cmd, "!")
+
 	// 組み込みコマンドはここで直接処理する
-	switch cmd {
+	switch cleanCmd {
 	case "set":
+		if cmd != cleanCmd {
+			return Value{}, errors.New("set command cannot be used with '!' prefix")
+		}
 		return vm.SetVar(args)
 	case "switch":
+		if cmd != cleanCmd {
+			return Value{}, errors.New("set command cannot be used with '!' prefix")
+		}
 		return vm.Switch(args)
 	case "repeat":
+		if cmd != cleanCmd {
+			return Value{}, errors.New("set command cannot be used with '!' prefix")
+		}
 		return vm.Repeat(args)
 	case "&":
+		if cmd != cleanCmd {
+			return Value{}, errors.New("set command cannot be used with '!' prefix")
+		}
 		return vm.Quote(args)
 	}
 
 	// コマンドに応じた処理を実装
-	fn, ok := vm.cmds[cmd]
+	fn, ok := vm.cmds[cleanCmd]
 	if !ok {
 		return Value{}, errors.New("unknown command: " + cmd)
 	}
@@ -228,11 +245,10 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 		vm.vars[counterName] = Value{Type: TypeNumber, Num: float64(i)}
 
 		// 第3引数：ブロックを評価
-		val, err := vm.Eval(args[2])
+		lastVal, err = vm.Eval(args[2])
 		if err != nil {
 			return Value{}, err
 		}
-		lastVal = val
 	}
 
 	return lastVal, nil
@@ -243,7 +259,7 @@ func (vm *VM) Repeat(args []Value) (Value, error) {
 // 引数を評価せずにそのまま返す。可変長引数もサポート
 func (vm *VM) Quote(args []Value) (Value, error) {
 	if len(args) == 1 {
-		return args[0], nil
+		return NewQuote(args), nil
 	}
 	return NewQuote(args), nil
 }
