@@ -17,7 +17,7 @@ func main() {
 (! 1 (+ 2 3) 4)
 `
 	vm := script.NewVM()
-	vm.RegisterCmdList(builtin.MathCmds)
+	builtin.SetBuiltinCmds(vm)
 	result, err := vm.Run(src)
 	if err != nil {
 		fmt.Printf("{\"Error\":\"%s\"}\n", err.Error())

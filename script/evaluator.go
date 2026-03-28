@@ -59,25 +59,6 @@ func (vm *VM) RegisterCmdList(cmds map[string]func(vm *VM, args []Value) (Value,
 	}
 }
 
-// ==================================================
-// ユーティリティ
-func (vm *VM) EvalArgs(args []Value) ([]Value, error) {
-	results := make([]Value, len(args))
-	for i, arg := range args {
-		v, err := vm.Eval(arg)
-		if err != nil {
-			return nil, err
-		}
-
-		// 展開後はリテラルのはず
-		if !v.IsLiteral() {
-			return nil, errors.New("expected literal value")
-		}
-		results[i] = v
-	}
-	return results, nil
-}
-
 // **********************************************************************
 // 評価関数
 // ==================================================
@@ -87,12 +68,36 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeNumber, TypeString, TypeBool, TypeLitList:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
-		return vm.vars[v.Str], nil // 変数の値を返す
+		v = vm.vars[v.Str] // 変数の値を返す
+		if !v.IsLiteral() {
+			return Value{}, errors.New("expected literal value")
+		}
+		return v, nil
 	case TypeList:
-		return vm.evalList(v.List) // ここで再帰
+		list, err := vm.evalList(v.List) // ここで再帰
+		if err != nil {
+			return Value{}, err
+		}
+		if !list.IsLiteral() {
+			return Value{}, errors.New("expected literal value from list evaluation")
+		}
+		return list, nil
 	default:
 		return Value{}, errors.New("unknown value type")
 	}
+}
+
+// Valueのリストを評価する関数
+func (vm *VM) EvalAll(values []Value) ([]Value, error) {
+	results := make([]Value, len(values))
+	for i, arg := range values {
+		v, err := vm.Eval(arg)
+		if err != nil {
+			return nil, err
+		}
+		results[i] = v
+	}
+	return results, nil
 }
 
 // ==================================================
@@ -104,22 +109,14 @@ func (vm *VM) evalList(list []Value) (Value, error) {
 
 	// 1番目をコマンドとして解釈
 	cmd := list[0].Str
-	args := make([]Value, len(list)-1)
 
-	// 引数を先に評価
-	for i := 1; i < len(list); i++ {
-		if !strings.HasPrefix(cmd, "!") {
-			args[i-1] = list[i] // そのまま
-			continue
-		}
-		// Evalして値にする
-		arg, err := vm.Eval(list[i])
-		if err != nil {
-			return Value{}, err
-		}
-		args[i-1] = arg
+	// 引数は先に評価
+	args, err := vm.EvalAll(list[1:])
+	if err != nil {
+		return Value{}, err
 	}
 
+	// コマンドを適用
 	return vm.applyCmd(cmd, args)
 }
 
@@ -187,24 +184,21 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 	}
 
 	// 第二引数以降は、このタイミングで Eval して「値」にする
-	var final Value
-	if len(args) == 2 {
-		val, err := vm.Eval(args[1])
-		if err != nil {
-			return Value{}, err
-		}
-		final = val
-	} else {
-		// 可変長の場合
-		results, err := vm.EvalArgs(args[1:])
-		if err != nil {
-			return Value{}, err
-		}
-		final = NewLitList(results)
+	var result Value
+	results, err := vm.EvalAll(args[1:])
+	if err != nil {
+		return Value{}, err
 	}
 
-	vm.vars[target] = final
-	return final, nil
+	if len(args) == 2 {
+		result = results[0] // 単一の値
+	} else {
+		// 可変長の場合
+		result = NewLitList(results)
+	}
+
+	vm.vars[target] = result
+	return result, nil
 }
 
 // ==================================================

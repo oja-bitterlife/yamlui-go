@@ -1,14 +1,12 @@
 package builtin
 
 import (
-	"errors"
-
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
 // 数学系のbuiltin
-var CompareCmds = map[string]func(*script.VM, []script.Value) (script.Value, error){
+var compareCmds = map[string]func(*script.VM, []script.Value) (script.Value, error){
 	">":  grator,
 	"<":  less,
 	"==": eq,
@@ -20,79 +18,79 @@ var CompareCmds = map[string]func(*script.VM, []script.Value) (script.Value, err
 // ==================================================
 // 比較演算
 func grator(vm *script.VM, args []script.Value) (script.Value, error) {
-	return binOp(vm, ">", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
-			return script.NewBool(values[0].Str > values[1].Str), nil
+	return binOp(vm, ">", args, func(vm *script.VM, arg0 script.Value, arg1 script.Value) (script.Value, error) {
+		if arg0.Type == script.TypeString && arg1.Type == script.TypeString {
+			return script.NewBool(arg0.Str > arg1.Str), nil
 		}
-		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
-			return script.NewBool(values[0].Num > values[1].Num), nil
+		if arg0.Type == script.TypeNumber && arg1.Type == script.TypeNumber {
+			return script.NewBool(arg0.Num > arg1.Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for >: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
+		return script.Value{}, binOpTypeError(">", arg0, arg1)
 	})
 }
 
 func less(vm *script.VM, args []script.Value) (script.Value, error) {
-	return binOp(vm, "<", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
-			return script.NewBool(values[0].Str < values[1].Str), nil
+	return binOp(vm, "<", args, func(vm *script.VM, arg0 script.Value, arg1 script.Value) (script.Value, error) {
+		if arg0.Type == script.TypeString && arg1.Type == script.TypeString {
+			return script.NewBool(arg0.Str < arg1.Str), nil
 		}
-		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
-			return script.NewBool(values[0].Num < values[1].Num), nil
+		if arg0.Type == script.TypeNumber && arg1.Type == script.TypeNumber {
+			return script.NewBool(arg0.Num < arg1.Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for <: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
+		return script.Value{}, binOpTypeError("<", arg0, arg1)
 	})
 }
 
 func eq(vm *script.VM, args []script.Value) (script.Value, error) {
-	return binOp(vm, "==", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
-			return script.NewBool(values[0].Str == values[1].Str), nil
+	return binOp(vm, "==", args, func(vm *script.VM, arg0 script.Value, arg1 script.Value) (script.Value, error) {
+		if arg0.Type == script.TypeString && arg1.Type == script.TypeString {
+			return script.NewBool(arg0.Str == arg1.Str), nil
 		}
-		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
-			return script.NewBool(values[0].Num == values[1].Num), nil
+		if arg0.Type == script.TypeNumber && arg1.Type == script.TypeNumber {
+			return script.NewBool(arg0.Num == arg1.Num), nil
 		}
-		if values[0].Type == script.TypeBool && values[1].Type == script.TypeBool {
-			return script.NewBool(values[0].Bool == values[1].Bool), nil
+		if arg0.Type == script.TypeBool && arg1.Type == script.TypeBool {
+			return script.NewBool(arg0.Bool == arg1.Bool), nil
 		}
-		return script.Value{}, errors.New("invalid types for ==: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
+		return script.Value{}, binOpTypeError("==", arg0, arg1)
 	})
 }
 
 func neq(vm *script.VM, args []script.Value) (script.Value, error) {
-	return binOp(vm, "!=", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
-			return script.NewBool(values[0].Str != values[1].Str), nil
+	return binOp(vm, "!=", args, func(vm *script.VM, arg0 script.Value, arg1 script.Value) (script.Value, error) {
+		if arg0.Type == script.TypeString && arg1.Type == script.TypeString {
+			return script.NewBool(arg0.Str != arg1.Str), nil
 		}
-		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
-			return script.NewBool(values[0].Num != values[1].Num), nil
+		if arg0.Type == script.TypeNumber && arg1.Type == script.TypeNumber {
+			return script.NewBool(arg0.Num != arg1.Num), nil
 		}
-		if values[0].Type == script.TypeBool && values[1].Type == script.TypeBool {
-			return script.NewBool(values[0].Bool != values[1].Bool), nil
+		if arg0.Type == script.TypeBool && arg1.Type == script.TypeBool {
+			return script.NewBool(arg0.Bool != arg1.Bool), nil
 		}
-		return script.Value{}, errors.New("invalid types for !=: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
+		return script.Value{}, binOpTypeError("!=: ", arg0, arg1)
 	})
 }
 
 func ge(vm *script.VM, args []script.Value) (script.Value, error) {
-	return binOp(vm, ">=", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
-			return script.NewBool(values[0].Str >= values[1].Str), nil
+	return binOp(vm, ">=", args, func(vm *script.VM, arg0 script.Value, arg1 script.Value) (script.Value, error) {
+		if arg0.Type == script.TypeString && arg1.Type == script.TypeString {
+			return script.NewBool(arg0.Str >= arg1.Str), nil
 		}
-		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
-			return script.NewBool(values[0].Num >= values[1].Num), nil
+		if arg0.Type == script.TypeNumber && arg1.Type == script.TypeNumber {
+			return script.NewBool(arg0.Num >= arg1.Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for >=: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
+		return script.Value{}, binOpTypeError(">=: ", arg0, arg1)
 	})
 }
 
 func le(vm *script.VM, args []script.Value) (script.Value, error) {
-	return binOp(vm, "<=", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
-			return script.NewBool(values[0].Str <= values[1].Str), nil
+	return binOp(vm, "<=", args, func(vm *script.VM, arg0 script.Value, arg1 script.Value) (script.Value, error) {
+		if arg0.Type == script.TypeString && arg1.Type == script.TypeString {
+			return script.NewBool(arg0.Str <= arg1.Str), nil
 		}
-		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
-			return script.NewBool(values[0].Num <= values[1].Num), nil
+		if arg0.Type == script.TypeNumber && arg1.Type == script.TypeNumber {
+			return script.NewBool(arg0.Num <= arg1.Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for <=: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
+		return script.Value{}, binOpTypeError("<=: ", arg0, arg1)
 	})
 }
