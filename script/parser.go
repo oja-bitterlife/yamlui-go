@@ -54,7 +54,7 @@ func parseToken(tn *Tokenizer, token []byte) (Value, error) {
 			return Value{}, errors.New("invalid string")
 		}
 		return NewString(string(token[1 : len(token)-1])), nil
-	case '@':
+	case '@', '_':
 		return NewProperty(string(token)), nil
 	default:
 		// 数値か、それ以外の識別子（コマンド名など）

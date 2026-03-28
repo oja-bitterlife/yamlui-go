@@ -149,8 +149,8 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 
 	// 第一引数は保存先
 	target := args[0].Str
-	if !strings.HasPrefix(target, "@") {
-		return Value{}, errors.New("first argument of set must be a property (e.g., @x)")
+	if !strings.HasPrefix(target, "@") && !strings.HasPrefix(target, "_") {
+		return Value{}, errors.New("set target must start with '@' or '_'")
 	}
 
 	// 第二引数以降は、このタイミングで Eval して「値」にする
