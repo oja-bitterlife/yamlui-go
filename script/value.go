@@ -10,6 +10,7 @@ const (
 	TypeString
 	TypeProperty // @i などの参照（未評価）
 	TypeList     // (op arg1 arg2)
+	TypeLiteral  // リテラルのみのリスト(評価済み)
 
 	// 制御構造の型
 	TypeSwitch // switch文
@@ -42,6 +43,8 @@ func (v Value) TypeStr() string {
 		return "String"
 	case TypeProperty:
 		return "Property"
+	case TypeLiteral:
+		return "LiteralList"
 	case TypeList:
 		return "List"
 	case TypeSwitch:
@@ -60,3 +63,25 @@ func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
 func NewProperty(s string) Value { return Value{Type: TypeProperty, Str: s} }
 func NewList(v []Value) Value    { return Value{Type: TypeList, List: v} }
+func NewLiteral(v []Value) Value { return Value{Type: TypeLiteral, List: v} }
+
+// ==================================================
+// リテラルチェック
+func (v Value) IsLiteral() bool {
+	switch v.Type {
+	case TypeNumber, TypeBool, TypeString, TypeLiteral:
+		return true
+	default:
+		return false
+	}
+}
+
+// リストチェック
+func (v Value) IsList() bool {
+	switch v.Type {
+	case TypeList, TypeLiteral:
+		return true
+	default:
+		return false
+	}
+}

@@ -67,6 +67,11 @@ func (vm *VM) EvalArgs(args []Value) ([]Value, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		// 展開後はリテラルのはず
+		if !v.IsLiteral() {
+			return nil, errors.New("expected literal value")
+		}
 		results[i] = v
 	}
 	return results, nil
@@ -78,7 +83,7 @@ func (vm *VM) EvalArgs(args []Value) ([]Value, error) {
 // Valueを評価して、最終的な値を返す関数
 func (vm *VM) Eval(v Value) (Value, error) {
 	switch v.Type {
-	case TypeNumber, TypeString, TypeBool:
+	case TypeNumber, TypeString, TypeBool, TypeLiteral:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
 		return vm.vars[v.Str], nil // 変数の値を返す
@@ -126,7 +131,7 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 		if len(args) == 1 {
 			return args[0], nil
 		}
-		return NewList(args), nil
+		return NewLiteral(args), nil
 	}
 
 	cleanCmd := strings.TrimPrefix(cmd, "!")
@@ -194,7 +199,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 		if err != nil {
 			return Value{}, err
 		}
-		final = NewList(results)
+		final = NewLiteral(results)
 	}
 
 	vm.vars[target] = final
@@ -277,7 +282,7 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 		results[i] = result
 	}
 
-	return NewList(results), nil
+	return NewLiteral(results), nil
 }
 
 // ==================================================

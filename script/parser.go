@@ -3,6 +3,7 @@ package script
 import (
 	"errors"
 	"strconv"
+	"strings"
 )
 
 // **********************************************************************
@@ -45,9 +46,11 @@ func parse(src string) (Value, error) {
 func parseToken(tn *Tokenizer, token []byte) (Value, error) {
 	switch token[0] {
 	case '(':
-		return parseList(tn)
-	case ')':
-		return Value{}, errors.New("unexpected ')'")
+		return parseList(tn, ')')
+	case '{':
+		return parseList(tn, '}')
+	case ')', '}':
+		return Value{}, errors.New("unexpected '" + string(token[0]) + "'")
 	case '"':
 		// 前後の " を除去して文字列に
 		if len(token) < 2 {
@@ -57,18 +60,30 @@ func parseToken(tn *Tokenizer, token []byte) (Value, error) {
 	case '@', '_':
 		return NewProperty(string(token)), nil
 	default:
-		// 数値か、それ以外の識別子（コマンド名など）
+		// bool, number, or string
 		s := string(token)
+
+		// boolチェック
+		if strings.ToLower(s) == "true" {
+			return NewBool(true), nil
+		}
+		if strings.ToLower(s) == "false" {
+			return NewBool(false), nil
+		}
+
+		// 数値にできる？
 		if f, err := strconv.ParseFloat(s, 64); err == nil {
 			return NewNumber(f), nil
 		}
+
+		// コマンドかPropety(""で囲まれていない文字列)
 		return NewString(s), nil
 	}
 }
 
 // ==================================================
 // parseList. ()で囲まれたリストを解析する
-func parseList(tn *Tokenizer) (Value, error) {
+func parseList(tn *Tokenizer, terminate byte) (Value, error) {
 	var list []Value
 	for {
 		token, err := tn.Next()
@@ -82,7 +97,7 @@ func parseList(tn *Tokenizer) (Value, error) {
 		}
 
 		// 終端
-		if len(token) == 1 && token[0] == ')' {
+		if len(token) == 1 && token[0] == terminate {
 			break
 		}
 
@@ -91,7 +106,24 @@ func parseList(tn *Tokenizer) (Value, error) {
 		if err != nil {
 			return Value{}, err
 		}
+
+		// リテラルブロックはPropertyやListを含められない
+		if terminate == '}' {
+			switch val.Type {
+			case TypeNumber, TypeString, TypeBool:
+				// OK
+			default:
+				return Value{}, errors.New("literal block can only contain number, string, or bool: " + val.TypeStr())
+			}
+		}
+
 		list = append(list, val)
 	}
-	return NewList(list), nil
+
+	// リテラルブロックなら、リスト全体を文字列化してリテラルとして返す
+	if terminate == '}' {
+		return NewLiteral(list), nil
+	} else {
+		return NewList(list), nil
+	}
 }
