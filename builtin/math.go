@@ -18,9 +18,9 @@ var MathCmds = map[string]func(*script.VM, []script.Value) (script.Value, error)
 	"%": mod,
 }
 
-func mathOp(vm *script.VM, cmdName string, argNum int, args []script.Value, fn func(*script.VM, []script.Value) (script.Value, error)) (script.Value, error) {
+func mathOp(vm *script.VM, cmdName string, args []script.Value, fn func(*script.VM, []script.Value) (script.Value, error)) (script.Value, error) {
 	// 引数の数をチェック
-	if err := script.ValidationArgNum(cmdName, argNum, args); err != nil {
+	if err := script.ValidationArgNum(cmdName, 2, args); err != nil {
 		return script.Value{}, err
 	}
 	// 参照を展開
@@ -75,7 +75,7 @@ func mathOp(vm *script.VM, cmdName string, argNum int, args []script.Value, fn f
 // ==================================================
 // 四則演算
 func add(vm *script.VM, args []script.Value) (script.Value, error) {
-	return mathOp(vm, "+", 2, args, func(vm *script.VM, values []script.Value) (script.Value, error) {
+	return mathOp(vm, "+", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + values[1].Str), nil
 		}
@@ -87,7 +87,7 @@ func add(vm *script.VM, args []script.Value) (script.Value, error) {
 }
 
 func sub(vm *script.VM, args []script.Value) (script.Value, error) {
-	return mathOp(vm, "-", 2, args, func(vm *script.VM, values []script.Value) (script.Value, error) {
+	return mathOp(vm, "-", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + "-" + values[1].Str), nil
 		}
@@ -99,7 +99,7 @@ func sub(vm *script.VM, args []script.Value) (script.Value, error) {
 }
 
 func mul(vm *script.VM, args []script.Value) (script.Value, error) {
-	return mathOp(vm, "*", 2, args, func(vm *script.VM, values []script.Value) (script.Value, error) {
+	return mathOp(vm, "*", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeString && values[1].Type == script.TypeNumber {
 			var str strings.Builder
 			for i := 0; i < int(values[1].Num); i++ {
@@ -122,7 +122,7 @@ func mul(vm *script.VM, args []script.Value) (script.Value, error) {
 }
 
 func div(vm *script.VM, args []script.Value) (script.Value, error) {
-	return mathOp(vm, "/", 2, args, func(vm *script.VM, values []script.Value) (script.Value, error) {
+	return mathOp(vm, "/", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + "/" + values[1].Str), nil
 		}
@@ -134,7 +134,7 @@ func div(vm *script.VM, args []script.Value) (script.Value, error) {
 }
 
 func mod(vm *script.VM, args []script.Value) (script.Value, error) {
-	return mathOp(vm, "%", 2, args, func(vm *script.VM, values []script.Value) (script.Value, error) {
+	return mathOp(vm, "%", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + "%" + values[1].Str), nil
 		}
