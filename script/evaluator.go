@@ -2,6 +2,7 @@ package script
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -237,7 +238,7 @@ func (vm *VM) switch_(args []Value) (Value, error) {
 
 	// caseNoの範囲をチェック
 	if caseNo < 1 || caseNo >= len(args) {
-		return Value{}, errors.New("case number out of range: " + Itoa(caseNo))
+		return Value{}, errors.New("case number out of range: " + strconv.Itoa(caseNo))
 	}
 
 	// switch先を評価する
