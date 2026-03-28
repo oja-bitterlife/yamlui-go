@@ -15,8 +15,17 @@ func main() {
 	// (repeat _i _count
 	//   (switch _i "First!" "Second!" "Third!"))
 	// `
+	// 	src := `
+	// 	(set _count 3)
+	// 	(set _greet "hello")
+	// 	(* (+ _greet " world!, ") _count)
+	// `
 	src := `
-	(* "Go" 3)
+(set @is_active 
+  (do 
+    (set _dist (abs (- @pos @target)))
+    (< _dist 1.0)
+  ))
 `
 
 	vm := script.NewVM()

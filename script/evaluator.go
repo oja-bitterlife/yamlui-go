@@ -135,19 +135,24 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 	switch cleanCmd {
 	case "set":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("set command cannot be used with '!' prefix")
+			return Value{}, errors.New("set cannot be used with '!' prefix")
 		}
 		return vm.setVar(args)
 	case "switch":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("set command cannot be used with '!' prefix")
+			return Value{}, errors.New("switch cannot be used with '!' prefix")
 		}
 		return vm.switch_(args)
 	case "repeat":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("set command cannot be used with '!' prefix")
+			return Value{}, errors.New("repeat cannot be used with '!' prefix")
 		}
 		return vm.repeat(args)
+	case "do":
+		if cmd != cleanCmd {
+			return Value{}, errors.New("do cannot be used with '!' prefix")
+		}
+		return vm.do(args)
 	}
 
 	// コマンドに応じた処理を実装
@@ -273,4 +278,22 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 	}
 
 	return NewList(results), nil
+}
+
+// ==================================================
+// do
+// 引数の式を順番に評価して、最後の値を返す
+func (vm *VM) do(args []Value) (Value, error) {
+	var lastVal Value
+	var err error
+
+	// args は Eval される前の「生の式（AST相当）」である必要があります
+	for _, arg := range args {
+		// 一行ずつ、その時の VM コンテキストで評価
+		lastVal, err = vm.Eval(arg)
+		if err != nil {
+			return Value{}, err
+		}
+	}
+	return lastVal, nil
 }
