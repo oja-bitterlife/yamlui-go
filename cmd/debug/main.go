@@ -20,14 +20,22 @@ func main() {
 	// 	(set _greet "hello")
 	// 	(* (+ _greet " world!, ") _count)
 	// `
+	// 	src := `
+	// (set @is_active
+	//   (do
+	//     (set _dist (abs (- @pos @target)))
+	//     (< _dist 1.0)  # コメントを入れてみる
+	//   ))
+	// `
 	src := `
-(set @is_active 
-  (do 
-    (set _dist (abs (- @pos @target)))
-    (< _dist 1.0)
-  ))
+	(do
+  # ----------------------------------------
+  # ベクターのオフセット計算
+  # ----------------------------------------
+  (set _v (! 10 20)) # 元の座標
+  (+ _v 5.5)         # 5.5加算して返す
+)
 `
-
 	vm := script.NewVM()
 	vm.RegisterCmdList(builtin.MathCmds)
 	result, err := vm.Run(src)

@@ -37,6 +37,13 @@ func (tn *Tokenizer) Next() ([]byte, error) {
 	c := tn.src[tn.pos]
 
 	switch c {
+	case '#': // コメント
+		tn.pos++ // '#' をスキップ
+		for tn.pos < len(tn.src) && tn.src[tn.pos] != '\n' {
+			tn.pos++ // 行末までスキップ
+		}
+		return tn.Next() // コメントをスキップして次のトークンを取得
+
 	case '(', ')', '{', '}': // 構造記号
 		tn.pos++
 		return tn.src[start:tn.pos], nil
