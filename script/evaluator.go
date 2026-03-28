@@ -107,6 +107,15 @@ func (vm *VM) evalList(list []Value) (Value, error) {
 // ==================================================
 // コマンド(リストの先頭)を適用する関数
 func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
+	// (! val)の場合は展開だけ
+	if cmd == "!" {
+		// 引数が1つなら内容を返す、複数ならリストにして返す
+		if len(args) == 1 {
+			return args[0], nil
+		}
+		return NewList(args), nil
+	}
+
 	cleanCmd := strings.TrimPrefix(cmd, "!")
 
 	// 組み込みコマンドはここで直接処理する
