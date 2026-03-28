@@ -100,19 +100,18 @@ func sub(vm *script.VM, args []script.Value) (script.Value, error) {
 
 func mul(vm *script.VM, args []script.Value) (script.Value, error) {
 	return mathOp(vm, "*", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString && values[1].Type == script.TypeNumber {
+		repeatStr := func(s string, n int) string {
 			var str strings.Builder
-			for i := 0; i < int(values[1].Num); i++ {
-				str.WriteString(values[0].Str)
+			for range n {
+				str.WriteString(s)
 			}
-			return script.NewString(str.String()), nil
+			return str.String()
+		}
+		if values[0].Type == script.TypeString && values[1].Type == script.TypeNumber {
+			return script.NewString(repeatStr(values[0].Str, int(values[1].Num))), nil
 		}
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeString {
-			var str strings.Builder
-			for i := 0; i < int(values[0].Num); i++ {
-				str.WriteString(values[1].Str)
-			}
-			return script.NewString(str.String()), nil
+			return script.NewString(repeatStr(values[1].Str, int(values[0].Num))), nil
 		}
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewNumber(values[0].Num * values[1].Num), nil
