@@ -10,6 +10,7 @@ tasks:
     sources:
       - ./script/*.go
       - ./builtin/*.go
+      - ./yamlui/*.go
       - ./cmd/**/*.go
     generates:
       - "{{.BIN_DIR}}/main"

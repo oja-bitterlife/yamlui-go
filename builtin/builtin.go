@@ -8,6 +8,15 @@ import (
 )
 
 // ==================================================
+// VMの生成
+func NewWithBuiltin() *script.VM {
+	vm := script.NewVM()
+	SetBuiltinCmds(vm)
+
+	return vm
+}
+
+// ==================================================
 // 組み込みコマンドの登録
 func SetBuiltinCmds(vm *script.VM) {
 	// 数学関数を追加
