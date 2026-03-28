@@ -195,10 +195,12 @@ func fit(vm *script.VM, args []script.Value) (script.Value, error) {
 	fitValue := outMin + norm*(outMax-outMin)
 
 	// min/maxでクランプ
-	if fitValue < outMin {
-		fitValue = outMin
-	} else if fitValue > outMax {
-		fitValue = outMax
+	realMin := math.Min(outMin, outMax)
+	realMax := math.Max(outMin, outMax)
+	if fitValue < realMin {
+		fitValue = realMin
+	} else if fitValue > realMax {
+		fitValue = realMax
 	}
 
 	return script.NewNumber(fitValue), nil
