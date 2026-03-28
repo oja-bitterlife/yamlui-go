@@ -13,6 +13,9 @@ func SetBuiltinCmds(vm *script.VM) {
 	// 数学関数を追加
 	vm.RegisterCmdList(mathCmds)
 
+	// 円関数を追加
+	vm.RegisterCmdList(circularCmds)
+
 	// 比較系関数を追加
 	vm.RegisterCmdList(compareCmds)
 

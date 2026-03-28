@@ -24,4 +24,10 @@ func main() {
 		return
 	}
 	result.Dump()
+
+	// vmのcmsを表示
+	fmt.Println("Commands in VM:")
+	for cmd := range vm.GetCmds() {
+		fmt.Printf("%s\n", cmd)
+	}
 }

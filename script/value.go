@@ -111,3 +111,43 @@ func (v Value) IsList() bool {
 		return false
 	}
 }
+
+// ==================================================
+// コンバート
+func (v Value) ConvertBool() Value {
+	switch v.Type {
+	case TypeBool:
+		return v
+	case TypeNumber:
+		return NewBool(v.Num != 0)
+	case TypeString:
+		return NewBool(strings.ToLower(v.Str) == "true")
+	case TypeLitList, TypeList:
+		return NewBool(len(v.List) > 0)
+	default:
+		return NewBool(false)
+	}
+}
+
+func (v Value) ConvertNumber() Value {
+	switch v.Type {
+	case TypeNumber:
+		return v
+	case TypeBool:
+		if v.Bool {
+			return NewNumber(1)
+		} else {
+			return NewNumber(0)
+		}
+	case TypeString:
+		f, err := strconv.ParseFloat(v.Str, 64)
+		if err != nil {
+			return NewNumber(0)
+		}
+		return NewNumber(f)
+	case TypeLitList, TypeList:
+		return NewNumber(float64(len(v.List)))
+	default:
+		return NewNumber(0)
+	}
+}

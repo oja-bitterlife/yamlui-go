@@ -59,6 +59,11 @@ func (vm *VM) RegisterCmdList(cmds map[string]func(vm *VM, args []Value) (Value,
 	}
 }
 
+// デバッグ用cmds取得関数
+func (vm *VM) GetCmds() map[string]func(vm *VM, args []Value) (Value, error) {
+	return vm.cmds
+}
+
 // **********************************************************************
 // 評価関数
 // ==================================================
