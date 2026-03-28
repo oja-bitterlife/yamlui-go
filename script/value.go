@@ -21,24 +21,9 @@ const (
 	TypeList     // 未評価リスト
 )
 
-// ==================================================
-// Listに格納する型付きの値。リフレクションを避けるため全部入り
-type Value struct {
-	// 型情報
-	Type ValueType
-
-	// 基本データ
-	Num  float64
-	Bool bool
-	Str  string
-
-	// リスト構造 (S式や、分解済みの文字列フラグメント)
-	List []Value
-}
-
 // 値の型を文字列で返す. デバッグ用.
-func (v Value) TypeStr() string {
-	switch v.Type {
+func (vt ValueType) ToStr() string {
+	switch vt {
 	case TypeNumber:
 		return "Number"
 	case TypeBool:
@@ -56,8 +41,23 @@ func (v Value) TypeStr() string {
 	}
 }
 
+// ==================================================
+// Listに格納する型付きの値。リフレクションを避けるため全部入り
+type Value struct {
+	// 型情報
+	Type ValueType
+
+	// 基本データ
+	Num  float64
+	Bool bool
+	Str  string
+
+	// リスト構造 (S式や、分解済みの文字列フラグメント)
+	List []Value
+}
+
 // 値を文字列で返す. デバッグ用.
-func (v Value) ValStr() string {
+func (v Value) ToStr() string {
 	switch v.Type {
 	case TypeNumber:
 		// 小数点以下が0なら整数として表示
@@ -74,7 +74,7 @@ func (v Value) ValStr() string {
 	case TypeLitList, TypeList:
 		strs := make([]string, len(v.List))
 		for i, elem := range v.List {
-			strs[i] = elem.ValStr()
+			strs[i] = elem.ToStr()
 		}
 		return "[" + strings.Join(strs, ", ") + "]"
 	default:

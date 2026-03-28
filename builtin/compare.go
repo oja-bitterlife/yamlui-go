@@ -27,7 +27,7 @@ func grator(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewBool(values[0].Num > values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for >: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for >: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -39,7 +39,7 @@ func less(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewBool(values[0].Num < values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for <: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for <: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -54,7 +54,7 @@ func eq(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeBool && values[1].Type == script.TypeBool {
 			return script.NewBool(values[0].Bool == values[1].Bool), nil
 		}
-		return script.Value{}, errors.New("invalid types for ==: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for ==: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -69,7 +69,7 @@ func neq(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeBool && values[1].Type == script.TypeBool {
 			return script.NewBool(values[0].Bool != values[1].Bool), nil
 		}
-		return script.Value{}, errors.New("invalid types for !=: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for !=: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -81,7 +81,7 @@ func ge(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewBool(values[0].Num >= values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for >=: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for >=: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -93,6 +93,6 @@ func le(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewBool(values[0].Num <= values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for <=: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for <=: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }

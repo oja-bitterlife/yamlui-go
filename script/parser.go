@@ -113,7 +113,7 @@ func parseList(tn *Tokenizer, terminate byte) (Value, error) {
 			case TypeNumber, TypeString, TypeBool:
 				// OK
 			default:
-				return Value{}, errors.New("literal block can only contain number, string, or bool: " + val.TypeStr())
+				return Value{}, errors.New("literal block can only contain number, string, or bool: " + val.Type.ToStr())
 			}
 		}
 

@@ -2,5 +2,5 @@
 
 package script
 
-func (v Value) Dump()         {}
-func (v Value) ToStr() string { return "" }
+func (v Value) Dump()          {}
+func (v Value) ToJSON() string { return "" }

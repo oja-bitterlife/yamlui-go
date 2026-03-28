@@ -12,32 +12,32 @@ import (
 // ==================================================
 // 文字列化して出力する関数。普段はこれ
 func (v Value) Dump() {
-	fmt.Printf("%s\n", v.ToJson())
+	fmt.Printf("%s\n", v.ToJSON())
 }
 
 // ==================================================
 // JSON形式で出力するための構造体と関数
-type debugJsonTree struct {
+type debugJSONTree struct {
 	Type  string
 	Value any
 }
 
 // JSON形式で出力する関数。構造体に変換してからJSON化
 // ----------------------------------------
-func (v Value) ToJson() string {
-	root := v.toJson()
+func (v Value) ToJSON() string {
+	root := v.toJSON()
 	str, _ := json.Marshal(root)
 	return string(str)
 }
 
-func (v Value) toJson() debugJsonTree {
+func (v Value) toJSON() debugJSONTree {
 	if v.IsList() {
-		list := make([]debugJsonTree, len(v.List))
+		list := make([]debugJSONTree, len(v.List))
 		for i, item := range v.List {
-			list[i] = item.toJson()
+			list[i] = item.toJSON()
 		}
-		return debugJsonTree{Type: v.TypeStr(), Value: list}
+		return debugJSONTree{Type: v.Type.ToStr(), Value: list}
 	} else {
-		return debugJsonTree{Type: v.TypeStr(), Value: v.ValStr()}
+		return debugJSONTree{Type: v.Type.ToStr(), Value: v.ToStr()}
 	}
 }

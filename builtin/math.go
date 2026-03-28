@@ -23,25 +23,25 @@ var MathCmds = map[string]func(*script.VM, []script.Value) (script.Value, error)
 // 四則演算
 func add(vm *script.VM, args []script.Value) (script.Value, error) {
 	return binOp(vm, "+", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
+		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + values[1].Str), nil
 		}
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewNumber(values[0].Num + values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for +: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for +: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
 func sub(vm *script.VM, args []script.Value) (script.Value, error) {
 	return binOp(vm, "-", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
+		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + "-" + values[1].Str), nil
 		}
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewNumber(values[0].Num - values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for -: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for -: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -63,31 +63,31 @@ func mul(vm *script.VM, args []script.Value) (script.Value, error) {
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewNumber(values[0].Num * values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for *: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for *: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
 func div(vm *script.VM, args []script.Value) (script.Value, error) {
 	return binOp(vm, "/", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
+		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + "/" + values[1].Str), nil
 		}
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewNumber(values[0].Num / values[1].Num), nil
 		}
-		return script.Value{}, errors.New("invalid types for /: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for /: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
 func mod(vm *script.VM, args []script.Value) (script.Value, error) {
 	return binOp(vm, "%", args, func(vm *script.VM, values []script.Value) (script.Value, error) {
-		if values[0].Type == script.TypeString || values[1].Type == script.TypeString {
+		if values[0].Type == script.TypeString && values[1].Type == script.TypeString {
 			return script.NewString(values[0].Str + "%" + values[1].Str), nil
 		}
 		if values[0].Type == script.TypeNumber && values[1].Type == script.TypeNumber {
 			return script.NewNumber(float64(int(values[0].Num) % int(values[1].Num))), nil
 		}
-		return script.Value{}, errors.New("invalid types for %: " + values[0].TypeStr() + " and " + values[1].TypeStr())
+		return script.Value{}, errors.New("invalid types for %: " + values[0].Type.ToStr() + " and " + values[1].Type.ToStr())
 	})
 }
 
@@ -140,5 +140,5 @@ func not(vm *script.VM, args []script.Value) (script.Value, error) {
 	}
 
 	// その他の値はエラー
-	return script.Value{}, errors.New("invalid type for not: " + value.TypeStr())
+	return script.Value{}, errors.New("invalid type for not: " + value.Type.ToStr())
 }
