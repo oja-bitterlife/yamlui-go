@@ -237,17 +237,18 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 	count := int(countVal.Num)
 
 	// 繰り返し回数分ループ
-	var lastVal Value
+	results := make([]Value, count)
 	for i := range count {
 		// カウンタ変数を現在の値で更新
 		vm.vars[counterName] = Value{Type: TypeNumber, Num: float64(i)}
 
 		// 第3引数：ブロックを評価
-		lastVal, err = vm.Eval(args[2])
+		result, err := vm.Eval(args[2])
 		if err != nil {
 			return Value{}, err
 		}
+		results[i] = result
 	}
 
-	return lastVal, nil
+	return NewList(results), nil
 }

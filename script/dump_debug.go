@@ -2,31 +2,49 @@
 
 package script
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
+// **********************************************************************
+// デバッグ用のダンプ関数
+// ==================================================
+// 文字列化して出力する関数。普段はこれ
 func (v Value) Dump() {
-	fmt.Printf("%s\n", v.toStr())
+	fmt.Printf("%s\n", v.ToJson())
 }
 
-func (v Value) ToStr() string {
-	return v.toStr()
+// ==================================================
+// JSON形式で出力するための構造体と関数
+type debugJsonTree struct {
+	Type  string
+	Value any
 }
-func (v Value) toStr() string {
+
+// JSON形式で出力する関数。構造体に変換してからJSON化
+// ----------------------------------------
+func (v Value) ToJson() string {
+	root := v.toJson()
+	str, _ := json.Marshal(root)
+	return string(str)
+}
+
+func (v Value) toJson() debugJsonTree {
 	switch v.Type {
 	case TypeNumber:
-		return fmt.Sprintf("[Number] %v", v.Num)
+		return debugJsonTree{Type: "Number", Value: v.Num}
 	case TypeString:
-		return fmt.Sprintf("[String] %q", v.Str)
+		return debugJsonTree{Type: "String", Value: v.Str}
 	case TypeProperty:
-		return fmt.Sprintf("[Property] %s", v.Str)
+		return debugJsonTree{Type: "Property", Value: v.Str}
 	case TypeList:
-		str := "[List] ("
-		for _, child := range v.List {
-			str += child.toStr()
+		list := make([]debugJsonTree, len(v.List))
+		for i, item := range v.List {
+			list[i] = item.toJson()
 		}
-		str += ")"
-		return str
+		return debugJsonTree{Type: "List", Value: list}
 	default:
-		return "[Unknown]"
+		return debugJsonTree{Type: "Unknown", Value: v.Type}
 	}
 }
