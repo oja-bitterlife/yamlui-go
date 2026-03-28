@@ -84,7 +84,7 @@ func (vm *VM) EvalArgs(args []Value) ([]Value, error) {
 // Valueを評価して、最終的な値を返す関数
 func (vm *VM) Eval(v Value) (Value, error) {
 	switch v.Type {
-	case TypeNumber, TypeString, TypeBool, TypeLiteral:
+	case TypeNumber, TypeString, TypeBool, TypeLitList:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
 		return vm.vars[v.Str], nil // 変数の値を返す
@@ -132,7 +132,7 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 		if len(args) == 1 {
 			return args[0], nil
 		}
-		return NewLiteral(args), nil
+		return NewLitList(args), nil
 	}
 
 	cleanCmd := strings.TrimPrefix(cmd, "!")
@@ -200,7 +200,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 		if err != nil {
 			return Value{}, err
 		}
-		final = NewLiteral(results)
+		final = NewLitList(results)
 	}
 
 	vm.vars[target] = final
@@ -283,7 +283,7 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 		results[i] = result
 	}
 
-	return NewLiteral(results), nil
+	return NewLitList(results), nil
 }
 
 // ==================================================

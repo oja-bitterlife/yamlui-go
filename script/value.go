@@ -1,20 +1,24 @@
 package script
 
+import (
+	"strconv"
+	"strings"
+)
+
 // ==================================================
 // 値の型定義
 type ValueType int
 
 const (
+	// 評価済み
 	TypeNumber ValueType = iota
 	TypeBool
 	TypeString
-	TypeProperty // @i などの参照（未評価）
-	TypeList     // (op arg1 arg2)
-	TypeLiteral  // リテラルのみのリスト(評価済み)
+	TypeLitList // 評価済みリスト
 
-	// 制御構造の型
-	TypeSwitch // switch文
-	TypeRepeat // repeat文
+	// 未評価
+	TypeProperty // @i などの参照
+	TypeList     // 未評価リスト
 )
 
 // ==================================================
@@ -41,16 +45,38 @@ func (v Value) TypeStr() string {
 		return "Bool"
 	case TypeString:
 		return "String"
+	case TypeLitList:
+		return "LiteralList"
 	case TypeProperty:
 		return "Property"
-	case TypeLiteral:
-		return "LiteralList"
 	case TypeList:
 		return "List"
-	case TypeSwitch:
-		return "Switch"
-	case TypeRepeat:
-		return "Repeat"
+	default:
+		return "Unknown"
+	}
+}
+
+// 値を文字列で返す. デバッグ用.
+func (v Value) ValStr() string {
+	switch v.Type {
+	case TypeNumber:
+		// 小数点以下が0なら整数として表示
+		fmod := v.Num - float64(int64(v.Num))
+		if fmod == 0 {
+			return strconv.FormatInt(int64(v.Num), 10)
+		} else {
+			return strconv.FormatFloat(v.Num, 'f', 4, 64)
+		}
+	case TypeBool:
+		return strconv.FormatBool(v.Bool)
+	case TypeString, TypeProperty:
+		return v.Str
+	case TypeLitList, TypeList:
+		strs := make([]string, len(v.List))
+		for i, elem := range v.List {
+			strs[i] = elem.ValStr()
+		}
+		return "[" + strings.Join(strs, ", ") + "]"
 	default:
 		return "Unknown"
 	}
@@ -61,15 +87,15 @@ func (v Value) TypeStr() string {
 func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
 func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
+func NewLitList(v []Value) Value { return Value{Type: TypeLitList, List: v} }
 func NewProperty(s string) Value { return Value{Type: TypeProperty, Str: s} }
 func NewList(v []Value) Value    { return Value{Type: TypeList, List: v} }
-func NewLiteral(v []Value) Value { return Value{Type: TypeLiteral, List: v} }
 
 // ==================================================
 // リテラルチェック
 func (v Value) IsLiteral() bool {
 	switch v.Type {
-	case TypeNumber, TypeBool, TypeString, TypeLiteral:
+	case TypeNumber, TypeBool, TypeString, TypeLitList:
 		return true
 	default:
 		return false
@@ -79,7 +105,7 @@ func (v Value) IsLiteral() bool {
 // リストチェック
 func (v Value) IsList() bool {
 	switch v.Type {
-	case TypeList, TypeLiteral:
+	case TypeList, TypeLitList:
 		return true
 	default:
 		return false

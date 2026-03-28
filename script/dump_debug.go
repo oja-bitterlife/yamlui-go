@@ -31,18 +31,13 @@ func (v Value) ToJson() string {
 }
 
 func (v Value) toJson() debugJsonTree {
-	switch v.Type {
-	case TypeNumber:
-		return debugJsonTree{Type: v.TypeStr(), Value: v.Num}
-	case TypeBool:
-		return debugJsonTree{Type: v.TypeStr(), Value: v.Bool}
-	case TypeString, TypeProperty:
-		return debugJsonTree{Type: v.TypeStr(), Value: v.Str}
-	default:
+	if v.IsList() {
 		list := make([]debugJsonTree, len(v.List))
 		for i, item := range v.List {
 			list[i] = item.toJson()
 		}
 		return debugJsonTree{Type: v.TypeStr(), Value: list}
+	} else {
+		return debugJsonTree{Type: v.TypeStr(), Value: v.ValStr()}
 	}
 }

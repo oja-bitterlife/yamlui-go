@@ -38,7 +38,7 @@ func mathOp(vm *script.VM, cmdName string, args []script.Value, fn func(*script.
 	}
 
 	// リストなら個別に
-	if values[0].Type == script.TypeLiteral && values[1].Type == script.TypeLiteral {
+	if values[0].Type == script.TypeLitList && values[1].Type == script.TypeLitList {
 		// 同じ長でないとエラー
 		if len(values[0].List) != len(values[1].List) {
 			return script.Value{}, errors.New("different length of lists: " + strconv.Itoa(len(values[0].List)) + " and " + strconv.Itoa(len(values[1].List)))
@@ -51,9 +51,9 @@ func mathOp(vm *script.VM, cmdName string, args []script.Value, fn func(*script.
 				return script.Value{}, err
 			}
 		}
-		return script.NewLiteral(result), nil
+		return script.NewLitList(result), nil
 	}
-	if values[0].Type == script.TypeLiteral && values[1].Type != script.TypeLiteral {
+	if values[0].Type == script.TypeLitList && values[1].Type != script.TypeLitList {
 		// 第二引数をリストに適用
 		result := make([]script.Value, len(values[0].List))
 		for i := 0; i < len(values[0].List); i++ {
@@ -62,9 +62,9 @@ func mathOp(vm *script.VM, cmdName string, args []script.Value, fn func(*script.
 				return script.Value{}, err
 			}
 		}
-		return script.NewLiteral(result), nil
+		return script.NewLitList(result), nil
 	}
-	if values[0].Type != script.TypeLiteral && values[1].Type == script.TypeLiteral {
+	if values[0].Type != script.TypeLitList && values[1].Type == script.TypeLitList {
 		// 第一引数をリストに適用
 		result := make([]script.Value, len(values[1].List))
 		for i := 0; i < len(values[1].List); i++ {
@@ -73,7 +73,7 @@ func mathOp(vm *script.VM, cmdName string, args []script.Value, fn func(*script.
 				return script.Value{}, err
 			}
 		}
-		return script.NewLiteral(result), nil
+		return script.NewLitList(result), nil
 	}
 
 	// 個別に計算

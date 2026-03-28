@@ -122,7 +122,7 @@ func parseList(tn *Tokenizer, terminate byte) (Value, error) {
 
 	// リテラルブロックなら、リスト全体を文字列化してリテラルとして返す
 	if terminate == '}' {
-		return NewLiteral(list), nil
+		return NewLitList(list), nil
 	} else {
 		return NewList(list), nil
 	}
