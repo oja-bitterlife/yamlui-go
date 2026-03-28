@@ -9,6 +9,7 @@ tasks:
     desc: "Build"
     sources:
       - ./script/*.go
+      - ./builtin/*.go
       - ./cmd/**/*.go
     generates:
       - "{{.BIN_DIR}}/main"

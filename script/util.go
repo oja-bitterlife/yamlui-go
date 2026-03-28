@@ -1,5 +1,7 @@
 package script
 
+import "errors"
+
 func Itoa(n int) string {
 	if n == 0 {
 		return "0"
@@ -14,4 +16,12 @@ func Itoa(n int) string {
 		buf[i], buf[j] = buf[j], buf[i]
 	}
 	return string(buf)
+}
+
+func ValidationArgNum(cmdName string, argNum int, args []Value) error {
+	if len(args) != argNum {
+		argNumStr := Itoa(argNum)
+		return errors.New(cmdName + ": requires exactly " + argNumStr + " arguments")
+	}
+	return nil
 }

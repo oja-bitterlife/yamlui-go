@@ -11,17 +11,18 @@ import (
 // 外部との連携用データ構造体
 type VM struct {
 	vars map[string]Value
-	cmds map[string]func(args []Value) (Value, error)
+	cmds map[string]func(vm *VM, args []Value) (Value, error)
 }
 
 // VMの初期化
 func NewVM() *VM {
 	return &VM{
 		vars: make(map[string]Value),
-		cmds: make(map[string]func(args []Value) (Value, error))}
+		cmds: make(map[string]func(vm *VM, args []Value) (Value, error))}
 }
 
-// ソースコードを実行する関数
+// ソースコードを実行する関数。とりあえずこれを呼べばOK
+// ----------------------------------------
 func (vm *VM) Run(src string) (Value, error) {
 	// ソースコードをパース
 	v, err := parse(src)
@@ -43,6 +44,18 @@ func (vm *VM) Run(src string) (Value, error) {
 		}
 	}
 	return lastVal, nil
+}
+
+// コマンドを登録する関数
+// ----------------------------------------
+func (vm *VM) RegisterCmd(name string, fn func(vm *VM, args []Value) (Value, error)) {
+	vm.cmds[name] = fn
+}
+
+func (vm *VM) RegisterCmdList(cmds map[string]func(vm *VM, args []Value) (Value, error)) {
+	for name, fn := range cmds {
+		vm.RegisterCmd(name, fn)
+	}
 }
 
 // ==================================================
@@ -143,7 +156,7 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 		return Value{}, errors.New("unknown command: " + cmd)
 	}
 
-	return fn(args)
+	return fn(vm, args)
 }
 
 // **********************************************************************
