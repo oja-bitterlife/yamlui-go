@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/oja-bitterlife/yamlui-go/builtin"
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -15,13 +16,14 @@ func main() {
 	//   (switch _i "First!" "Second!" "Third!"))
 	// `
 	src := `
-(!)
+	(* "Go" 3)
 `
 
 	vm := script.NewVM()
+	vm.RegisterCmdList(builtin.MathCmds)
 	result, err := vm.Run(src)
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Printf("{\"Error\":\"%s\"}\n", err.Error())
 		return
 	}
 	result.Dump()

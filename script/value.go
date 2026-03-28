@@ -31,6 +31,28 @@ type Value struct {
 	List []Value
 }
 
+// 値の型を文字列で返す. デバッグ用.
+func (v Value) TypeStr() string {
+	switch v.Type {
+	case TypeNumber:
+		return "Number"
+	case TypeBool:
+		return "Bool"
+	case TypeString:
+		return "String"
+	case TypeProperty:
+		return "Property"
+	case TypeList:
+		return "List"
+	case TypeSwitch:
+		return "Switch"
+	case TypeRepeat:
+		return "Repeat"
+	default:
+		return "Unknown"
+	}
+}
+
 // ==================================================
 // 値の生成関数
 func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
