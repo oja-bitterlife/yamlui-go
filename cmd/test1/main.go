@@ -22,7 +22,6 @@ type model struct {
 	frame  int
 
 	canvas [][]Cell
-	label1 *BTLabel
 }
 
 func initialModel() model {
@@ -32,14 +31,11 @@ func initialModel() model {
 		height: 24,
 	}
 
-	area := yamlui.NewUIArea()
-	m.root.AddChild(area.Base)
+	win := NewBTWindow(&m, 4, 2, 30, 10)
+	m.root.AddChild(win.Base.Base)
 
-	m.label1 = NewBTLabel("Hello, YAMLUI!")
-	area.Base.AddChild(m.label1.Base.Base)
-
-	area.Base.X = 4
-	area.Base.Y = 2
+	label := NewBTLabel(&m, "Hello, YAMLUI!")
+	win.Base.Base.AddChild(label.Base.Base)
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	scriptSrc := `
@@ -48,7 +44,7 @@ func initialModel() model {
 		(+ @X 1)
 		(set @X 0)))
 	   `
-	if err := m.label1.Base.Base.SetScript(scriptSrc); err != nil {
+	if err := label.Base.Base.SetScript(scriptSrc); err != nil {
 		panic(fmt.Sprintf("Failed to set script: %v", err))
 	}
 
@@ -96,9 +92,8 @@ func (m model) View() string {
 			m.canvas[y][x] = Cell{Rune: ' ', Color: "white"}
 		}
 	}
-	m.label1.Canvas = m.canvas
 
-	m.root.DrawTree(4, 2) // 描画用の構造体を更新
+	m.root.DrawTree(yamlui.NewArea(0, 0, 80, 24)) // 描画用の構造体を更新
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

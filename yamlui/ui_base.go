@@ -13,11 +13,11 @@ type UIBase struct {
 	IsEnable bool
 
 	// 座標
-	IsAbs  bool
-	X      int
-	Y      int
-	Width  int
-	Height int
+	IsAbs bool
+	X     int
+	Y     int
+	W     int
+	H     int
 
 	// 表示
 	IsVisivle bool
@@ -48,8 +48,8 @@ func (ui *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@IsAbs", script.NewBool(ui.IsAbs))
 	vm.SetVar("@X", script.NewNumber(float64(ui.X)))
 	vm.SetVar("@Y", script.NewNumber(float64(ui.Y)))
-	vm.SetVar("@Width", script.NewNumber(float64(ui.Width)))
-	vm.SetVar("@Height", script.NewNumber(float64(ui.Height)))
+	vm.SetVar("@Width", script.NewNumber(float64(ui.W)))
+	vm.SetVar("@Height", script.NewNumber(float64(ui.H)))
 	vm.SetVar("@IsVisivle", script.NewBool(ui.IsVisivle))
 	vm.SetVar("@Text", script.NewString(ui.Text))
 	vm.SetVar("@Color", script.NewString(ui.Color))
@@ -64,8 +64,8 @@ func (ui *UIBase) loadFromVM(vm *script.VM) {
 	ui.IsAbs = vm.GetVar("@IsAbs").Bool
 	ui.X = int(vm.GetVar("@X").Num)
 	ui.Y = int(vm.GetVar("@Y").Num)
-	ui.Width = int(vm.GetVar("@Width").Num)
-	ui.Height = int(vm.GetVar("@Height").Num)
+	ui.W = int(vm.GetVar("@Width").Num)
+	ui.H = int(vm.GetVar("@Height").Num)
 	ui.IsVisivle = vm.GetVar("@IsVisivle").Bool
 	ui.Text = vm.GetVar("@Text").Str
 	ui.Color = vm.GetVar("@Color").Str
@@ -83,8 +83,8 @@ func NewUIBase(type_ string) *UIBase {
 	ui.IsVisivle = true
 	ui.Color = "system"
 	// 0だと設定忘れ時どこがおかしいかわからないのでデフォルト値を入れる
-	ui.Width = 64
-	ui.Height = 48 / 2
+	ui.W = 64
+	ui.H = 48 / 2
 	return ui
 }
 
@@ -197,55 +197,60 @@ func (ui *UIBase) updateTree(frame int) error {
 // ==================================================
 // 描画
 type Drawable interface {
-	Draw(ui *UIBase, x, y int)
+	Draw(ui *UIBase, clip Area)
 }
 
-// 描画のオフセット計算と呼び出し
-func (ui *UIBase) calcDrawArea(x, y int) (int, int) {
-	// 描画位置の計算
+func (ui *UIBase) calcDrawArea(clip Area) Area {
 	if ui.IsAbs {
-		x = ui.X
-		y = ui.Y
+		return Area{
+			X: ui.X,
+			Y: ui.Y,
+			W: ui.W,
+			H: ui.H,
+		}.Clip(clip)
 	} else {
-		x += ui.X
-		y += ui.Y
+		return Area{
+			X: clip.X + ui.X,
+			Y: clip.Y + ui.Y,
+			W: ui.W,
+			H: ui.H,
+		}.Clip(clip)
 	}
-	return x, y
 }
 
 // 呼び出し口
-func (ui *UIBase) DrawTree(x, y int) {
+func (ui *UIBase) DrawTree(clip Area) {
 	if !ui.IsVisivle {
 		return
 	}
 
 	// 自身の位置で更新
-	ox, oy := ui.calcDrawArea(x, y)
+	area := ui.calcDrawArea(clip)
 
 	// 自分のDrawを呼び出す
 	if ui.drawIF != nil {
-		ui.drawIF.Draw(ui, ox, oy)
+		ui.drawIF.Draw(ui, area)
 	}
 
 	// 子のDrawを呼び出す
-	ui.drawTree(ox, oy)
+	ui.drawTree(area)
 }
 
 // 再帰実行
-func (ui *UIBase) drawTree(x, y int) {
+func (ui *UIBase) drawTree(clip Area) {
 	// 先に子のDrawを全部実行する
 	for _, child := range ui.children {
 		if child.drawIF != nil && child.IsVisivle {
-			ox, oy := child.calcDrawArea(x, y)
-			child.drawIF.Draw(child, ox, oy)
+			area := child.calcDrawArea(clip)
+			child.drawIF.Draw(child, area)
 		}
 	}
 
 	// そのあとTreeを手繰る
 	for _, child := range ui.children {
 		if child.IsVisivle {
-			ox, oy := child.calcDrawArea(x, y)
-			child.drawTree(ox, oy)
+			area := child.calcDrawArea(clip)
+			child.drawTree(area)
 		}
 	}
 }
