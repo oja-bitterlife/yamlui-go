@@ -185,7 +185,7 @@ func (ui *UIBase) updateTree(frame int) error {
 
 	// そのあとTreeを手繰る
 	for _, child := range ui.children {
-		err := child.UpdateTree(frame)
+		err := child.updateTree(frame)
 		if err != nil {
 			lastErr = err
 		}
@@ -214,7 +214,7 @@ func (ui *UIBase) drawTree(x, y int) {
 	// 先に子のDrawを全部実行する
 	for _, child := range ui.children {
 		if child.drawIF != nil {
-			child.drawIF.Draw(ui, x, y)
+			child.drawIF.Draw(child, x, y)
 		}
 	}
 

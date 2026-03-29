@@ -26,20 +26,20 @@ type model struct {
 }
 
 func initialModel() model {
-	model := model{
+	m := model{
 		root:   yamlui.NewUIBase("Root"),
-		width:  64,
+		width:  80,
 		height: 24,
 	}
 
 	area := yamlui.NewUIArea()
-	model.root.AddChild(area.Base)
+	m.root.AddChild(area.Base)
 
-	model.label1 = NewBTLabel("Hello, YAMLUI!")
-	area.Base.AddChild(model.label1.Base.Base)
+	m.label1 = NewBTLabel("Hello, YAMLUI!")
+	area.Base.AddChild(m.label1.Base.Base)
 
-	area.Base.X = 10
-	area.Base.Y = 3
+	area.Base.X = 0
+	area.Base.Y = 0
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	scriptSrc := `
@@ -48,21 +48,21 @@ func initialModel() model {
 		(set @X 0)
 		(+ @X 1)))
 	   `
-	if err := model.label1.Base.Base.SetScript(scriptSrc); err != nil {
+	if err := m.label1.Base.Base.SetScript(scriptSrc); err != nil {
 		panic(fmt.Sprintf("Failed to set script: %v", err))
 	}
 
-	model.canvas = make([][]Cell, model.width)
-	for i := range model.canvas {
+	m.canvas = make([][]Cell, m.height)
+	for i := range m.canvas {
 		// 内側のスライス（列）を作る
-		model.canvas[i] = make([]Cell, model.width)
+		m.canvas[i] = make([]Cell, m.width)
 		// 初期状態としてスペースなどで埋める
-		for j := range model.canvas[i] {
-			model.canvas[i][j] = Cell{Rune: 'x', Color: "white"}
+		for j := range m.canvas[i] {
+			m.canvas[i][j] = Cell{Rune: ' ', Color: "white"}
 		}
 	}
 
-	return model
+	return m
 }
 
 func (m model) Init() tea.Cmd {
@@ -91,16 +91,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-
+	for y := range m.canvas {
+		for x := range m.canvas[y] {
+			m.canvas[y][x] = Cell{Rune: ' ', Color: "white"}
+		}
+	}
 	m.label1.Canvas = m.canvas
 
 	m.root.DrawTree(0, 0) // 描画用の構造体を更新
-
-	// ラベルに色と位置（マージン）を適用
-	// style := lipgloss.NewStyle().
-	// 	Foreground(m.getColor(m.root.Color)).
-	// 	MarginLeft(m.root.X).
-	// 	MarginTop(m.root.Y)
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

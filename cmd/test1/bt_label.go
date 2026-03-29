@@ -16,7 +16,6 @@ func NewBTLabel(text string) *BTLabel {
 }
 
 func (bt *BTLabel) Draw(ui *yamlui.UIBase, x, y int) {
-	ui.X = x
-	ui.Y = y
-	bt.Canvas[y][x] = Cell{Rune: 'L', Color: "white"} // 仮の描画
+	r := rune(ui.X + '0')                              // 仮の描画: X座標を文字に変換
+	bt.Canvas[ui.Y][ui.X] = Cell{Rune: r, Color: "86"} // 仮の描画
 }
