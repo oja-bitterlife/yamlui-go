@@ -18,12 +18,13 @@ type model struct {
 	root   *yamlui.UIBase
 	width  int
 	height int
+	frame  int
 }
 
 func initialModel() model {
 	area := yamlui.NewUIArea()
-	label := yamlui.NewUILabel("Hello, YAMLUI!")
-	area.Base.AddChild(label.Base)
+	label := NewBTLabel("Hello, YAMLUI!")
+	area.Base.AddChild(label.lib.Base)
 
 	area.Base.X = 10
 	area.Base.Y = 3
@@ -35,7 +36,7 @@ func initialModel() model {
 		(set @X 0)
 		(+ @X 1)))
 	   `
-	if err := label.Base.SetScript(scriptSrc); err != nil {
+	if err := label.lib.Base.SetScript(scriptSrc); err != nil {
 		panic(fmt.Sprintf("Failed to set script: %v", err))
 	}
 
@@ -49,6 +50,8 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.frame++ // フレームを進める
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		// 'q' か 'ctrl+c' で終了
@@ -57,7 +60,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// キーが押されたらLispを実行して構造体を更新
-		err := m.root.Update()
+		err := m.root.UpdateTree(m.frame)
 		if err != nil {
 			fmt.Printf("Error executing script: %v\n", err)
 			return m, nil
@@ -68,6 +71,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+	m.root.DrawTree(0, 0) // 描画用の構造体を更新
+
 	// ラベルに色と位置（マージン）を適用
 	style := lipgloss.NewStyle().
 		Foreground(m.getColor(m.root.Color)).

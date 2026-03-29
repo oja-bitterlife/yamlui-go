@@ -33,9 +33,9 @@ type UIBase struct {
 	// ----------------------------------------
 	children []*UIBase
 
-	onInitFunc func(ui *UIBase)
-	updateFunc func(ui *UIBase, frame int)
-	drawFunc   func(ui *UIBase, x, y int)
+	onInitIF Initarizable
+	updateIF Updatable
+	drawIF   Drawable
 
 	script *script.Runtime
 }
@@ -94,16 +94,20 @@ func (ui *UIBase) SetScript(scriptSrc string) error {
 	return err
 }
 
-func (ui *UIBase) SetOnInitFunc(initFunc func(*UIBase)) {
-	ui.onInitFunc = initFunc
+type Initarizable interface {
+	OnInit(ui *UIBase)
 }
 
-func (ui *UIBase) SetUpdateFunc(updateFunc func(*UIBase, int)) {
-	ui.updateFunc = updateFunc
+func (ui *UIBase) SetOnInitFunc(onInitIF Initarizable) {
+	ui.onInitIF = onInitIF
 }
 
-func (ui *UIBase) SetDrawFunc(drawFunc func(*UIBase, int, int)) {
-	ui.drawFunc = drawFunc
+func (ui *UIBase) SetUpdateIF(updateIF Updatable) {
+	ui.updateIF = updateIF
+}
+
+func (ui *UIBase) SetDrawIF(drawIF Drawable) {
+	ui.drawIF = drawIF
 }
 
 func (ui *UIBase) GetRuntime() *script.Runtime {
@@ -111,42 +115,9 @@ func (ui *UIBase) GetRuntime() *script.Runtime {
 }
 
 // **********************************************************************
-// 実行
-func (ui *UIBase) update(frame int) error {
-	var err error
-
-	if ui.IsEnable {
-		if ui.Frame == 0 && ui.onInitFunc != nil {
-			ui.onInitFunc(ui)
-		}
-		ui.Frame++
-
-		if ui.updateFunc != nil {
-			ui.updateFunc(ui, frame)
-		}
-
-		if ui.script != nil {
-			ui.storeToVM(ui.script.GetVM())
-			_, err = ui.script.Run()
-			ui.loadFromVM(ui.script.GetVM())
-		}
-	}
-
-	if ui.IsVisivle && ui.drawFunc != nil {
-		ui.drawFunc(ui, ui.X, ui.Y)
-	}
-
-	return err
-}
-
-func (ui *UIBase) draw(x, y int) {
-	if ui.IsVisivle && ui.drawFunc != nil {
-		ui.drawFunc(ui, x, y)
-	}
-}
-
-// **********************************************************************
 // Tree構造化
+// ==================================================
+// ツリー操作
 func (ui *UIBase) AddChild(child *UIBase) {
 	ui.children = append(ui.children, child)
 }
@@ -160,6 +131,36 @@ func (ui *UIBase) RemoveChild(child *UIBase) {
 	}
 }
 
+// ==================================================
+// 更新
+type Updatable interface {
+	Update(ui *UIBase, frame int) error
+}
+
+func (ui *UIBase) update(frame int) error {
+	var err error
+
+	if ui.IsEnable {
+		if ui.Frame == 0 && ui.onInitIF != nil {
+			ui.onInitIF.OnInit(ui)
+		}
+		ui.Frame++
+
+		if ui.updateIF != nil {
+			ui.updateIF.Update(ui, frame)
+		}
+
+		if ui.script != nil {
+			ui.storeToVM(ui.script.GetVM())
+			_, err = ui.script.Run()
+			ui.loadFromVM(ui.script.GetVM())
+		}
+	}
+
+	return err
+}
+
+// 呼び出し口
 func (ui *UIBase) UpdateTree(frame int) error {
 	lastErr := ui.update(frame)
 
@@ -169,6 +170,8 @@ func (ui *UIBase) UpdateTree(frame int) error {
 
 	return lastErr
 }
+
+// 再帰実行
 func (ui *UIBase) updateTree(frame int) error {
 	var lastErr error
 
@@ -191,15 +194,28 @@ func (ui *UIBase) updateTree(frame int) error {
 	return lastErr
 }
 
+// ==================================================
+// 描画
+type Drawable interface {
+	Draw(ui *UIBase, x, y int)
+}
+
+// 呼び出し口
 func (ui *UIBase) DrawTree(x, y int) {
-	ui.draw(x, y)
+	if ui.drawIF != nil {
+		ui.drawIF.Draw(ui, x, y)
+	}
+
 	ui.drawTree(x, y)
 }
 
+// 再帰実行
 func (ui *UIBase) drawTree(x, y int) {
 	// 先に子のDrawを全部実行する
 	for _, child := range ui.children {
-		child.draw(x, y)
+		if child.drawIF != nil {
+			child.drawIF.Draw(ui, x, y)
+		}
 	}
 
 	// そのあとTreeを手繰る
