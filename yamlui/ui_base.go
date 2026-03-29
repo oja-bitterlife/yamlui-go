@@ -200,26 +200,52 @@ type Drawable interface {
 	Draw(ui *UIBase, x, y int)
 }
 
+// 描画のオフセット計算と呼び出し
+func (ui *UIBase) calcDrawArea(x, y int) (int, int) {
+	// 描画位置の計算
+	if ui.IsAbs {
+		x = ui.X
+		y = ui.Y
+	} else {
+		x += ui.X
+		y += ui.Y
+	}
+	return x, y
+}
+
 // 呼び出し口
 func (ui *UIBase) DrawTree(x, y int) {
-	if ui.drawIF != nil {
-		ui.drawIF.Draw(ui, x, y)
+	if !ui.IsVisivle {
+		return
 	}
 
-	ui.drawTree(x, y)
+	// 自身の位置で更新
+	ox, oy := ui.calcDrawArea(x, y)
+
+	// 自分のDrawを呼び出す
+	if ui.drawIF != nil {
+		ui.drawIF.Draw(ui, ox, oy)
+	}
+
+	// 子のDrawを呼び出す
+	ui.drawTree(ox, oy)
 }
 
 // 再帰実行
 func (ui *UIBase) drawTree(x, y int) {
 	// 先に子のDrawを全部実行する
 	for _, child := range ui.children {
-		if child.drawIF != nil {
-			child.drawIF.Draw(child, x, y)
+		if child.drawIF != nil && child.IsVisivle {
+			ox, oy := child.calcDrawArea(x, y)
+			child.drawIF.Draw(child, ox, oy)
 		}
 	}
 
 	// そのあとTreeを手繰る
 	for _, child := range ui.children {
-		child.drawTree(x, y)
+		if child.IsVisivle {
+			ox, oy := child.calcDrawArea(x, y)
+			child.drawTree(ox, oy)
+		}
 	}
 }

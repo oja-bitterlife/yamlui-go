@@ -38,15 +38,15 @@ func initialModel() model {
 	m.label1 = NewBTLabel("Hello, YAMLUI!")
 	area.Base.AddChild(m.label1.Base.Base)
 
-	area.Base.X = 0
-	area.Base.Y = 0
+	area.Base.X = 4
+	area.Base.Y = 2
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	scriptSrc := `
 (set @X
-	(switch (> @X 30)
-		(set @X 0)
-		(+ @X 1)))
+	(switch (< @X 3)
+		(+ @X 1)
+		(set @X 0)))
 	   `
 	if err := m.label1.Base.Base.SetScript(scriptSrc); err != nil {
 		panic(fmt.Sprintf("Failed to set script: %v", err))
@@ -98,7 +98,7 @@ func (m model) View() string {
 	}
 	m.label1.Canvas = m.canvas
 
-	m.root.DrawTree(0, 0) // 描画用の構造体を更新
+	m.root.DrawTree(4, 2) // 描画用の構造体を更新
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {
