@@ -26,15 +26,18 @@ type UIBase struct {
 
 	// インタラクティブなUIに必要なプロパティ
 	SelectNo int
-	SelGridX int // SelectGridで横の折り返し位置
-	Action   string
+	SelGridX int    // SelectGridで横の折り返し位置
+	Action   string // 都度リセットされる
 
 	// 保存しないもの
 	// ----------------------------------------
-	script     *script.Runtime
-	onInitFunc func(ui *UIBase, x, y int)
-	updateFunc func(ui *UIBase, x, y int)
+	children []*UIBase
+
+	onInitFunc func(ui *UIBase)
+	updateFunc func(ui *UIBase, frame int)
 	drawFunc   func(ui *UIBase, x, y int)
+
+	script *script.Runtime
 }
 
 // ==================================================
@@ -52,11 +55,11 @@ func (ui *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Color", script.NewString(ui.Color))
 	vm.SetVar("@SelectNo", script.NewNumber(float64(ui.SelectNo)))
 	vm.SetVar("@SelGridX", script.NewNumber(float64(ui.SelGridX)))
-	vm.SetVar("@Action", script.NewString(ui.Action))
+	// 都度リセット
+	vm.SetVar("@Action", script.NewString(""))
 }
 
 func (ui *UIBase) loadFromVM(vm *script.VM) {
-	ui.Frame = int(vm.GetVar("@Frame").Num)
 	ui.IsEnable = vm.GetVar("@IsEnable").Bool
 	ui.IsAbs = vm.GetVar("@IsAbs").Bool
 	ui.X = int(vm.GetVar("@X").Num)
@@ -80,8 +83,8 @@ func NewUIBase(type_ string) *UIBase {
 	ui.IsVisivle = true
 	ui.Color = "system"
 	// 0だと設定忘れ時どこがおかしいかわからないのでデフォルト値を入れる
-	ui.Width = 80
-	ui.Height = 24
+	ui.Width = 64
+	ui.Height = 48 / 2
 	return ui
 }
 
@@ -91,15 +94,15 @@ func (ui *UIBase) SetScript(scriptSrc string) error {
 	return err
 }
 
-func (ui *UIBase) SetOnInitFunc(initFunc func(ui *UIBase, x, y int)) {
+func (ui *UIBase) SetOnInitFunc(initFunc func(*UIBase)) {
 	ui.onInitFunc = initFunc
 }
 
-func (ui *UIBase) SetUpdateFunc(updateFunc func(ui *UIBase, x, y int)) {
+func (ui *UIBase) SetUpdateFunc(updateFunc func(*UIBase, int)) {
 	ui.updateFunc = updateFunc
 }
 
-func (ui *UIBase) SetDrawFunc(drawFunc func(ui *UIBase, x, y int)) {
+func (ui *UIBase) SetDrawFunc(drawFunc func(*UIBase, int, int)) {
 	ui.drawFunc = drawFunc
 }
 
@@ -109,23 +112,22 @@ func (ui *UIBase) GetRuntime() *script.Runtime {
 
 // **********************************************************************
 // 実行
-func (ui *UIBase) Update() (script.Value, error) {
-	var result script.Value
+func (ui *UIBase) update(frame int) error {
 	var err error
 
 	if ui.IsEnable {
 		if ui.Frame == 0 && ui.onInitFunc != nil {
-			ui.onInitFunc(ui, ui.X, ui.Y)
+			ui.onInitFunc(ui)
 		}
 		ui.Frame++
 
 		if ui.updateFunc != nil {
-			ui.updateFunc(ui, ui.X, ui.Y)
+			ui.updateFunc(ui, frame)
 		}
 
 		if ui.script != nil {
 			ui.storeToVM(ui.script.GetVM())
-			result, err = ui.script.Run()
+			_, err = ui.script.Run()
 			ui.loadFromVM(ui.script.GetVM())
 		}
 	}
@@ -134,5 +136,74 @@ func (ui *UIBase) Update() (script.Value, error) {
 		ui.drawFunc(ui, ui.X, ui.Y)
 	}
 
-	return result, err
+	return err
+}
+
+func (ui *UIBase) draw(x, y int) {
+	if ui.IsVisivle && ui.drawFunc != nil {
+		ui.drawFunc(ui, x, y)
+	}
+}
+
+// **********************************************************************
+// Tree構造化
+func (ui *UIBase) AddChild(child *UIBase) {
+	ui.children = append(ui.children, child)
+}
+
+func (ui *UIBase) RemoveChild(child *UIBase) {
+	for i, c := range ui.children {
+		if c == child {
+			ui.children = append(ui.children[:i], ui.children[i+1:]...)
+			return
+		}
+	}
+}
+
+func (ui *UIBase) UpdateTree(frame int) error {
+	lastErr := ui.update(frame)
+
+	if err := ui.updateTree(frame); err != nil {
+		lastErr = err
+	}
+
+	return lastErr
+}
+func (ui *UIBase) updateTree(frame int) error {
+	var lastErr error
+
+	// 先に子のUpdateを全部実行する
+	for _, child := range ui.children {
+		err := child.update(frame)
+		if err != nil {
+			lastErr = err
+		}
+	}
+
+	// そのあとTreeを手繰る
+	for _, child := range ui.children {
+		err := child.UpdateTree(frame)
+		if err != nil {
+			lastErr = err
+		}
+	}
+
+	return lastErr
+}
+
+func (ui *UIBase) DrawTree(x, y int) {
+	ui.draw(x, y)
+	ui.drawTree(x, y)
+}
+
+func (ui *UIBase) drawTree(x, y int) {
+	// 先に子のDrawを全部実行する
+	for _, child := range ui.children {
+		child.draw(x, y)
+	}
+
+	// そのあとTreeを手繰る
+	for _, child := range ui.children {
+		child.drawTree(x, y)
+	}
 }

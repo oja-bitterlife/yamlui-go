@@ -1,11 +1,13 @@
 package yamlui
 
-type UILabelBase struct {
+type UILabel struct {
 	Base *UIBase
 }
 
-func NewUILabelBase() *UILabelBase {
-	return &UILabelBase{
+func NewUILabel(text string) *UILabel {
+	label := &UILabel{
 		Base: NewUIBase("Label"),
 	}
+	label.Base.Text = text
+	return label
 }
