@@ -1,6 +1,8 @@
 package script
 
-import "errors"
+import (
+	"errors"
+)
 
 type Runtime struct {
 	vm       *VM
@@ -23,31 +25,34 @@ func Compile(src string) (*Runtime, error) {
 		return nil, errors.New("no commands to execute")
 	}
 
+	vm := NewVM()
+	SetBuiltinCmds(vm)
+
 	return &Runtime{
-		vm:       NewVM(),
+		vm:       vm,
 		compiled: v.List, // Listをそのままコンパイル済みコードとして保存
 	}, nil
 }
 
-func (runtime *Runtime) Run() (Value, error) {
+func (runtime *Runtime) Run() (*Value, error) {
 	// リスト(root)に入ってやってくる
 	var lastVal Value
 	var err error
 	for _, v := range runtime.compiled {
 		lastVal, err = runtime.vm.Eval(v)
 		if err != nil {
-			return Value{}, err
+			return nil, err
 		}
 	}
-	return lastVal, nil
+	return &lastVal, nil
 }
 
 // ==================================================
 // CompileしてRunまで一気にやる
-func Run(src string) (Value, error) {
+func Run(src string) (*Value, error) {
 	runtime, err := Compile(src)
 	if err != nil {
-		return Value{}, err
+		return nil, err
 	}
 	return runtime.Run()
 }

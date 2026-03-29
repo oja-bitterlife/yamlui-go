@@ -103,9 +103,16 @@ func (ui *UIBase) SetDrawFunc(drawFunc func(ui *UIBase, x, y int)) {
 	ui.drawFunc = drawFunc
 }
 
+func (ui *UIBase) GetRuntime() *script.Runtime {
+	return ui.script
+}
+
 // **********************************************************************
 // 実行
-func (ui *UIBase) Update() {
+func (ui *UIBase) Update() (script.Value, error) {
+	var result script.Value
+	var err error
+
 	if ui.IsEnable {
 		if ui.Frame == 0 && ui.onInitFunc != nil {
 			ui.onInitFunc(ui, ui.X, ui.Y)
@@ -118,7 +125,7 @@ func (ui *UIBase) Update() {
 
 		if ui.script != nil {
 			ui.storeToVM(ui.script.GetVM())
-			ui.script.Run()
+			result, err = ui.script.Run()
 			ui.loadFromVM(ui.script.GetVM())
 		}
 	}
@@ -126,4 +133,6 @@ func (ui *UIBase) Update() {
 	if ui.IsVisivle && ui.drawFunc != nil {
 		ui.drawFunc(ui, ui.X, ui.Y)
 	}
+
+	return result, err
 }
