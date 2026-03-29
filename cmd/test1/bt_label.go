@@ -20,8 +20,8 @@ func (label *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
 	cx, cy := clip.AlignCenter(len(ui.Text), 1)
 
 	for i, r := range ui.Text {
-		targetX := cx + clip.X + i
-		targetY := cy + clip.Y
+		targetX := cx + i
+		targetY := cy
 
 		// clip の範囲内かチェック
 		if clip.Contains(targetX, targetY) {
