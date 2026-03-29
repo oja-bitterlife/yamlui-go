@@ -16,7 +16,7 @@ tasks:
       - "{{.BIN_DIR}}/main"
     cmds:
       - mkdir -p {{.BIN_DIR}}
-      - go build -o {{.BIN_DIR}}/main --tags debug ./cmd/debug
+      - go build -o {{.BIN_DIR}}/main --tags debug ./cmd/test1
 
   run:
     desc: "Run"

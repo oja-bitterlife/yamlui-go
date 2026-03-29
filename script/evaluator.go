@@ -22,31 +22,6 @@ func NewVM() *VM {
 		cmds: make(map[string]func(vm *VM, args []Value) (Value, error))}
 }
 
-// ソースコードを実行する関数。とりあえずこれを呼べばOK
-// ----------------------------------------
-func (vm *VM) Run(src string) (Value, error) {
-	// ソースコードをパース
-	v, err := parse(src)
-	if err != nil {
-		return Value{}, err
-	}
-
-	// Listが空の場合はエラー
-	if len(v.List) == 0 {
-		return Value{}, errors.New("no commands to execute")
-	}
-
-	// リスト(root)に入ってやってくる
-	var lastVal Value
-	for _, v := range v.List {
-		lastVal, err = vm.Eval(v)
-		if err != nil {
-			return Value{}, err
-		}
-	}
-	return lastVal, nil
-}
-
 // コマンドを登録する関数
 // ----------------------------------------
 func (vm *VM) RegisterCmd(name string, fn func(vm *VM, args []Value) (Value, error)) {
@@ -57,6 +32,19 @@ func (vm *VM) RegisterCmdList(cmds map[string]func(vm *VM, args []Value) (Value,
 	for name, fn := range cmds {
 		vm.RegisterCmd(name, fn)
 	}
+}
+
+// 変数を取得・設定する関数
+func (vm *VM) GetVar(name string) Value {
+	return vm.vars[name]
+}
+
+func (vm *VM) GetVars() map[string]Value {
+	return vm.vars
+}
+
+func (vm *VM) SetVar(name string, value Value) {
+	vm.vars[name] = value
 }
 
 // デバッグ用cmds取得関数
