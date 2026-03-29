@@ -12,6 +12,7 @@ func NewBTWindow(m *model, x, y, w, h int) *BTWindow {
 		Base:  yamlui.NewUIWindow(),
 		model: m,
 	}
+	window.Base.Base.SetRect(x, y, w, h)
 	window.Base.Base.SetDrawIF(window)
 	return window
 }

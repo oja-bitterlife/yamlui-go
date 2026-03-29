@@ -16,7 +16,20 @@ func NewBTLabel(m *model, text string) *BTLabel {
 	return label
 }
 
-func (bt *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
-	r := rune(ui.X + '0')                                        // 仮の描画: X座標を文字に変換
-	bt.model.canvas[clip.Y][clip.X] = Cell{Rune: r, Color: "86"} // 仮の描画
+func (label *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
+	cx, cy := clip.AlignCenter(len(ui.Text), 1)
+
+	for i, r := range ui.Text {
+		targetX := cx + clip.X + i
+		targetY := cy + clip.Y
+
+		// clip の範囲内かチェック
+		if clip.Contains(targetX, targetY) {
+			// キャンバスの物理境界チェック
+			if targetY >= 0 && targetY < len(label.model.canvas) &&
+				targetX >= 0 && targetX < len(label.model.canvas[targetY]) {
+				label.model.canvas[targetY][targetX] = Cell{Rune: r, Color: "white"}
+			}
+		}
+	}
 }
