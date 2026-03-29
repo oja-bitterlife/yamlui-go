@@ -4,7 +4,7 @@ import "github.com/oja-bitterlife/yamlui-go/yamlui"
 
 type BTLabel struct {
 	Base   *yamlui.UILabel
-	canvas [][]Cell
+	Canvas [][]Cell
 }
 
 func NewBTLabel(text string) *BTLabel {
@@ -18,5 +18,5 @@ func NewBTLabel(text string) *BTLabel {
 func (bt *BTLabel) Draw(ui *yamlui.UIBase, x, y int) {
 	ui.X = x
 	ui.Y = y
-	bt.canvas[y][x] = Cell{Rune: 'L', Color: "white"} // 仮の描画
+	bt.Canvas[y][x] = Cell{Rune: 'L', Color: "white"} // 仮の描画
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -19,12 +20,23 @@ type model struct {
 	width  int
 	height int
 	frame  int
+
+	canvas [][]Cell
+	label1 *BTLabel
 }
 
 func initialModel() model {
+	model := model{
+		root:   yamlui.NewUIBase("Root"),
+		width:  64,
+		height: 24,
+	}
+
 	area := yamlui.NewUIArea()
-	label := NewBTLabel("Hello, YAMLUI!")
-	area.Base.AddChild(label.lib.Base)
+	model.root.AddChild(area.Base)
+
+	model.label1 = NewBTLabel("Hello, YAMLUI!")
+	area.Base.AddChild(model.label1.Base.Base)
 
 	area.Base.X = 10
 	area.Base.Y = 3
@@ -36,13 +48,21 @@ func initialModel() model {
 		(set @X 0)
 		(+ @X 1)))
 	   `
-	if err := label.lib.Base.SetScript(scriptSrc); err != nil {
+	if err := model.label1.Base.Base.SetScript(scriptSrc); err != nil {
 		panic(fmt.Sprintf("Failed to set script: %v", err))
 	}
 
-	root := yamlui.NewUIBase("Root")
-	root.AddChild(area.Base)
-	return model{root: root}
+	model.canvas = make([][]Cell, model.width)
+	for i := range model.canvas {
+		// 内側のスライス（列）を作る
+		model.canvas[i] = make([]Cell, model.width)
+		// 初期状態としてスペースなどで埋める
+		for j := range model.canvas[i] {
+			model.canvas[i][j] = Cell{Rune: 'x', Color: "white"}
+		}
+	}
+
+	return model
 }
 
 func (m model) Init() tea.Cmd {
@@ -71,15 +91,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
+
+	m.label1.Canvas = m.canvas
+
 	m.root.DrawTree(0, 0) // 描画用の構造体を更新
 
 	// ラベルに色と位置（マージン）を適用
-	style := lipgloss.NewStyle().
-		Foreground(m.getColor(m.root.Color)).
-		MarginLeft(m.root.X).
-		MarginTop(m.root.Y)
+	// style := lipgloss.NewStyle().
+	// 	Foreground(m.getColor(m.root.Color)).
+	// 	MarginLeft(m.root.X).
+	// 	MarginTop(m.root.Y)
 
-	return style.Render(m.root.Text)
+	var b strings.Builder
+	for y := 0; y < len(m.canvas); y++ {
+		for x := 0; x < len(m.canvas[y]); x++ {
+			cell := m.canvas[y][x]
+			// ここで lipgloss などを使って色をつけても良いですが、
+			// まずはシンプルに文字だけ出すなら：
+			b.WriteRune(cell.Rune)
+		}
+		b.WriteByte('\n')
+	}
+
+	// return style.Render(m.root.Text)
+	return b.String()
 }
 
 func (m model) getColor(c string) lipgloss.Color {
