@@ -10,7 +10,7 @@ import (
 )
 
 type model struct {
-	label *.UILabelBase
+	label *yamlui.UILabelBase
 }
 
 func initialModel() model {
@@ -52,7 +52,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			fmt.Printf("Error executing script: %v\n", err)
 			return m, nil
 		}
-		m.label.Base.GetRuntime().GetVM().GetVar("@X")
 	}
 
 	return m, nil

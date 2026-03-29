@@ -5,8 +5,8 @@ import (
 )
 
 type Runtime struct {
-	vm       *VM
-	compiled []Value
+	vm  *VM
+	ast []Value
 }
 
 // **********************************************************************
@@ -29,36 +29,38 @@ func Compile(src string) (*Runtime, error) {
 	SetBuiltinCmds(vm)
 
 	return &Runtime{
-		vm:       vm,
-		compiled: v.List, // Listをそのままコンパイル済みコードとして保存
+		vm:  vm,
+		ast: v.List, // Listをそのままコンパイル済みコードとして保存
 	}, nil
 }
 
-func (runtime *Runtime) Run() (*Value, error) {
-	// リスト(root)に入ってやってくる
+func (runtime *Runtime) Run() (Value, error) {
 	var lastVal Value
 	var err error
-	for _, v := range runtime.compiled {
+	for _, v := range runtime.ast {
+		// 深さのリセット
+		runtime.vm.vars["vm_depth"] = NewNumber(0)
+		runtime.vm.vars["vm_depth_max"] = NewNumber(0)
+
+		// 評価
 		lastVal, err = runtime.vm.Eval(v)
 		if err != nil {
-			return nil, err
+			return Value{}, err
 		}
 	}
-	return &lastVal, nil
-}
-
-// ==================================================
-// CompileしてRunまで一気にやる
-func Run(src string) (*Value, error) {
-	runtime, err := Compile(src)
-	if err != nil {
-		return nil, err
-	}
-	return runtime.Run()
+	return lastVal, nil
 }
 
 // **********************************************************************
 // Getter
 func (runtime *Runtime) GetVM() *VM {
 	return runtime.vm
+}
+
+func (runtime *Runtime) GetAST() Value {
+	return NewList(runtime.ast)
+}
+
+func (runtime *Runtime) GetVar(name string) Value {
+	return runtime.vm.GetVar(name)
 }

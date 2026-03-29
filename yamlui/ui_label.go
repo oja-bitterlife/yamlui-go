@@ -1,11 +1,11 @@
 package yamlui
 
 type UILabelBase struct {
-	Base UIBase
+	Base *UIBase
 }
 
 func NewUILabelBase() *UILabelBase {
 	return &UILabelBase{
-		Base: *NewUIBase("Label"),
+		Base: NewUIBase("Label"),
 	}
 }

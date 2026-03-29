@@ -11,15 +11,20 @@ import (
 // ==================================================
 // 外部との連携用データ構造体
 type VM struct {
-	vars map[string]Value
-	cmds map[string]func(vm *VM, args []Value) (Value, error)
+	vars         map[string]Value
+	cmds         map[string]func(vm *VM, args []Value) (Value, error)
+	maxRecursion int // 再帰の最大深さ
+	maxRepeat    int // repeatの最大回数
 }
 
 // VMの初期化
 func NewVM() *VM {
 	return &VM{
-		vars: make(map[string]Value),
-		cmds: make(map[string]func(vm *VM, args []Value) (Value, error))}
+		vars:         make(map[string]Value),
+		cmds:         make(map[string]func(vm *VM, args []Value) (Value, error)),
+		maxRecursion: 64,
+		maxRepeat:    256,
+	}
 }
 
 // コマンドを登録する関数
@@ -67,13 +72,36 @@ func (vm *VM) Eval(v Value) (Value, error) {
 		}
 		return v, nil
 	case TypeList:
-		list, err := vm.evalList(v.List) // ここで再帰
+		// 再帰の深さをチェック
+		// ----------------------------------------
+		depth := vm.vars["vm_depth"]
+		depth.Num++ // 深さを増やす
+		defer func() {
+			depth.Num-- // 深さを戻す
+			vm.vars["vm_depth"] = depth
+		}()
+		if int(depth.Num) >= vm.maxRecursion {
+			return Value{}, errors.New("maximum recursion depth exceeded")
+		}
+		vm.vars["vm_depth"] = depth
+
+		// デバッグ用: 過去の最大深さを更新
+		depthMax := vm.vars["vm_depth_max"]
+		if depth.Num > depthMax.Num {
+			depthMax.Num = depth.Num
+			vm.vars["vm_depth_max"] = depthMax
+		}
+
+		// ここで再帰
+		// ----------------------------------------
+		list, err := vm.evalList(v.List)
 		if err != nil {
 			return Value{}, err
 		}
 		if !list.IsLiteral() {
 			return Value{}, errors.New("expected literal value from list evaluation")
 		}
+
 		return list, nil
 	default:
 		return Value{}, errors.New("unknown value type")
@@ -103,14 +131,18 @@ func (vm *VM) evalList(list []Value) (Value, error) {
 	// 1番目をコマンドとして解釈
 	cmd := list[0].Str
 
-	// 引数は先に評価
-	args, err := vm.EvalAll(list[1:])
-	if err != nil {
-		return Value{}, err
+	// !で始まるコマンドは先に引数を評価
+	if strings.HasPrefix(cmd, "!") {
+		// 引数は先に評価
+		args, err := vm.EvalAll(list[1:])
+		if err != nil {
+			return Value{}, err
+		}
+		return vm.applyCmd(cmd, args)
 	}
 
 	// コマンドを適用
-	return vm.applyCmd(cmd, args)
+	return vm.applyCmd(cmd, list[1:])
 }
 
 // ==================================================
@@ -173,7 +205,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 	// 第一引数は保存先
 	target := args[0].Str
 	if !strings.HasPrefix(target, "@") && !strings.HasPrefix(target, "_") {
-		return Value{}, errors.New("set target must start with '@' or '_'")
+		return Value{}, errors.New("set target must start with '@' or '_': '" + target + "'")
 	}
 
 	// 第二引数以降は、このタイミングで Eval して「値」にする
@@ -255,6 +287,11 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 		return Value{}, errors.New("repeat count must be a number")
 	}
 	count := int(countVal.Num)
+
+	// 繰り返し回数の上限をチェック
+	if count > vm.maxRepeat {
+		return Value{}, errors.New("repeat count exceeds maximum: " + strconv.Itoa(count))
+	}
 
 	// 繰り返し回数分ループ
 	results := make([]Value, count)
