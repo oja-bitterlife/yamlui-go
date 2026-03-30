@@ -20,6 +20,7 @@ func NewUIArea() *UIArea {
 }
 
 func (self *UIArea) DrawTree(ui *UIBase, clip Area) {
+	// マージンを考慮して、子の描画領域を計算する
 	left := self.MarginLeft + self.MarginX + self.Margin
 	top := self.MarginTop + self.MarginY + self.Margin
 	right := self.MarginRight + self.MarginX + self.Margin

@@ -59,6 +59,7 @@ func initialModel() model {
 	startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))
 	startSel.Base.Base.SetArea(margin.Base.Area())
 	margin.Base.AddChild(startSel.Base.Base)
+	startSel.Base.Base.SetRect(0, 10, 10, 2)
 	m.startSel = startSel
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える

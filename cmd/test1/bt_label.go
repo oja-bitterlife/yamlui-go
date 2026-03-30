@@ -18,7 +18,7 @@ func NewBTLabel(m *model, text string) *BTLabel {
 	return label
 }
 
-func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
+func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
 	orgArea := clip.Inset(-ui.X, -ui.Y)
 	cx, cy := orgArea.AlignCenter(len(ui.Text), 1)
 	cx += ui.X

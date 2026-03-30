@@ -126,15 +126,20 @@ func (self *UIBase) RemoveChild(child *UIBase) {
 // ----------------------------------------
 // Updateのインターフェース
 type OnInitIF interface {
-	OnInit(ui *UIBase) error
+	OnInit(ui *UIBase, ctx UpdateContext) error
 }
 
 type UpdateIF interface {
-	Update(ui *UIBase, frame int) error
+	Update(ui *UIBase, ctx UpdateContext) error
 }
 
 type UpdateTreeIF interface {
-	UpdateTree(ui *UIBase, frame int) error
+	UpdateTree(ui *UIBase, ctx UpdateContext) error
+}
+
+type UpdateContext struct {
+	Parent *UIBase
+	frame  int
 }
 
 func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
@@ -149,14 +154,21 @@ func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
 	self.updateTreeIF = updateTreeIF
 }
 
+func NewUpdateContext(parent *UIBase, frame int) UpdateContext {
+	return UpdateContext{
+		Parent: parent,
+		frame:  frame,
+	}
+}
+
 // ----------------------------------------
 // UpdateIFの呼び出し
-func (self *UIBase) callUpdate(frame int) error {
+func (self *UIBase) callUpdate(ctx UpdateContext) error {
 	var err error
 
 	if self.IsEnable {
 		if self.updateIF != nil {
-			self.updateIF.Update(self, frame)
+			self.updateIF.Update(self, ctx)
 		}
 
 		// UIの更新後スクリプトがあれば走らせる
@@ -170,11 +182,11 @@ func (self *UIBase) callUpdate(frame int) error {
 	return err
 }
 
-func (self *UIBase) callUpdateTree(frame int) error {
+func (self *UIBase) callUpdateTree(ctx UpdateContext) error {
 	if self.updateTreeIF != nil {
-		return self.updateTreeIF.UpdateTree(self, frame)
+		return self.updateTreeIF.UpdateTree(self, ctx)
 	} else {
-		return self.updateTree(frame)
+		return self.updateTree(ctx)
 	}
 }
 
@@ -182,21 +194,23 @@ func (self *UIBase) callUpdateTree(frame int) error {
 // Update実行
 // 呼び出し口
 func (self *UIBase) Update(frame int) error {
+	ctx := NewUpdateContext(self, frame)
+
 	var lastErr error
 	if self.Frame == 0 {
 		// 最初のフレームならOnInitを呼び出す
 		if self.onInitIF != nil {
-			lastErr = self.onInitIF.OnInit(self)
+			lastErr = self.onInitIF.OnInit(self, ctx)
 		}
 	} else {
 		// それ以降のフレームならUpdateを呼び出す
-		if err := self.callUpdate(frame); err != nil {
+		if err := self.callUpdate(ctx); err != nil {
 			lastErr = err
 		}
 	}
 
 	// InitもUpdateもTreeは手繰る
-	if err := self.callUpdateTree(frame); err != nil {
+	if err := self.callUpdateTree(ctx); err != nil {
 		lastErr = err
 	}
 
@@ -206,19 +220,21 @@ func (self *UIBase) Update(frame int) error {
 }
 
 // 再帰実行
-func (self *UIBase) updateTree(frame int) error {
+func (self *UIBase) updateTree(ctx UpdateContext) error {
+	ctx = NewUpdateContext(self, ctx.frame)
+
 	var lastErr error
 
 	// 先に子のUpdateを全部実行する
 	for _, child := range self.children {
-		if err := child.callUpdate(frame); err != nil {
+		if err := child.callUpdate(ctx); err != nil {
 			lastErr = err
 		}
 	}
 
 	// そのあとTreeを手繰る
 	for _, child := range self.children {
-		if err := child.callUpdateTree(frame); err != nil {
+		if err := child.callUpdateTree(ctx); err != nil {
 			lastErr = err
 		}
 	}
@@ -232,12 +248,17 @@ func (self *UIBase) updateTree(frame int) error {
 // 描画のインターフェース
 // 描画を行うとき
 type DrawIF interface {
-	Draw(ui *UIBase, clip Area)
+	Draw(ui *UIBase, clip Area, ctx DrawContext)
 }
 
 // クリップ操作が必要な時とか
 type DrawTreeIF interface {
 	DrawTree(ui *UIBase, clip Area)
+}
+
+type DrawContext struct {
+	Parent     *UIBase
+	ParentArea Area
 }
 
 func (self *UIBase) SetDrawIF(drawIF DrawIF) {
@@ -248,11 +269,18 @@ func (self *UIBase) SetDrawTreeIF(drawTreeIF DrawTreeIF) {
 	self.drawTreeIF = drawTreeIF
 }
 
+func NewDrawContext(parent *UIBase, parentArea Area) DrawContext {
+	return DrawContext{
+		Parent:     parent,
+		ParentArea: parentArea,
+	}
+}
+
 // ----------------------------------------
 // 描画IFの呼び出し
-func (self *UIBase) callDraw(clip Area) {
+func (self *UIBase) callDraw(clip Area, ctx DrawContext) {
 	if self.IsVisivle && self.drawIF != nil {
-		self.drawIF.Draw(self, clip)
+		self.drawIF.Draw(self, clip, ctx)
 	}
 }
 
@@ -286,10 +314,11 @@ func (self *UIBase) calcDrawArea(clip Area) Area {
 
 // 呼び出し口
 func (self *UIBase) Draw(screen Area) {
+	ctx := NewDrawContext(self, screen)
 	area := self.calcDrawArea(screen)
 
 	// 先に自分を描画する
-	self.callDraw(area)
+	self.callDraw(area, ctx)
 
 	// 子のDrawを呼び出す
 	self.callDrawTree(area)
@@ -297,11 +326,13 @@ func (self *UIBase) Draw(screen Area) {
 
 // 再帰実行
 func (self *UIBase) drawTree(clip Area) {
+	ctx := NewDrawContext(self, clip)
+
 	// 先に子のDrawを全部実行する
 	for _, child := range self.children {
 		if child.drawIF != nil && child.IsVisivle {
 			area := child.calcDrawArea(clip)
-			child.callDraw(area)
+			child.callDraw(area, ctx)
 		}
 	}
 

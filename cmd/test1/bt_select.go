@@ -16,7 +16,9 @@ func NewBTSelect(m *model, rows int) *BTSelect {
 	return selectUI
 }
 
-func (self *BTSelect) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
+func (self *BTSelect) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
+	clip.X = ctx.ParentArea.AlignCenterX(ui.W) // 1行あたり16文字分の幅を中央寄せ
+
 	for i, item := range self.Base.Items {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
 		if i >= clip.H {

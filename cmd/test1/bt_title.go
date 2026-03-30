@@ -28,7 +28,7 @@ func stringWidth(s string) int {
 	return width
 }
 
-func (self *BTTitle) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
+func (self *BTTitle) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
 	// 64x24のエリア内での描画
 	logo := []string{
 		` __     __      __  __  _      _    _  _____  _ `,

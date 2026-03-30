@@ -25,7 +25,7 @@ func NewBTWindowRect(m *model, x, y, w, h int) *BTWindow {
 	return window
 }
 
-func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
+func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
 	// 1. 自分の本来の絶対座標領域を取得
 	myArea := ui.Area() // DrawTree で ui.X, ui.Y が絶対座標に更新されている前提
 
