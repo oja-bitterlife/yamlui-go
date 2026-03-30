@@ -1,6 +1,8 @@
 package main
 
-import "github.com/oja-bitterlife/yamlui-go/yamlui"
+import (
+	"github.com/oja-bitterlife/yamlui-go/yamlui"
+)
 
 type BTLabel struct {
 	Base  *yamlui.UILabel
@@ -17,7 +19,10 @@ func NewBTLabel(m *model, text string) *BTLabel {
 }
 
 func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
-	cx, cy := clip.AlignCenter(len(ui.Text), 1)
+	orgArea := clip.Inset(-ui.X, -ui.Y)
+	cx, cy := orgArea.AlignCenter(len(ui.Text), 1)
+	cx += ui.X
+	cy += ui.Y
 
 	for i, r := range ui.Text {
 		targetX := cx + i

@@ -300,7 +300,7 @@ func (self *UIBase) drawTree(clip Area) {
 	// 先に子のDrawを全部実行する
 	for _, child := range self.children {
 		if child.drawIF != nil && child.IsVisivle {
-			area := self.calcDrawArea(clip)
+			area := child.calcDrawArea(clip)
 			child.callDraw(area)
 		}
 	}
