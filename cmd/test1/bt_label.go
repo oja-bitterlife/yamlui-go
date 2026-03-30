@@ -16,7 +16,7 @@ func NewBTLabel(m *model, text string) *BTLabel {
 	return label
 }
 
-func (label *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
+func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
 	cx, cy := clip.AlignCenter(len(ui.Text), 1)
 
 	for i, r := range ui.Text {
@@ -26,9 +26,9 @@ func (label *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
 		// clip の範囲内かチェック
 		if clip.Contains(targetX, targetY) {
 			// キャンバスの物理境界チェック
-			if targetY >= 0 && targetY < len(label.model.canvas) &&
-				targetX >= 0 && targetX < len(label.model.canvas[targetY]) {
-				label.model.canvas[targetY][targetX] = Cell{Rune: r, Color: "white"}
+			if targetY >= 0 && targetY < len(self.model.canvas) &&
+				targetX >= 0 && targetX < len(self.model.canvas[targetY]) {
+				self.model.canvas[targetY][targetX] = Cell{Rune: r, Color: "white"}
 			}
 		}
 	}

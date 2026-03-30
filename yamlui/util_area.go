@@ -8,10 +8,10 @@ type Area struct {
 }
 
 // 左端、上端、右端、下端を取得する
-func (a Area) Left() int   { return a.X }
-func (a Area) Top() int    { return a.Y }
-func (a Area) Right() int  { return a.X + a.W }
-func (a Area) Bottom() int { return a.Y + a.H }
+func (self Area) Left() int   { return self.X }
+func (self Area) Top() int    { return self.Y }
+func (self Area) Right() int  { return self.X + self.W }
+func (self Area) Bottom() int { return self.Y + self.H }
 
 func NewArea(x, y, w, h int) Area {
 	return Area{
@@ -25,54 +25,54 @@ func NewArea(x, y, w, h int) Area {
 // ==================================================
 // UIBase用機能
 // UIBase から Area を取得する
-func (ui *UIBase) Area() Area {
+func (self *UIBase) Area() Area {
 	return Area{
-		X: ui.X,
-		Y: ui.Y,
-		W: ui.W,
-		H: ui.H,
+		X: self.X,
+		Y: self.Y,
+		W: self.W,
+		H: self.H,
 	}
 }
 
-func (ui *UIBase) SetArea() Area {
+func (self *UIBase) SetArea() Area {
 	return Area{
-		X: ui.X,
-		Y: ui.Y,
-		W: ui.W,
-		H: ui.H,
+		X: self.X,
+		Y: self.Y,
+		W: self.W,
+		H: self.H,
 	}
 }
 
-func (ui *UIBase) SetXY(x, y int) {
-	ui.X = x
-	ui.Y = y
+func (self *UIBase) SetXY(x, y int) {
+	self.X = x
+	self.Y = y
 }
 
-func (ui *UIBase) SetWH(w, h int) {
-	ui.W = w
-	ui.H = h
+func (self *UIBase) SetWH(w, h int) {
+	self.W = w
+	self.H = h
 }
 
-func (ui *UIBase) SetRect(x, y, w, h int) {
-	ui.X = x
-	ui.Y = y
-	ui.W = w
-	ui.H = h
+func (self *UIBase) SetRect(x, y, w, h int) {
+	self.X = x
+	self.Y = y
+	self.W = w
+	self.H = h
 }
 
 // ==================================================
 // ユーティリティー
 // 二つのエリアを重ね合わせて、重なった部分のエリアを返す
-func (a Area) Clip(limiter Area) Area {
+func (self Area) Clip(limiter Area) Area {
 	// 左端：二つの左端のうち、より右にある方
-	newX := max(a.Left(), limiter.Left())
+	newX := max(self.Left(), limiter.Left())
 	// 上端：二つの上端のうち、より下にある方
-	newY := max(a.Top(), limiter.Top())
+	newY := max(self.Top(), limiter.Top())
 
 	// 右端：二つの右端のうち、より左にある方
-	newRight := min(a.Right(), limiter.Right())
+	newRight := min(self.Right(), limiter.Right())
 	// 下端：二つの下端のうち、より上にある方
-	newBottom := min(a.Bottom(), limiter.Bottom())
+	newBottom := min(self.Bottom(), limiter.Bottom())
 
 	// 幅と高さを計算（マイナスになったら重なりなしなので 0 にする）
 	newW := max(0, newRight-newX)
@@ -87,74 +87,74 @@ func (a Area) Clip(limiter Area) Area {
 }
 
 // 上下左右を指定された量だけ削る（マイナスなら広げる）
-func (a Area) Inset(dx, dy int) Area {
+func (self Area) Inset(dx, dy int) Area {
 	return Area{
-		X: a.X + dx,
-		Y: a.Y + dy,
-		W: max(0, a.W-dx*2),
-		H: max(0, a.H-dy*2),
+		X: self.X + dx,
+		Y: self.Y + dy,
+		W: max(0, self.W-dx*2),
+		H: max(0, self.H-dy*2),
 	}
 }
 
 // エリアを dx, dy だけ移動させる
-func (a Area) Offset(dx, dy int) Area {
+func (self Area) Offset(dx, dy int) Area {
 	return Area{
-		X: a.X + dx,
-		Y: a.Y + dy,
-		W: a.W,
-		H: a.H,
+		X: self.X + dx,
+		Y: self.Y + dy,
+		W: self.W,
+		H: self.H,
 	}
 }
 
 // ==================================================
 // alignment
-func (a Area) AlignCenterX(w int) int {
-	return a.X + (a.W-w)/2
+func (self Area) AlignCenterX(w int) int {
+	return self.X + (self.W-w)/2
 }
 
-func (a Area) AlignCenterY(h int) int {
-	return a.Y + (a.H-h)/2
+func (self Area) AlignCenterY(h int) int {
+	return self.Y + (self.H-h)/2
 }
 
-func (a Area) AlignCenter(w, h int) (x, y int) {
-	return a.AlignCenterX(w), a.AlignCenterY(h)
+func (self Area) AlignCenter(w, h int) (x, y int) {
+	return self.AlignCenterX(w), self.AlignCenterY(h)
 }
 
-func (a Area) AlignRightX(w int) int {
-	return a.X + a.W - w
+func (self Area) AlignRightX(w int) int {
+	return self.X + self.W - w
 }
 
-func (a Area) AlignBottomY(h int) int {
-	return a.Y + a.H - h
+func (self Area) AlignBottomY(h int) int {
+	return self.Y + self.H - h
 }
 
-func (a Area) AlignRightBottom(w, h int) (x, y int) {
-	return a.AlignRightX(w), a.AlignBottomY(h)
+func (self Area) AlignRightBottom(w, h int) (x, y int) {
+	return self.AlignRightX(w), self.AlignBottomY(h)
 }
 
 // ==================================================
 // Getter
 // XYを取り出す
-func (a Area) XY() (x, y int) {
-	return a.X, a.Y
+func (self Area) XY() (x, y int) {
+	return self.X, self.Y
 }
 
 // WHを取り出す
-func (a Area) WH() (w, h int) {
-	return a.W, a.H
+func (self Area) WH() (w, h int) {
+	return self.W, self.H
 }
 
 // XYWHを取り出す
-func (a Area) Rect() (x, y, w, h int) {
-	return a.X, a.Y, a.W, a.H
+func (self Area) Rect() (x, y, w, h int) {
+	return self.X, self.Y, self.W, self.H
 }
 
 // ==================================================
 // ユーティリティー関数
-func (a Area) Contains(x, y int) bool {
-	return x >= a.Left() && x < a.Right() && y >= a.Top() && y < a.Bottom()
+func (self Area) Contains(x, y int) bool {
+	return x >= self.Left() && x < self.Right() && y >= self.Top() && y < self.Bottom()
 }
 
-func (a Area) IsEmpty() bool {
-	return a.W <= 0 || a.H <= 0
+func (self Area) IsEmpty() bool {
+	return self.W <= 0 || self.H <= 0
 }

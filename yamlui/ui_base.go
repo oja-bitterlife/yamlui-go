@@ -33,45 +33,47 @@ type UIBase struct {
 	// ----------------------------------------
 	children []*UIBase
 
-	onInitIF Initarizable
-	updateIF Updatable
-	drawIF   Drawable
+	onInitIF     OnInitIF
+	updateIF     UpdateIF
+	updateTreeIF UpdateTreeIF
+	drawIF       DrawIF
+	drawTreeIF   DrawTreeIF
 
 	script *script.Runtime
 }
 
 // ==================================================
 // VMとのやりとり
-func (ui *UIBase) storeToVM(vm *script.VM) {
-	vm.SetVar("@Frame", script.NewNumber(float64(ui.Frame)))
-	vm.SetVar("@IsEnable", script.NewBool(ui.IsEnable))
-	vm.SetVar("@IsAbs", script.NewBool(ui.IsAbs))
-	vm.SetVar("@X", script.NewNumber(float64(ui.X)))
-	vm.SetVar("@Y", script.NewNumber(float64(ui.Y)))
-	vm.SetVar("@Width", script.NewNumber(float64(ui.W)))
-	vm.SetVar("@Height", script.NewNumber(float64(ui.H)))
-	vm.SetVar("@IsVisivle", script.NewBool(ui.IsVisivle))
-	vm.SetVar("@Text", script.NewString(ui.Text))
-	vm.SetVar("@Color", script.NewString(ui.Color))
-	vm.SetVar("@SelectNo", script.NewNumber(float64(ui.SelectNo)))
-	vm.SetVar("@SelGridX", script.NewNumber(float64(ui.SelGridX)))
+func (self *UIBase) storeToVM(vm *script.VM) {
+	vm.SetVar("@Frame", script.NewNumber(float64(self.Frame)))
+	vm.SetVar("@IsEnable", script.NewBool(self.IsEnable))
+	vm.SetVar("@IsAbs", script.NewBool(self.IsAbs))
+	vm.SetVar("@X", script.NewNumber(float64(self.X)))
+	vm.SetVar("@Y", script.NewNumber(float64(self.Y)))
+	vm.SetVar("@Width", script.NewNumber(float64(self.W)))
+	vm.SetVar("@Height", script.NewNumber(float64(self.H)))
+	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisivle))
+	vm.SetVar("@Text", script.NewString(self.Text))
+	vm.SetVar("@Color", script.NewString(self.Color))
+	vm.SetVar("@SelectNo", script.NewNumber(float64(self.SelectNo)))
+	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
 	// 都度リセット
 	vm.SetVar("@Action", script.NewString(""))
 }
 
-func (ui *UIBase) loadFromVM(vm *script.VM) {
-	ui.IsEnable = vm.GetVar("@IsEnable").Bool
-	ui.IsAbs = vm.GetVar("@IsAbs").Bool
-	ui.X = int(vm.GetVar("@X").Num)
-	ui.Y = int(vm.GetVar("@Y").Num)
-	ui.W = int(vm.GetVar("@Width").Num)
-	ui.H = int(vm.GetVar("@Height").Num)
-	ui.IsVisivle = vm.GetVar("@IsVisivle").Bool
-	ui.Text = vm.GetVar("@Text").Str
-	ui.Color = vm.GetVar("@Color").Str
-	ui.SelectNo = int(vm.GetVar("@SelectNo").Num)
-	ui.SelGridX = int(vm.GetVar("@SelGridX").Num)
-	ui.Action = vm.GetVar("@Action").Str
+func (self *UIBase) loadFromVM(vm *script.VM) {
+	self.IsEnable = vm.GetVar("@IsEnable").Bool
+	self.IsAbs = vm.GetVar("@IsAbs").Bool
+	self.X = int(vm.GetVar("@X").Num)
+	self.Y = int(vm.GetVar("@Y").Num)
+	self.W = int(vm.GetVar("@Width").Num)
+	self.H = int(vm.GetVar("@Height").Num)
+	self.IsVisivle = vm.GetVar("@IsVisivle").Bool
+	self.Text = vm.GetVar("@Text").Str
+	self.Color = vm.GetVar("@Color").Str
+	self.SelectNo = int(vm.GetVar("@SelectNo").Num)
+	self.SelGridX = int(vm.GetVar("@SelGridX").Num)
+	self.Action = vm.GetVar("@Action").Str
 }
 
 // **********************************************************************
@@ -88,44 +90,32 @@ func NewUIBase(type_ string) *UIBase {
 	return ui
 }
 
-func (ui *UIBase) SetScript(scriptSrc string) error {
+func (self *UIBase) SetScript(scriptSrc string) error {
 	var err error
-	ui.script, err = script.Compile(scriptSrc)
+	self.script, err = script.Compile(scriptSrc)
 	return err
 }
 
-type Initarizable interface {
-	OnInit(ui *UIBase)
+func (self *UIBase) GetRuntime() *script.Runtime {
+	return self.script
 }
 
-func (ui *UIBase) SetOnInitFunc(onInitIF Initarizable) {
-	ui.onInitIF = onInitIF
-}
-
-func (ui *UIBase) SetUpdateIF(updateIF Updatable) {
-	ui.updateIF = updateIF
-}
-
-func (ui *UIBase) SetDrawIF(drawIF Drawable) {
-	ui.drawIF = drawIF
-}
-
-func (ui *UIBase) GetRuntime() *script.Runtime {
-	return ui.script
+func (self *UIBase) SetVar(name string, value script.Value) {
+	self.script.GetVM().SetVar(name, value)
 }
 
 // **********************************************************************
 // Tree構造化
 // ==================================================
 // ツリー操作
-func (ui *UIBase) AddChild(child *UIBase) {
-	ui.children = append(ui.children, child)
+func (self *UIBase) AddChild(child *UIBase) {
+	self.children = append(self.children, child)
 }
 
-func (ui *UIBase) RemoveChild(child *UIBase) {
-	for i, c := range ui.children {
+func (self *UIBase) RemoveChild(child *UIBase) {
+	for i, c := range self.children {
 		if c == child {
-			ui.children = append(ui.children[:i], ui.children[i+1:]...)
+			self.children = append(self.children[:i], self.children[i+1:]...)
 			return
 		}
 	}
@@ -133,60 +123,102 @@ func (ui *UIBase) RemoveChild(child *UIBase) {
 
 // ==================================================
 // 更新
-type Updatable interface {
+// ----------------------------------------
+// Updateのインターフェース
+type OnInitIF interface {
+	OnInit(ui *UIBase) error
+}
+
+type UpdateIF interface {
 	Update(ui *UIBase, frame int) error
 }
 
-func (ui *UIBase) update(frame int) error {
+type UpdateTreeIF interface {
+	UpdateTree(ui *UIBase, frame int) error
+}
+
+func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
+	self.onInitIF = onInitIF
+}
+
+func (self *UIBase) SetUpdateIF(updateIF UpdateIF) {
+	self.updateIF = updateIF
+}
+
+func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
+	self.updateTreeIF = updateTreeIF
+}
+
+// ----------------------------------------
+// UpdateIFの呼び出し
+func (self *UIBase) callUpdate(frame int) error {
 	var err error
 
-	if ui.IsEnable {
-		if ui.Frame == 0 && ui.onInitIF != nil {
-			ui.onInitIF.OnInit(ui)
-		}
-		ui.Frame++
-
-		if ui.updateIF != nil {
-			ui.updateIF.Update(ui, frame)
+	if self.IsEnable {
+		if self.updateIF != nil {
+			self.updateIF.Update(self, frame)
 		}
 
-		if ui.script != nil {
-			ui.storeToVM(ui.script.GetVM())
-			_, err = ui.script.Run()
-			ui.loadFromVM(ui.script.GetVM())
+		// UIの更新後スクリプトがあれば走らせる
+		if self.script != nil {
+			self.storeToVM(self.script.GetVM())
+			_, err = self.script.Run()
+			self.loadFromVM(self.script.GetVM())
 		}
 	}
 
 	return err
 }
 
-// 呼び出し口
-func (ui *UIBase) UpdateTree(frame int) error {
-	lastErr := ui.update(frame)
+func (self *UIBase) callUpdateTree(frame int) error {
+	if self.updateTreeIF != nil {
+		return self.updateTreeIF.UpdateTree(self, frame)
+	} else {
+		return self.updateTree(frame)
+	}
+}
 
-	if err := ui.updateTree(frame); err != nil {
+// ----------------------------------------
+// Update実行
+// 呼び出し口
+func (self *UIBase) UpdateTree(frame int) error {
+	var lastErr error
+	if self.Frame == 0 {
+		// 最初のフレームならOnInitを呼び出す
+		if self.onInitIF != nil {
+			lastErr = self.onInitIF.OnInit(self)
+		}
+	} else {
+		// それ以降のフレームならUpdateを呼び出す
+		if err := self.callUpdate(frame); err != nil {
+			lastErr = err
+		}
+	}
+
+	// InitもUpdateもTreeは手繰る
+	if err := self.callUpdateTree(frame); err != nil {
 		lastErr = err
 	}
+
+	self.Frame++
 
 	return lastErr
 }
 
 // 再帰実行
-func (ui *UIBase) updateTree(frame int) error {
+func (self *UIBase) updateTree(frame int) error {
 	var lastErr error
 
 	// 先に子のUpdateを全部実行する
-	for _, child := range ui.children {
-		err := child.update(frame)
-		if err != nil {
+	for _, child := range self.children {
+		if err := child.callUpdate(frame); err != nil {
 			lastErr = err
 		}
 	}
 
 	// そのあとTreeを手繰る
-	for _, child := range ui.children {
-		err := child.updateTree(frame)
-		if err != nil {
+	for _, child := range self.children {
+		if err := child.callUpdateTree(frame); err != nil {
 			lastErr = err
 		}
 	}
@@ -196,61 +228,88 @@ func (ui *UIBase) updateTree(frame int) error {
 
 // ==================================================
 // 描画
-type Drawable interface {
+// ----------------------------------------
+// 描画のインターフェース
+// 描画を行うとき
+type DrawIF interface {
 	Draw(ui *UIBase, clip Area)
 }
 
-func (ui *UIBase) calcDrawArea(clip Area) Area {
-	if ui.IsAbs {
+// クリップ操作が必要な時とか
+type DrawTreeIF interface {
+	DrawTree(ui *UIBase, clip Area)
+}
+
+func (self *UIBase) SetDrawIF(drawIF DrawIF) {
+	self.drawIF = drawIF
+}
+
+func (self *UIBase) SetDrawTreeIF(drawTreeIF DrawTreeIF) {
+	self.drawTreeIF = drawTreeIF
+}
+
+// ----------------------------------------
+// 描画IFの呼び出し
+func (self *UIBase) callDraw(clip Area) {
+	if self.IsVisivle && self.drawIF != nil {
+		self.drawIF.Draw(self, clip)
+	}
+}
+
+func (self *UIBase) callDrawTree(clip Area) {
+	if self.drawTreeIF != nil {
+		self.drawTreeIF.DrawTree(self, clip)
+	} else {
+		self.drawTree(clip)
+	}
+}
+
+// ----------------------------------------
+// 描画実行
+func (self *UIBase) calcDrawArea(clip Area) Area {
+	if self.IsAbs {
 		return Area{
-			X: ui.X,
-			Y: ui.Y,
-			W: ui.W,
-			H: ui.H,
+			X: self.X,
+			Y: self.Y,
+			W: self.W,
+			H: self.H,
 		}.Clip(clip)
 	} else {
 		return Area{
-			X: clip.X + ui.X,
-			Y: clip.Y + ui.Y,
-			W: ui.W,
-			H: ui.H,
+			X: clip.X + self.X,
+			Y: clip.Y + self.Y,
+			W: self.W,
+			H: self.H,
 		}.Clip(clip)
 	}
 }
 
 // 呼び出し口
-func (ui *UIBase) DrawTree(clip Area) {
-	if !ui.IsVisivle {
-		return
-	}
+func (self *UIBase) DrawTree(clip Area) {
+	area := self.calcDrawArea(clip)
 
-	// 自身の位置で更新
-	area := ui.calcDrawArea(clip)
-
-	// 自分のDrawを呼び出す
-	if ui.drawIF != nil {
-		ui.drawIF.Draw(ui, area)
-	}
+	// 先に自分を描画する
+	self.callDraw(area)
 
 	// 子のDrawを呼び出す
-	ui.drawTree(area)
+	self.callDrawTree(area)
 }
 
 // 再帰実行
-func (ui *UIBase) drawTree(clip Area) {
+func (self *UIBase) drawTree(clip Area) {
 	// 先に子のDrawを全部実行する
-	for _, child := range ui.children {
+	for _, child := range self.children {
 		if child.drawIF != nil && child.IsVisivle {
-			area := child.calcDrawArea(clip)
-			child.drawIF.Draw(child, area)
+			area := self.calcDrawArea(clip)
+			child.callDraw(area)
 		}
 	}
 
 	// そのあとTreeを手繰る
-	for _, child := range ui.children {
+	for _, child := range self.children {
 		if child.IsVisivle {
 			area := child.calcDrawArea(clip)
-			child.drawTree(area)
+			child.callDrawTree(area)
 		}
 	}
 }
