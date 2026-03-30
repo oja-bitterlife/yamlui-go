@@ -22,37 +22,15 @@ type model struct {
 	frame  int
 
 	canvas [][]Cell
+	sel    *BTSelect
 }
 
 func initialModel() model {
 	m := model{
 		root:   yamlui.NewUIBase("Root"),
-		width:  80,
+		width:  64,
 		height: 24,
 	}
-
-	win := NewBTWindow(&m, 4, 2, 30, 10)
-	m.root.AddChild(win.Base.Base)
-
-	margin := yamlui.NewUIArea()
-	margin.Margin = 1
-	margin.MarginX = 1
-	win.Base.Base.AddChild(margin.Base)
-
-	label := NewBTLabel(&m, "Hello, YAMLUI!")
-	margin.Base.AddChild(label.Base.Base)
-
-	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
-	scriptSrc := `
-(set @X
-	(switch (< @X 3)
-		(+ @X 1)
-		(set @X 0)))
-	   `
-	if err := label.Base.Base.SetScript(scriptSrc); err != nil {
-		panic(fmt.Sprintf("Failed to set script: %v", err))
-	}
-
 	m.canvas = make([][]Cell, m.height)
 	for i := range m.canvas {
 		// 内側のスライス（列）を作る
@@ -62,6 +40,38 @@ func initialModel() model {
 			m.canvas[i][j] = Cell{Rune: ' ', Color: "white"}
 		}
 	}
+
+	win := NewBTWindow(&m)
+	m.root.AddChild(win.Base.Base)
+
+	// margin := yamlui.NewUIArea()
+	// margin.Margin = 1
+	// margin.MarginX = 1
+	// win.Base.Base.AddChild(margin.Base)
+
+	// label := NewBTLabel(&m, "Hello, YAMLUI!")
+	// margin.Base.AddChild(label.Base.Base)
+
+	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
+	// 	scriptSrc := `
+	// (set @X
+	// 	(switch (< @X 3)
+	// 		(+ @X 1)
+	// 		(set @X 0)))
+	// 	   `
+	// 	if err := label.Base.Base.SetScript(scriptSrc); err != nil {
+	// 		panic(fmt.Sprintf("Failed to set script: %v", err))
+	// 	}
+
+	m.sel = NewBTSelect(&m, 3)
+	m.sel.Base.AddItems([]*yamlui.UISelectItem{
+		yamlui.NewUISelectItem("Option 1"),
+		yamlui.NewUISelectItem("Option 2"),
+		yamlui.NewUISelectItem("Option 3"),
+		yamlui.NewUISelectItem("Option 4"),
+		yamlui.NewUISelectItem("Option 5"),
+	})
+	win.Base.Base.AddChild(m.sel.Base.Base)
 
 	return m
 }
@@ -85,6 +95,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if err != nil {
 			fmt.Printf("Error executing script: %v\n", err)
 			return m, nil
+		}
+
+		// 縦方向の移動 (NextGridY)
+		selectToggle := true
+		if msg.Type == tea.KeyUp {
+			m.sel.Base.NextGridY(-1, selectToggle)
+		}
+		if msg.Type == tea.KeyDown {
+			m.sel.Base.NextGridY(1, selectToggle)
+		}
+
+		// 横方向の移動 (NextGridX)
+		if msg.Type == tea.KeyLeft {
+			m.sel.Base.NextGridX(-1, selectToggle)
+		}
+		if msg.Type == tea.KeyRight {
+			m.sel.Base.NextGridX(1, selectToggle)
 		}
 	}
 

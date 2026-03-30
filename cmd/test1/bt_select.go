@@ -7,9 +7,9 @@ type BTSelect struct {
 	model *model
 }
 
-func NewBTSelect(m *model) *BTSelect {
+func NewBTSelect(m *model, rows int) *BTSelect {
 	selectUI := &BTSelect{
-		Base:  yamlui.NewUISelect(),
+		Base:  yamlui.NewUISelect(rows),
 		model: m,
 	}
 	selectUI.Base.Base.SetDrawIF(selectUI)
@@ -24,8 +24,8 @@ func (self *BTSelect) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := clip.Y + i
-		x := clip.X
+		y := clip.Y + i/self.Base.Rows
+		x := clip.X + (i%self.Base.Rows)*16
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "  "

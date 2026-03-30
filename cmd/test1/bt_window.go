@@ -7,7 +7,15 @@ type BTWindow struct {
 	model *model
 }
 
-func NewBTWindow(m *model, x, y, w, h int) *BTWindow {
+func NewBTWindow(m *model) *BTWindow {
+	window := &BTWindow{
+		Base:  yamlui.NewUIWindow(),
+		model: m,
+	}
+	window.Base.Base.SetDrawIF(window)
+	return window
+}
+func NewBTWindowRect(m *model, x, y, w, h int) *BTWindow {
 	window := &BTWindow{
 		Base:  yamlui.NewUIWindow(),
 		model: m,
