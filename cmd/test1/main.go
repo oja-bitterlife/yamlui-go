@@ -124,7 +124,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.root.Draw(m.root.Area()) // 描画用の構造体を更新
+	m.root.Draw(yamlui.NewArea(0, 0, m.width, m.height))
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {
