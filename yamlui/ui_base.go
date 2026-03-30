@@ -285,8 +285,8 @@ func (self *UIBase) calcDrawArea(clip Area) Area {
 }
 
 // 呼び出し口
-func (self *UIBase) Draw(clip Area) {
-	area := self.calcDrawArea(clip)
+func (self *UIBase) Draw(screen Area) {
+	area := self.calcDrawArea(screen)
 
 	// 先に自分を描画する
 	self.callDraw(area)
