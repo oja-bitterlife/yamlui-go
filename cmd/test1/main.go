@@ -49,14 +49,18 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
 
-	var raw []map[string]any
-	if err := json.Unmarshal(data, &raw); err != nil {
+	var uiMap []map[string]any
+	if err := json.Unmarshal(data, &uiMap); err != nil {
 		panic(fmt.Sprintf("Failed to parse ui.json: %v", err))
 	}
 
-	//	uiMap := make(map[string]*yamlui.UIBase)
-	// ここでさっきの再帰的な Build ロジックを回す
-	// JSON なので数値は float64 で来る点だけ注意（intへのキャストが必要）
+	lib := yamlui.NewYAMLUI()
+
+	win := NewBTWindow(&m)
+	m.root.AddChild(win.Base.Base)
+	lib.RegisterRemap("window", win)
+
+	lib.Load(uiMap)
 
 	// win := NewBTWindow(&m)
 	// win.Base.Base.SetRect(0, 0, m.width, m.height)

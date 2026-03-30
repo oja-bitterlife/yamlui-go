@@ -50,6 +50,21 @@ type UIBase struct {
 	drawTreeIF   DrawTreeIF
 }
 
+func (self *UIBase) CopyProp(src *UIBase) {
+	self.IsEnable = src.IsEnable
+	self.IsAbs = src.IsAbs
+	self.X = src.X
+	self.Y = src.Y
+	self.W = src.W
+	self.H = src.H
+	self.IsVisible = src.IsVisible
+	self.Text = src.Text
+	self.Color = src.Color
+	self.SelectNo = src.SelectNo
+	self.SelGridX = src.SelGridX
+	self.Action = src.Action
+}
+
 // ==================================================
 // VMとのやりとり
 func (self *UIBase) storeToVM(vm *script.VM) {

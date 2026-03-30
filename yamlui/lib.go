@@ -22,7 +22,7 @@ type RemapFunc interface {
 	Remap(ui *UIBase, data map[string]any) (*UIBase, error)
 }
 
-func (self *YAMLUI) RegisterRemapFunc(typeName string, fn RemapFunc) {
+func (self *YAMLUI) RegisterRemap(typeName string, fn RemapFunc) {
 	self.remapFuncs[typeName] = fn
 }
 
@@ -91,12 +91,12 @@ func (self *YAMLUI) BuildUI(data map[string]any) (*UIBase, error) {
 func (self *YAMLUI) Load(data any) error {
 	switch v := data.(type) {
 	case []any:
-		// ルートが配列 [{}, {}] の場合
+		return errors.New("invalid data format: expected a single map, but got an array")
+	case []map[string]any:
+		// ルートが配列 [] の場合
 		for _, item := range v {
-			if m, ok := item.(map[string]any); ok {
-				if err := self.load(self.Root, m); err != nil {
-					return err
-				}
+			if err := self.load(self.Root, item); err != nil {
+				return err
 			}
 		}
 	case map[string]any:
@@ -109,13 +109,20 @@ func (self *YAMLUI) Load(data any) error {
 }
 
 func (self *YAMLUI) load(parent *UIBase, data map[string]any) error {
+	// 現在のノードを構築
+	ui, err := self.BuildUI(data)
+	if err != nil {
+		return err
+	}
+	parent.AddChild(ui) // 親ノードに追加
+
 	// ここで再帰的に UI を構築するロジックを入れる
-	children, ok := data["children"].([]interface{})
+	children, ok := data["children"].([]any)
 	if !ok {
 		return nil // children がない場合は終了
 	}
 	for _, c := range children {
-		if m, ok := c.(map[string]interface{}); ok {
+		if m, ok := c.(map[string]any); ok {
 			// 子要素を構築
 			child, err := self.BuildUI(m)
 			if err != nil {
