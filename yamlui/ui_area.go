@@ -2,13 +2,13 @@ package yamlui
 
 type UIArea struct {
 	Base         *UIBase
-	margin       int
-	marginTop    int
-	marginBottom int
-	marginLeft   int
-	marginRight  int
-	marginX      int
-	marginY      int
+	Margin       int
+	MarginTop    int
+	MarginBottom int
+	MarginLeft   int
+	MarginRight  int
+	MarginX      int
+	MarginY      int
 }
 
 func NewUIArea() *UIArea {
@@ -20,10 +20,10 @@ func NewUIArea() *UIArea {
 }
 
 func (self *UIArea) DrawTree(ui *UIBase, clip Area) {
-	left := self.marginLeft + self.marginX + self.margin
-	top := self.marginTop + self.marginY + self.margin
-	right := self.marginRight + self.marginX + self.margin
-	bottom := self.marginBottom + self.marginY + self.margin
+	left := self.MarginLeft + self.MarginX + self.Margin
+	top := self.MarginTop + self.MarginY + self.Margin
+	right := self.MarginRight + self.MarginX + self.Margin
+	bottom := self.MarginBottom + self.MarginY + self.Margin
 
 	area := Area{
 		X: clip.X + left,

@@ -34,8 +34,13 @@ func initialModel() model {
 	win := NewBTWindow(&m, 4, 2, 30, 10)
 	m.root.AddChild(win.Base.Base)
 
+	margin := yamlui.NewUIArea()
+	margin.Margin = 1
+	margin.MarginX = 1
+	win.Base.Base.AddChild(margin.Base)
+
 	label := NewBTLabel(&m, "Hello, YAMLUI!")
-	win.Base.Base.AddChild(label.Base.Base)
+	margin.Base.AddChild(label.Base.Base)
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	scriptSrc := `

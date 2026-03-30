@@ -24,6 +24,9 @@ func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
 	cx += ui.X
 	cy += ui.Y
 
+	cx = clip.X
+	cy = clip.Y
+
 	for i, r := range ui.Text {
 		targetX := cx + i
 		targetY := cy
