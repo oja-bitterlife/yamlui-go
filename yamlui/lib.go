@@ -1,0 +1,134 @@
+package yamlui
+
+import "errors"
+
+type YAMLUI struct {
+	Root       *UIBase
+	remapFuncs map[string]RemapFunc
+}
+
+func NewYAMLUI() *YAMLUI {
+	return &YAMLUI{
+		Root:       NewUIBase("Root"),
+		remapFuncs: make(map[string]RemapFunc),
+	}
+}
+
+// **********************************************************************
+// mapの解析
+// ==================================================
+// mapを解析して必要なデータを構造体に流し込むためのインターフェース
+type RemapFunc interface {
+	Remap(ui *UIBase, data map[string]any) (*UIBase, error)
+}
+
+func (self *YAMLUI) RegisterRemapFunc(typeName string, fn RemapFunc) {
+	self.remapFuncs[typeName] = fn
+}
+
+// ==================================================
+// map解析
+// Mapの値を構造体に流し込むためのヘルパー関数
+func propStr(data map[string]any, key string, def string) string {
+	if v, ok := data[key].(string); ok {
+		return v
+	}
+	return def
+}
+
+func propNum(data map[string]any, key string, def float64) float64 {
+	if v, ok := data[key].(float64); ok {
+		return v
+	}
+	return def
+}
+func propBool(data map[string]any, key string, def bool) bool {
+	if v, ok := data[key].(bool); ok {
+		return v
+	}
+	return def
+}
+
+// ==================================================
+// UIコンポーネントの構築
+func (self *YAMLUI) BuildUI(data map[string]any) (*UIBase, error) {
+	Type := propStr(data, "Type", "area") // Type を取得（デフォルトは "area"）
+	ui := NewUIBase(Type)                 // ルートの UIBase を作成
+
+	if ID, ok := data["ID"].(string); ok {
+		ui.ID = ID
+	}
+
+	ui.IsEnable = propBool(data, "IsEnable", ui.IsEnable)
+	ui.IsAbs = propBool(data, "IsAbs", ui.IsAbs)
+	ui.X = propNum(data, "X", ui.X)
+	ui.Y = propNum(data, "Y", ui.Y)
+	ui.W = propNum(data, "W", ui.W)
+	ui.H = propNum(data, "H", ui.H)
+
+	ui.IsVisible = propBool(data, "IsVisible", ui.IsVisible)
+	ui.Text = propStr(data, "Text", ui.Text)
+	ui.Color = propStr(data, "Color", ui.Color)
+
+	ui.SelectNo = propNum(data, "SelectNo", ui.SelectNo)
+	ui.SelGridX = propNum(data, "SelGridX", ui.SelGridX)
+	ui.Action = propStr(data, "Action", ui.Action)
+
+	// 具体的なコンポーネントを生成
+	if remapFunc, ok := self.remapFuncs[Type]; ok {
+		if remapUI, err := remapFunc.Remap(ui, data); err == nil {
+			return remapUI, nil
+		} else {
+			return nil, err
+		}
+	} else {
+		return ui, nil
+	}
+}
+
+// ==================================================
+// UITreeの構築（再帰的に子要素も構築）
+func (self *YAMLUI) Load(data any) error {
+	switch v := data.(type) {
+	case []any:
+		// ルートが配列 [{}, {}] の場合
+		for _, item := range v {
+			if m, ok := item.(map[string]any); ok {
+				if err := self.load(self.Root, m); err != nil {
+					return err
+				}
+			}
+		}
+	case map[string]any:
+		// ルートが単一オブジェクト {} の場合
+		return self.load(self.Root, v)
+	default:
+		return errors.New("invalid data format: expected array or map")
+	}
+	return nil
+}
+
+func (self *YAMLUI) load(parent *UIBase, data map[string]any) error {
+	// ここで再帰的に UI を構築するロジックを入れる
+	children, ok := data["children"].([]interface{})
+	if !ok {
+		return nil // children がない場合は終了
+	}
+	for _, c := range children {
+		if m, ok := c.(map[string]interface{}); ok {
+			// 子要素を構築
+			child, err := self.BuildUI(m)
+			if err != nil {
+				continue
+			}
+
+			parent.AddChild(child) // ルートの子要素として追加
+
+			// 子要素に対しても再帰的に load を呼び出す
+			if err := self.load(child, m); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}

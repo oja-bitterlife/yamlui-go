@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -42,43 +43,58 @@ func initialModel() model {
 		}
 	}
 
-	win := NewBTWindow(&m)
-	win.Base.Base.SetRect(0, 0, m.width, m.height)
-	m.root.AddChild(win.Base.Base)
+	// ここで JSON を読み込んで UI を構築するロジックを入れる
+	data, err := os.ReadFile("ui.json")
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
+	}
 
-	margin := yamlui.NewUIArea()
-	margin.MarginX = 2
-	margin.MarginY = 1
-	win.Base.Base.AddChild(margin.Base)
+	var raw []map[string]any
+	if err := json.Unmarshal(data, &raw); err != nil {
+		panic(fmt.Sprintf("Failed to parse ui.json: %v", err))
+	}
 
-	title := NewBTTitle(&m)
-	title.Base.Base.Y = 2
-	margin.Base.AddChild(title.Base.Base)
+	uiMap := make(map[string]*yamlui.UIBase)
+	// ここでさっきの再帰的な Build ロジックを回す
+	// JSON なので数値は float64 で来る点だけ注意（intへのキャストが必要）
 
-	startSel := NewBTStart(&m, 1)
-	startSel.Base.AddItem(yamlui.NewUISelectItem("START"))
-	startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))
-	startSel.Base.Base.SetArea(margin.Base.Area())
-	win.Base.Base.AddChild(startSel.Base.Base)
-	startSel.Base.Base.SetRect(0, 14, 16, 2)
-	m.startSel = startSel
-
-	speedArea := yamlui.NewUIArea()
-	speedArea.Base.X = 12
-	speedArea.Base.Y = 19
-	win.Base.Base.AddChild(speedArea.Base)
-
-	sppedLabel := NewBTLabel(&m, "-MESSAGE SPEED-")
-	sppedLabel.Base.Base.X = 13
-	speedArea.Base.AddChild(sppedLabel.Base.Base)
-
-	speedSel := NewBTSpeed(&m, 3)
-	speedSel.Base.Base.Y = 1
-	speedSel.Base.AddItem(yamlui.NewUISelectItem("SLOW"))
-	speedSel.Base.AddItem(yamlui.NewUISelectItem("NORMAL"))
-	speedSel.Base.AddItem(yamlui.NewUISelectItem("FAST"))
-	speedArea.Base.AddChild(speedSel.Base.Base)
-	m.speedSel = speedSel
+	// win := NewBTWindow(&m)
+	// win.Base.Base.SetRect(0, 0, m.width, m.height)
+	// m.root.AddChild(win.Base.Base)
+	//
+	// margin := yamlui.NewUIArea()
+	// margin.MarginX = 2
+	// margin.MarginY = 1
+	// win.Base.Base.AddChild(margin.Base)
+	//
+	// title := NewBTTitle(&m)
+	// title.Base.Base.Y = 2
+	// margin.Base.AddChild(title.Base.Base)
+	//
+	// startSel := NewBTStart(&m, 1)
+	// startSel.Base.AddItem(yamlui.NewUISelectItem("START"))
+	// startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))
+	// startSel.Base.Base.SetArea(margin.Base.Area())
+	// win.Base.Base.AddChild(startSel.Base.Base)
+	// startSel.Base.Base.SetRect(0, 14, 16, 2)
+	// m.startSel = startSel
+	//
+	// speedArea := yamlui.NewUIArea()
+	// speedArea.Base.X = 12
+	// speedArea.Base.Y = 19
+	// win.Base.Base.AddChild(speedArea.Base)
+	//
+	// sppedLabel := NewBTLabel(&m, "-MESSAGE SPEED-")
+	// sppedLabel.Base.Base.X = 13
+	// speedArea.Base.AddChild(sppedLabel.Base.Base)
+	//
+	// speedSel := NewBTSpeed(&m, 3)
+	// speedSel.Base.Base.Y = 1
+	// speedSel.Base.AddItem(yamlui.NewUISelectItem("SLOW"))
+	// speedSel.Base.AddItem(yamlui.NewUISelectItem("NORMAL"))
+	// speedSel.Base.AddItem(yamlui.NewUISelectItem("FAST"))
+	// speedArea.Base.AddChild(speedSel.Base.Base)
+	// m.speedSel = speedSel
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	// 	scriptSrc := `

@@ -1,0 +1,14 @@
+- Type: "window"
+  X: 0
+  Y: 0
+  W: 68
+  H: 26
+  children:
+    - Type: "area"
+      ID: "screen"
+      MarginX: 2
+      MarginY: 1
+      children:
+      - Type: "label"
+        ID: "title"
+        Y: 2

@@ -1,11 +1,18 @@
 package yamlui
 
-import "github.com/oja-bitterlife/yamlui-go/script"
+import (
+	"crypto/rand"
+	"encoding/hex"
+
+	"github.com/oja-bitterlife/yamlui-go/script"
+)
 
 // **********************************************************************
 // UIの基本構造.これを保有して各UI構造体を作る
 type UIBase struct {
+	// Scriptで更新差せないもの
 	Type  string
+	ID    string
 	Frame int
 
 	// スクリプトで更新できるプロパティ
@@ -14,32 +21,33 @@ type UIBase struct {
 
 	// 座標
 	IsAbs bool
-	X     int
-	Y     int
-	W     int
-	H     int
+	X     float64
+	Y     float64
+	W     float64
+	H     float64
 
 	// 表示
-	IsVisivle bool
+	IsVisible bool
 	Text      string
-	Color     string
+	Color     string // 使用するカラーの名称。system/msg/frameなどを想定
 
 	// インタラクティブなUIに必要なプロパティ
-	SelectNo int
-	SelGridX int    // SelectGridで横の折り返し位置
-	Action   string // 都度リセットされる
+	SelectNo float64
+	SelGridX float64 // SelectGridで横の折り返し位置
+	Action   string  // 都度リセットされる
 
 	// 保存しないもの
 	// ----------------------------------------
 	children []*UIBase
+	script   *script.Runtime
 
+	// インターフェース(ランタイム用)
+	// ----------------------------------------
 	onInitIF     OnInitIF
 	updateIF     UpdateIF
 	updateTreeIF UpdateTreeIF
 	drawIF       DrawIF
 	drawTreeIF   DrawTreeIF
-
-	script *script.Runtime
 }
 
 // ==================================================
@@ -52,7 +60,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Y", script.NewNumber(float64(self.Y)))
 	vm.SetVar("@Width", script.NewNumber(float64(self.W)))
 	vm.SetVar("@Height", script.NewNumber(float64(self.H)))
-	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisivle))
+	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
 	vm.SetVar("@Text", script.NewString(self.Text))
 	vm.SetVar("@Color", script.NewString(self.Color))
 	vm.SetVar("@SelectNo", script.NewNumber(float64(self.SelectNo)))
@@ -64,25 +72,32 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.IsEnable = vm.GetVar("@IsEnable").Bool
 	self.IsAbs = vm.GetVar("@IsAbs").Bool
-	self.X = int(vm.GetVar("@X").Num)
-	self.Y = int(vm.GetVar("@Y").Num)
-	self.W = int(vm.GetVar("@Width").Num)
-	self.H = int(vm.GetVar("@Height").Num)
-	self.IsVisivle = vm.GetVar("@IsVisivle").Bool
+	self.X = vm.GetVar("@X").Num
+	self.Y = vm.GetVar("@Y").Num
+	self.W = vm.GetVar("@Width").Num
+	self.H = vm.GetVar("@Height").Num
+	self.IsVisible = vm.GetVar("@IsVisivle").Bool
 	self.Text = vm.GetVar("@Text").Str
 	self.Color = vm.GetVar("@Color").Str
-	self.SelectNo = int(vm.GetVar("@SelectNo").Num)
-	self.SelGridX = int(vm.GetVar("@SelGridX").Num)
+	self.SelectNo = vm.GetVar("@SelectNo").Num
+	self.SelGridX = vm.GetVar("@SelGridX").Num
 	self.Action = vm.GetVar("@Action").Str
 }
 
 // **********************************************************************
 // UIBaseの関数
 func NewUIBase(type_ string) *UIBase {
+	// 仮のIDを生成
+	b := make([]byte, 16) // 128bit
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+
 	ui := &UIBase{}
 	ui.Type = type_
+	ui.ID = hex.EncodeToString(b)
 	ui.IsEnable = true
-	ui.IsVisivle = true
+	ui.IsVisible = true
 	ui.Color = "system"
 	// とりあえず大きな値を入れておく
 	ui.W = 65536
@@ -279,7 +294,7 @@ func NewDrawContext(parent *UIBase, parentArea Area) DrawContext {
 // ----------------------------------------
 // 描画IFの呼び出し
 func (self *UIBase) callDraw(clip Area, ctx DrawContext) {
-	if self.IsVisivle && self.drawIF != nil {
+	if self.IsVisible && self.drawIF != nil {
 		self.drawIF.Draw(self, clip, ctx)
 	}
 }
@@ -330,7 +345,7 @@ func (self *UIBase) drawTree(clip Area) {
 
 	// 先に子のDrawを全部実行する
 	for _, child := range self.children {
-		if child.drawIF != nil && child.IsVisivle {
+		if child.drawIF != nil && child.IsVisible {
 			area := child.calcDrawArea(clip)
 			child.callDraw(area, ctx)
 		}
@@ -338,7 +353,7 @@ func (self *UIBase) drawTree(clip Area) {
 
 	// そのあとTreeを手繰る
 	for _, child := range self.children {
-		if child.IsVisivle {
+		if child.IsVisible {
 			area := child.calcDrawArea(clip)
 			child.callDrawTree(area)
 		}
