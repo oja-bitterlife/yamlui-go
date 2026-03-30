@@ -18,20 +18,21 @@ func NewBTSpeed(m *model, rows int) *BTSpeed {
 
 func (self *BTSpeed) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
 	clip.X = ctx.ParentArea.AlignCenterX(clip.W) // 1行あたり16文字分の幅を中央寄せ
+	clipX, clipY, clipW, clipH := clip.IRect()
 
 	for i, item := range self.Base.Items {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
-		if i >= clip.H {
+		if i/self.Base.Rows >= clipH {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := clip.Y + i/self.Base.Rows
-		x := clip.X + (i%self.Base.Rows)*15 // 1行あたり16文字分の幅を確保
+		y := clipY + i/self.Base.Rows
+		x := clipX + (i%self.Base.Rows)*15 // 1行あたり16文字分の幅を確保
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "
-		if i == ui.SelectNo {
+		if i == int(ui.SelectNo) {
 			prefix = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}
@@ -40,7 +41,7 @@ func (self *BTSpeed) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 		line := prefix + item.Base.Text
 		for j, char := range line {
 			// 横幅(clip.W)を超えないようにガード
-			if j >= clip.W {
+			if j >= clipW {
 				break
 			}
 			// Canvas の (x + j, y) に char を書き込む

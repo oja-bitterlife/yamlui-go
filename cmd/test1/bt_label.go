@@ -20,7 +20,7 @@ func NewBTLabel(m *model, text string) *BTLabel {
 
 func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
 	orgArea := clip.Inset(-ui.X, -ui.Y)
-	cx, cy := orgArea.AlignCenter(len(ui.Text), 1)
+	cx, cy := orgArea.AlignCenter(float64(len(ui.Text)), 1)
 	cx += ui.X
 	cy += ui.Y
 
@@ -28,11 +28,11 @@ func (self *BTLabel) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 	cy = clip.Y
 
 	for i, r := range ui.Text {
-		targetX := cx + i
-		targetY := cy
+		targetX := int(cx) + i
+		targetY := int(cy)
 
 		// clip の範囲内かチェック
-		if clip.Contains(targetX, targetY) {
+		if clip.IContains(targetX, targetY) {
 			// キャンバスの物理境界チェック
 			if targetY >= 0 && targetY < len(self.model.canvas) &&
 				targetX >= 0 && targetX < len(self.model.canvas[targetY]) {

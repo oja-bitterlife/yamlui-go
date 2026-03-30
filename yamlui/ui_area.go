@@ -2,13 +2,13 @@ package yamlui
 
 type UIArea struct {
 	Base         *UIBase
-	Margin       int
-	MarginTop    int
-	MarginBottom int
-	MarginLeft   int
-	MarginRight  int
-	MarginX      int
-	MarginY      int
+	Margin       float64
+	MarginTop    float64
+	MarginBottom float64
+	MarginLeft   float64
+	MarginRight  float64
+	MarginX      float64
+	MarginY      float64
 }
 
 func NewUIArea() *UIArea {

@@ -40,10 +40,11 @@ func NewUISelect(rows int) *UISelect {
 }
 
 func (self *UISelect) GetSelectItem() (*UISelectItem, error) {
-	if self.Base.SelectNo < 0 || self.Base.SelectNo >= len(self.Items) {
-		return nil, errors.New("select no is out of range: " + strconv.Itoa(self.Base.SelectNo))
+	selectNo := self.GetSelectNo()
+	if selectNo < 0 || selectNo >= len(self.Items) {
+		return nil, errors.New("select no is out of range: " + strconv.Itoa(selectNo))
 	}
-	return self.Items[self.Base.SelectNo], nil
+	return self.Items[selectNo], nil
 }
 
 func (self *UISelect) GetSelectAction() string {
@@ -55,7 +56,11 @@ func (self *UISelect) GetSelectAction() string {
 }
 
 func (self *UISelect) GetSelectNo() int {
-	return self.Base.SelectNo
+	return int(self.Base.SelectNo)
+}
+
+func (self *UISelect) SetSelectNo(selectNo int) {
+	self.Base.SelectNo = float64(selectNo)
 }
 
 // ==================================================
@@ -90,13 +95,15 @@ func (self *UISelect) Next(step int, toggle bool) {
 		return
 	}
 
-	self.Base.SelectNo += step
+	selectNo := self.GetSelectNo() + step
 
 	if toggle {
-		self.Base.SelectNo = (len(self.Items) + self.Base.SelectNo) % len(self.Items)
+		selectNo = (len(self.Items) + selectNo) % len(self.Items)
 	} else {
-		self.Base.SelectNo = min(max(self.Base.SelectNo, 0), len(self.Items)-1)
+		selectNo = (min(max(selectNo, 0), len(self.Items)-1))
 	}
+
+	self.SetSelectNo(selectNo)
 }
 
 // グリッドX移動（RowsでItemを折り返している場合の移動）
@@ -105,8 +112,8 @@ func (self *UISelect) NextGridX(step int, toggle bool) {
 		return
 	}
 
-	gridX := self.Base.SelectNo % self.Rows
-	gridY := self.Base.SelectNo / self.Rows
+	gridX := self.GetSelectNo() % self.Rows
+	gridY := self.GetSelectNo() / self.Rows
 	gridX += step
 
 	if toggle {
@@ -121,7 +128,7 @@ func (self *UISelect) NextGridX(step int, toggle bool) {
 		}
 	}
 
-	self.Base.SelectNo = gridY*self.Rows + gridX
+	self.SetSelectNo(gridY*self.Rows + gridX)
 }
 
 // グリッドY移動（RowsでItemを折り返している場合の移動）
@@ -130,8 +137,8 @@ func (self *UISelect) NextGridY(step int, toggle bool) {
 		return
 	}
 
-	gridX := self.Base.SelectNo % self.Rows
-	gridY := self.Base.SelectNo / self.Rows
+	gridX := self.GetSelectNo() % self.Rows
+	gridY := self.GetSelectNo() / self.Rows
 	lineNum := (len(self.Items) + self.Rows - 1) / self.Rows
 	gridY += step
 
@@ -144,5 +151,5 @@ func (self *UISelect) NextGridY(step int, toggle bool) {
 		gridX = (len(self.Items) - 1) % self.Rows
 	}
 
-	self.Base.SelectNo = gridY*self.Rows + gridX
+	self.SetSelectNo(gridY*self.Rows + gridX)
 }

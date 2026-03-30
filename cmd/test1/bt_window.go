@@ -15,7 +15,7 @@ func NewBTWindow(m *model) *BTWindow {
 	window.Base.Base.SetDrawIF(window)
 	return window
 }
-func NewBTWindowRect(m *model, x, y, w, h int) *BTWindow {
+func NewBTWindowRect(m *model, x, y, w, h float64) *BTWindow {
 	window := &BTWindow{
 		Base:  yamlui.NewUIWindow(),
 		model: m,
@@ -33,14 +33,14 @@ func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCont
 	drawArea := myArea.Clip(clip)
 
 	// 3. 描画ループ
-	for y := drawArea.Top(); y < drawArea.Bottom(); y++ {
-		for x := drawArea.Left(); x < drawArea.Right(); x++ {
+	for y := int(drawArea.Top()); y < int(drawArea.Bottom()); y++ {
+		for x := int(drawArea.Left()); x < int(drawArea.Right()); x++ {
 
 			// 現在の (x, y) が「本来の自分の領域(myArea)」のどこに当たるかで文字を決める
-			isLeft := (x == myArea.Left())
-			isRight := (x == myArea.Right()-1)
-			isTop := (y == myArea.Top())
-			isBottom := (y == myArea.Bottom()-1)
+			isLeft := (x == myArea.ILeft())
+			isRight := (x == myArea.IRight()-1)
+			isTop := (y == myArea.ITop())
+			isBottom := (y == myArea.IBottom()-1)
 
 			var r rune
 			if isLeft && isTop {

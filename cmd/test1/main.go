@@ -44,7 +44,7 @@ func initialModel() model {
 	}
 
 	// ここで JSON を読み込んで UI を構築するロジックを入れる
-	data, err := os.ReadFile("ui.json")
+	data, err := os.ReadFile("cmd/test1/ui.json")
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
@@ -54,7 +54,7 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to parse ui.json: %v", err))
 	}
 
-	uiMap := make(map[string]*yamlui.UIBase)
+	//	uiMap := make(map[string]*yamlui.UIBase)
 	// ここでさっきの再帰的な Build ロジックを回す
 	// JSON なので数値は float64 で来る点だけ注意（intへのキャストが必要）
 
@@ -159,7 +159,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.root.Draw(yamlui.NewArea(0, 0, m.width, m.height))
+	m.root.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

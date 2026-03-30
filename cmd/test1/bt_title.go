@@ -40,18 +40,18 @@ func (self *BTTitle) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 	}
 
 	// Y座標：上から 1/4 くらいの場所に置くと DQ っぽいです
-	startY := clip.Y + 2
+	startY := int(clip.Y + 2)
 
 	for i, line := range logo {
-		if i >= clip.H {
+		if i >= int(clip.H) {
 			break
 		}
 
 		// X座標：中央寄せ
-		startX := clip.AlignCenterX(stringWidth(line)) - 1
+		startX := int(clip.AlignCenterIX(stringWidth(line)) - 1)
 
 		for j, char := range line {
-			if startX+j < clip.X+clip.W {
+			if startX+j < int(clip.X+clip.W) {
 				// Canvasにセット
 				self.model.canvas[startY+i][startX+j] = Cell{Rune: char, Color: "white"}
 			}
