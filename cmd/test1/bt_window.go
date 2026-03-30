@@ -43,14 +43,26 @@ func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area) {
 			isBottom := (y == myArea.Bottom()-1)
 
 			var r rune
-			if (isLeft || isRight) && (isTop || isBottom) {
-				r = '+' // 四隅
-			} else if isLeft || isRight {
-				r = '|' // 縦の辺
-			} else if isTop || isBottom {
-				r = '-' // 横の辺
-			} else {
-				r = ' ' // 中身（背景）
+			if isLeft && isTop {
+				r = '╔' // 左上
+			}
+			if isRight && isTop {
+				r = '╗' // 右上
+			}
+			if isLeft && isBottom {
+				r = '╚' // 左下
+			}
+			if isRight && isBottom {
+				r = '╝' // 右下
+			}
+			if r == 0 {
+				if isTop || isBottom {
+					r = '═' // 上下の線
+				} else if isLeft || isRight {
+					r = '║' // 左右の線
+				} else {
+					r = ' ' // 内部はスペース
+				}
 			}
 
 			// キャンバスの物理境界チェックをして書き込み

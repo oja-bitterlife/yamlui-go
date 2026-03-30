@@ -34,13 +34,12 @@ func (self *UIBase) Area() Area {
 	}
 }
 
-func (self *UIBase) SetArea() Area {
-	return Area{
-		X: self.X,
-		Y: self.Y,
-		W: self.W,
-		H: self.H,
-	}
+func (self *UIBase) SetArea(area Area) Area {
+	self.X = area.X
+	self.Y = area.Y
+	self.W = area.W
+	self.H = area.H
+	return area
 }
 
 func (self *UIBase) SetXY(x, y int) {

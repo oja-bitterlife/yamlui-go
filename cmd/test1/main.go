@@ -21,15 +21,16 @@ type model struct {
 	height int
 	frame  int
 
-	canvas [][]Cell
-	sel    *BTSelect
+	canvas   [][]Cell
+	startSel *BTSelect
+	speedSel *BTSelect
 }
 
 func initialModel() model {
 	m := model{
 		root:   yamlui.NewUIBase("Root"),
-		width:  64,
-		height: 24,
+		width:  68,
+		height: 26,
 	}
 	m.canvas = make([][]Cell, m.height)
 	for i := range m.canvas {
@@ -42,15 +43,23 @@ func initialModel() model {
 	}
 
 	win := NewBTWindow(&m)
+	win.Base.Base.SetRect(0, 0, m.width, m.height)
 	m.root.AddChild(win.Base.Base)
 
-	// margin := yamlui.NewUIArea()
-	// margin.Margin = 1
-	// margin.MarginX = 1
-	// win.Base.Base.AddChild(margin.Base)
+	margin := yamlui.NewUIArea()
+	margin.MarginX = 2
+	margin.MarginY = 1
+	win.Base.Base.AddChild(margin.Base)
 
-	// label := NewBTLabel(&m, "Hello, YAMLUI!")
-	// margin.Base.AddChild(label.Base.Base)
+	title := NewBTTitle(&m)
+	margin.Base.AddChild(title.Base.Base)
+
+	startSel := NewBTSelect(&m, 1)
+	startSel.Base.AddItem(yamlui.NewUISelectItem("START"))
+	startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))
+	startSel.Base.Base.SetArea(margin.Base.Area())
+	margin.Base.AddChild(startSel.Base.Base)
+	m.startSel = startSel
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	// 	scriptSrc := `
@@ -62,16 +71,6 @@ func initialModel() model {
 	// 	if err := label.Base.Base.SetScript(scriptSrc); err != nil {
 	// 		panic(fmt.Sprintf("Failed to set script: %v", err))
 	// 	}
-
-	m.sel = NewBTSelect(&m, 3)
-	m.sel.Base.AddItems([]*yamlui.UISelectItem{
-		yamlui.NewUISelectItem("Option 1"),
-		yamlui.NewUISelectItem("Option 2"),
-		yamlui.NewUISelectItem("Option 3"),
-		yamlui.NewUISelectItem("Option 4"),
-		yamlui.NewUISelectItem("Option 5"),
-	})
-	win.Base.Base.AddChild(m.sel.Base.Base)
 
 	return m
 }
@@ -100,18 +99,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// 縦方向の移動 (NextGridY)
 		selectToggle := true
 		if msg.Type == tea.KeyUp {
-			m.sel.Base.NextGridY(-1, selectToggle)
+			m.startSel.Base.NextGridY(-1, selectToggle)
 		}
 		if msg.Type == tea.KeyDown {
-			m.sel.Base.NextGridY(1, selectToggle)
+			m.startSel.Base.NextGridY(1, selectToggle)
 		}
 
 		// 横方向の移動 (NextGridX)
 		if msg.Type == tea.KeyLeft {
-			m.sel.Base.NextGridX(-1, selectToggle)
+			m.startSel.Base.NextGridX(-1, selectToggle)
 		}
 		if msg.Type == tea.KeyRight {
-			m.sel.Base.NextGridX(1, selectToggle)
+			m.startSel.Base.NextGridX(1, selectToggle)
 		}
 	}
 
@@ -125,7 +124,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.root.Draw(yamlui.NewArea(0, 0, 80, 24)) // 描画用の構造体を更新
+	m.root.Draw(m.root.Area()) // 描画用の構造体を更新
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

@@ -84,9 +84,9 @@ func NewUIBase(type_ string) *UIBase {
 	ui.IsEnable = true
 	ui.IsVisivle = true
 	ui.Color = "system"
-	// 0だと設定忘れ時どこがおかしいかわからないのでデフォルト値を入れる
-	ui.W = 64
-	ui.H = 48 / 2
+	// とりあえず大きな値を入れておく
+	ui.W = 65536
+	ui.H = 65536
 	return ui
 }
 
