@@ -4,13 +4,13 @@ import "errors"
 
 type YAMLUI struct {
 	Root       *UIBase
-	remapFuncs map[string]RemapFunc
+	remapFuncs map[string]func(*UIBase, map[string]any) (*UIBase, error)
 }
 
 func NewYAMLUI() *YAMLUI {
 	return &YAMLUI{
 		Root:       NewUIBase("Root"),
-		remapFuncs: make(map[string]RemapFunc),
+		remapFuncs: make(map[string]func(*UIBase, map[string]any) (*UIBase, error)),
 	}
 }
 
@@ -18,11 +18,7 @@ func NewYAMLUI() *YAMLUI {
 // mapの解析
 // ==================================================
 // mapを解析して必要なデータを構造体に流し込むためのインターフェース
-type RemapFunc interface {
-	Remap(ui *UIBase, data map[string]any) (*UIBase, error)
-}
-
-func (self *YAMLUI) RegisterRemap(typeName string, fn RemapFunc) {
+func (self *YAMLUI) RegisterRemap(typeName string, fn func(*UIBase, map[string]any) (*UIBase, error)) {
 	self.remapFuncs[typeName] = fn
 }
 
@@ -53,12 +49,13 @@ func propBool(data map[string]any, key string, def bool) bool {
 // UIコンポーネントの構築
 func (self *YAMLUI) BuildUI(data map[string]any) (*UIBase, error) {
 	Type := propStr(data, "Type", "area") // Type を取得（デフォルトは "area"）
-	ui := NewUIBase(Type)                 // ルートの UIBase を作成
+	ui := NewUIBase(Type)                 // データ格納用
 
 	if ID, ok := data["ID"].(string); ok {
 		ui.ID = ID
 	}
 
+	// 共通プロパティの取り出し
 	ui.IsEnable = propBool(data, "IsEnable", ui.IsEnable)
 	ui.IsAbs = propBool(data, "IsAbs", ui.IsAbs)
 	ui.X = propNum(data, "X", ui.X)
@@ -74,14 +71,17 @@ func (self *YAMLUI) BuildUI(data map[string]any) (*UIBase, error) {
 	ui.SelGridX = propNum(data, "SelGridX", ui.SelGridX)
 	ui.Action = propStr(data, "Action", ui.Action)
 
-	// 具体的なコンポーネントを生成
+	// ユーザー定義コンポーネントを生成
 	if remapFunc, ok := self.remapFuncs[Type]; ok {
-		if remapUI, err := remapFunc.Remap(ui, data); err == nil {
+		// 登録されたリマップ関数でUIを構築
+		if remapUI, err := remapFunc(ui, data); err == nil {
+			remapUI.CopyProp(ui) // 共通プロパティをコピー
 			return remapUI, nil
 		} else {
 			return nil, err
 		}
 	} else {
+		// 登録されたリマップ関数がない場合は、基本的なUIを返す
 		return ui, nil
 	}
 }

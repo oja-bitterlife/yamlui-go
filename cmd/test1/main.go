@@ -17,7 +17,7 @@ type Cell struct {
 }
 
 type model struct {
-	root   *yamlui.UIBase
+	lib    *yamlui.YAMLUI
 	width  int
 	height int
 	frame  int
@@ -29,7 +29,7 @@ type model struct {
 
 func initialModel() model {
 	m := model{
-		root:   yamlui.NewUIBase("Root"),
+		lib:    yamlui.NewYAMLUI(),
 		width:  68,
 		height: 26,
 	}
@@ -54,13 +54,12 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to parse ui.json: %v", err))
 	}
 
-	lib := yamlui.NewYAMLUI()
+	// UI構築の登録
+	m.lib.RegisterRemap("window", func(ui *yamlui.UIBase, data map[string]any) (*yamlui.UIBase, error) {
+		return NewBTWindow(&m, ui, data).Base.Base, nil
+	})
 
-	win := NewBTWindow(&m)
-	m.root.AddChild(win.Base.Base)
-	lib.RegisterRemap("window", win)
-
-	lib.Load(uiMap)
+	m.lib.Load(uiMap)
 
 	// win := NewBTWindow(&m)
 	// win.Base.Base.SetRect(0, 0, m.width, m.height)
@@ -129,7 +128,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// キーが押されたらLispを実行して構造体を更新
-		err := m.root.Update(m.frame)
+		err := m.lib.Root.Update(m.frame)
 		if err != nil {
 			fmt.Printf("Error executing script: %v\n", err)
 			return m, nil
@@ -163,7 +162,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.root.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
+	m.lib.Root.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

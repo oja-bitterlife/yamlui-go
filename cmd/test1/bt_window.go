@@ -7,27 +7,13 @@ type BTWindow struct {
 	model *model
 }
 
-func NewBTWindow(m *model) *BTWindow {
+func NewBTWindow(m *model, ui *yamlui.UIBase, data map[string]any) *BTWindow {
 	window := &BTWindow{
 		Base:  yamlui.NewUIWindow(),
 		model: m,
 	}
 	window.Base.Base.SetDrawIF(window)
 	return window
-}
-func NewBTWindowRect(m *model, x, y, w, h float64) *BTWindow {
-	window := &BTWindow{
-		Base:  yamlui.NewUIWindow(),
-		model: m,
-	}
-	window.Base.Base.SetRect(x, y, w, h)
-	window.Base.Base.SetDrawIF(window)
-	return window
-}
-
-func (w *BTWindow) Remap(ui *yamlui.UIBase, data map[string]any) (*yamlui.UIBase, error) {
-	w.Base.Base.CopyProp(ui)
-	return w.Base.Base, nil
 }
 
 func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
