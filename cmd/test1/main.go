@@ -58,6 +58,9 @@ func initialModel() model {
 	m.lib.RegisterRemap("window", func(ui *yamlui.UIBase, data map[string]any) (*yamlui.UIBase, error) {
 		return NewBTWindow(&m, ui, data).Base.Base, nil
 	})
+	m.lib.RegisterRemap("title", func(ui *yamlui.UIBase, data map[string]any) (*yamlui.UIBase, error) {
+		return NewBTTitle(&m, ui, data).Base.Base, nil
+	})
 
 	m.lib.Load(uiMap)
 

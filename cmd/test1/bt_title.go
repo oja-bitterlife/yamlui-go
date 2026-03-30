@@ -7,7 +7,7 @@ type BTTitle struct {
 	model *model
 }
 
-func NewBTTitle(m *model) *BTTitle {
+func NewBTTitle(m *model, ui *yamlui.UIBase, data map[string]any) *BTTitle {
 	title := &BTTitle{
 		Base:  yamlui.NewUILabel("YAMLUI"),
 		model: m,

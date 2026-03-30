@@ -1,6 +1,8 @@
 package yamlui
 
-import "errors"
+import (
+	"errors"
+)
 
 type YAMLUI struct {
 	Root       *UIBase
@@ -123,16 +125,7 @@ func (self *YAMLUI) load(parent *UIBase, data map[string]any) error {
 	}
 	for _, c := range children {
 		if m, ok := c.(map[string]any); ok {
-			// 子要素を構築
-			child, err := self.BuildUI(m)
-			if err != nil {
-				continue
-			}
-
-			parent.AddChild(child) // ルートの子要素として追加
-
-			// 子要素に対しても再帰的に load を呼び出す
-			if err := self.load(child, m); err != nil {
+			if err := self.load(ui, m); err != nil {
 				return err
 			}
 		}

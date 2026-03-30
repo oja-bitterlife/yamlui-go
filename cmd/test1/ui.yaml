@@ -5,10 +5,8 @@
   H: 26
   children:
     - Type: "area"
-      ID: "screen"
       MarginX: 2
       MarginY: 1
       children:
-      - Type: "label"
-        ID: "title"
+      - Type: "title"
         Y: 2
