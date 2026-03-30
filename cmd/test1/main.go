@@ -22,8 +22,8 @@ type model struct {
 	frame  int
 
 	canvas   [][]Cell
-	startSel *BTSelect
-	speedSel *BTSelect
+	startSel *BTSpeed
+	speedSel *BTSpeed
 }
 
 func initialModel() model {
@@ -52,15 +52,33 @@ func initialModel() model {
 	win.Base.Base.AddChild(margin.Base)
 
 	title := NewBTTitle(&m)
+	title.Base.Base.Y = 2
 	margin.Base.AddChild(title.Base.Base)
 
-	startSel := NewBTSelect(&m, 1)
+	startSel := NewBTStart(&m, 1)
 	startSel.Base.AddItem(yamlui.NewUISelectItem("START"))
 	startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))
 	startSel.Base.Base.SetArea(margin.Base.Area())
-	margin.Base.AddChild(startSel.Base.Base)
-	startSel.Base.Base.SetRect(0, 10, 10, 2)
+	win.Base.Base.AddChild(startSel.Base.Base)
+	startSel.Base.Base.SetRect(0, 14, 16, 2)
 	m.startSel = startSel
+
+	speedArea := yamlui.NewUIArea()
+	speedArea.Base.X = 12
+	speedArea.Base.Y = 19
+	win.Base.Base.AddChild(speedArea.Base)
+
+	sppedLabel := NewBTLabel(&m, "-MESSAGE SPEED-")
+	sppedLabel.Base.Base.X = 13
+	speedArea.Base.AddChild(sppedLabel.Base.Base)
+
+	speedSel := NewBTSpeed(&m, 3)
+	speedSel.Base.Base.Y = 1
+	speedSel.Base.AddItem(yamlui.NewUISelectItem("SLOW"))
+	speedSel.Base.AddItem(yamlui.NewUISelectItem("NORMAL"))
+	speedSel.Base.AddItem(yamlui.NewUISelectItem("FAST"))
+	speedArea.Base.AddChild(speedSel.Base.Base)
+	m.speedSel = speedSel
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	// 	scriptSrc := `
@@ -108,10 +126,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// 横方向の移動 (NextGridX)
 		if msg.Type == tea.KeyLeft {
-			m.startSel.Base.NextGridX(-1, selectToggle)
+			m.speedSel.Base.NextGridX(-1, selectToggle)
 		}
 		if msg.Type == tea.KeyRight {
-			m.startSel.Base.NextGridX(1, selectToggle)
+			m.speedSel.Base.NextGridX(1, selectToggle)
 		}
 	}
 

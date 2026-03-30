@@ -2,13 +2,13 @@ package main
 
 import "github.com/oja-bitterlife/yamlui-go/yamlui"
 
-type BTSelect struct {
+type BTSpeed struct {
 	Base  *yamlui.UISelect
 	model *model
 }
 
-func NewBTSelect(m *model, rows int) *BTSelect {
-	selectUI := &BTSelect{
+func NewBTSpeed(m *model, rows int) *BTSpeed {
+	selectUI := &BTSpeed{
 		Base:  yamlui.NewUISelect(rows),
 		model: m,
 	}
@@ -16,8 +16,8 @@ func NewBTSelect(m *model, rows int) *BTSelect {
 	return selectUI
 }
 
-func (self *BTSelect) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
-	clip.X = ctx.ParentArea.AlignCenterX(ui.W) // 1行あたり16文字分の幅を中央寄せ
+func (self *BTSpeed) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
+	clip.X = ctx.ParentArea.AlignCenterX(clip.W) // 1行あたり16文字分の幅を中央寄せ
 
 	for i, item := range self.Base.Items {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
@@ -27,12 +27,12 @@ func (self *BTSelect) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawC
 
 		// 描画する Y 座標（1行ずつズラしていく）
 		y := clip.Y + i/self.Base.Rows
-		x := clip.X + (i%self.Base.Rows)*16
+		x := clip.X + (i%self.Base.Rows)*15 // 1行あたり16文字分の幅を確保
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
-		prefix := "  "
+		prefix := "   "
 		if i == ui.SelectNo {
-			prefix = "> "
+			prefix = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}
 
