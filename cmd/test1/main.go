@@ -91,7 +91,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// キーが押されたらLispを実行して構造体を更新
-		err := m.root.UpdateTree(m.frame)
+		err := m.root.Update(m.frame)
 		if err != nil {
 			fmt.Printf("Error executing script: %v\n", err)
 			return m, nil
@@ -125,7 +125,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.root.DrawTree(yamlui.NewArea(0, 0, 80, 24)) // 描画用の構造体を更新
+	m.root.Draw(yamlui.NewArea(0, 0, 80, 24)) // 描画用の構造体を更新
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

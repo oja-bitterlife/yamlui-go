@@ -181,7 +181,7 @@ func (self *UIBase) callUpdateTree(frame int) error {
 // ----------------------------------------
 // Update実行
 // 呼び出し口
-func (self *UIBase) UpdateTree(frame int) error {
+func (self *UIBase) Update(frame int) error {
 	var lastErr error
 	if self.Frame == 0 {
 		// 最初のフレームならOnInitを呼び出す
@@ -285,7 +285,7 @@ func (self *UIBase) calcDrawArea(clip Area) Area {
 }
 
 // 呼び出し口
-func (self *UIBase) DrawTree(clip Area) {
+func (self *UIBase) Draw(clip Area) {
 	area := self.calcDrawArea(clip)
 
 	// 先に自分を描画する
