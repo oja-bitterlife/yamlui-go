@@ -15,7 +15,9 @@ func (v Value) MarshalJSON() ([]byte, error) {
 
 	switch v.Type {
 	case TypeNumber:
-		buf.WriteString(`{"Num":`)
+		buf.WriteString(`{"`)
+		buf.WriteString(TypeNumberStr)
+		buf.WriteString(`":`)
 		// 数値を直接書き込み
 		b := buf.AvailableBuffer()
 		b = strconv.AppendFloat(b, v.Num, 'f', 4, 64)
@@ -25,9 +27,13 @@ func (v Value) MarshalJSON() ([]byte, error) {
 	case TypeString, TypeProperty:
 		switch v.Type {
 		case TypeString:
-			buf.WriteString(`{"Str":`)
+			buf.WriteString(`{"`)
+			buf.WriteString(TypeStringStr)
+			buf.WriteString(`":`)
 		case TypeProperty:
-			buf.WriteString(`{"Prop":`)
+			buf.WriteString(`{"`)
+			buf.WriteString(TypePropertyStr)
+			buf.WriteString(`":`)
 		}
 		// strconv.AppendQuote を使えば、AvailableBuffer に直接
 		// エスケープ済みの文字列 ("hello" など) を書き込めます！
@@ -38,16 +44,24 @@ func (v Value) MarshalJSON() ([]byte, error) {
 
 	case TypeBool:
 		if v.Bool {
-			buf.WriteString(`{"Bool":true}`)
+			buf.WriteString(`{"`)
+			buf.WriteString(TypeBoolStr)
+			buf.WriteString(`":true}`)
 		} else {
-			buf.WriteString(`{"Bool":false}`)
+			buf.WriteString(`{"`)
+			buf.WriteString(TypeBoolStr)
+			buf.WriteString(`":false}`)
 		}
 	case TypeList, TypeLitList:
 		switch v.Type {
 		case TypeList:
-			buf.WriteString(`{"List":`)
+			buf.WriteString(`{"`)
+			buf.WriteString(TypeListStr)
+			buf.WriteString(`":`)
 		case TypeLitList:
-			buf.WriteString(`{"LitList":`)
+			buf.WriteString(`{"`)
+			buf.WriteString(TypeLitListStr)
+			buf.WriteString(`":`)
 		}
 		buf.WriteByte('[')
 		for i, item := range v.List {
@@ -63,7 +77,9 @@ func (v Value) MarshalJSON() ([]byte, error) {
 		}
 		buf.WriteString(`]}`)
 	case TypeLitMap:
-		buf.WriteString(`{"LitMap":{`)
+		buf.WriteString(`{"`)
+		buf.WriteString(TypeLitMapStr)
+		buf.WriteString(`":{`)
 		i := 0
 		for k, v := range v.Map {
 			if i > 0 {
@@ -109,44 +125,46 @@ func (v *Value) parseValue(data []byte) (Value, error) {
 	key := bytes.TrimSpace(parts[0])
 	value := bytes.TrimSpace(parts[1])
 
+	key = bytes.TrimPrefix([]byte("\""), key)
+	key = bytes.TrimSuffix([]byte("\""), key)
 	switch string(key) {
-	case `"Num"`:
+	case TypeNumberStr:
 		f, err := strconv.ParseFloat(string(value), 64)
 		if err != nil {
 			return Value{}, err
 		}
 		return NewNumber(f), nil
-	case `"Str"`:
+	case TypeStringStr:
 		s, err := strconv.Unquote(string(value))
 		if err != nil {
 			return Value{}, err
 		}
 		return NewString(s), nil
-	case `"Prop"`:
+	case TypePropertyStr:
 		s, err := strconv.Unquote(string(value))
 		if err != nil {
 			return Value{}, err
 		}
 		return NewProperty(s), nil
-	case `"Bool"`:
+	case TypeBoolStr:
 		b, err := strconv.ParseBool(string(value))
 		if err != nil {
 			return Value{}, err
 		}
 		return NewBool(b), nil
-	case `"List"`:
+	case TypeListStr:
 		list, err := v.parseList(value)
 		if err != nil {
 			return Value{}, err
 		}
 		return NewList(list), nil
-	case `"LitList"`:
+	case TypeLitListStr:
 		list, err := v.parseList(value)
 		if err != nil {
 			return Value{}, err
 		}
 		return NewLitList(list), nil
-	case `"LitMap"`:
+	case TypeLitMapStr:
 		m, err := v.parseMap(value)
 		if err != nil {
 			return Value{}, err

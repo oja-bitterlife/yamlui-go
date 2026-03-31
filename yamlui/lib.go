@@ -3,6 +3,8 @@ package yamlui
 import (
 	"encoding/json"
 	"errors"
+
+	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 type YAMLUI struct {
@@ -41,6 +43,14 @@ func propNum(data map[string]any, key string, def float64) float64 {
 	}
 	return def
 }
+
+func propINum(data map[string]any, key string, def float64) float64 {
+	if v, ok := data[key].(float64); ok {
+		return v
+	}
+	return def
+}
+
 func propBool(data map[string]any, key string, def bool) bool {
 	if v, ok := data[key].(bool); ok {
 		return v
@@ -98,7 +108,10 @@ func (self *YAMLUI) BuildUI(data map[string]any) (*UIBase, error) {
 
 // ==================================================
 // UITreeの構築（再帰的に子要素も構築）
-func (self *YAMLUI) Load(data any) error {
+func (self *YAMLUI) Load(data []byte) error {
+	var root script.Value
+	root.UnmarshalJSON(data)
+
 	switch v := data.(type) {
 	case []any:
 		return errors.New("invalid data format: expected a single map, but got an array")

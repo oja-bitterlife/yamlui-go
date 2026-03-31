@@ -24,6 +24,37 @@ const (
 	TypeList     // 未評価リスト
 )
 
+const (
+	TypeNumberStr   = "Num"
+	TypeBoolStr     = "Bool"
+	TypeStringStr   = "Str"
+	TypeLitListStr  = "LitList"
+	TypeLitMapStr   = "LitMap"
+	TypePropertyStr = "Prop"
+	TypeListStr     = "List"
+)
+
+func (t ValueType) String() string {
+	switch t {
+	case TypeNumber:
+		return TypeNumberStr
+	case TypeBool:
+		return TypeBoolStr
+	case TypeString:
+		return TypeStringStr
+	case TypeLitList:
+		return TypeLitListStr
+	case TypeLitMap:
+		return TypeLitMapStr
+	case TypeProperty:
+		return TypePropertyStr
+	case TypeList:
+		return TypeListStr
+	default:
+		return "Unknown"
+	}
+}
+
 // ==================================================
 // Listに格納する型付きの値。リフレクションを避けるため全部入り
 type Value struct {
@@ -38,6 +69,14 @@ type Value struct {
 	// リスト構造 (S式や、分解済みの文字列フラグメント)
 	List []Value
 	Map  map[string]Value
+}
+
+func (v Value) String() string {
+	jsonBytes, err := v.MarshalJSON()
+	if err != nil {
+		return "Error: " + err.Error()
+	}
+	return string(jsonBytes)
 }
 
 // ==================================================

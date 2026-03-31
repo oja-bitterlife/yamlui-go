@@ -3,6 +3,7 @@ package yamlui
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -151,6 +152,35 @@ func (self *UIBase) ToValue() script.Value {
 		"Action":    script.NewString(self.Action),
 		"Prop":      script.NewLitMap(self.Prop),
 	})
+}
+
+func (self *UIBase) LoadFromValue(value script.Value) error {
+	if value.Type != script.TypeLitMap {
+		return errors.New("Expected Value to be MapType: " + string(value.Type))
+	}
+	m := value.Map
+
+	self.Type = m["Type"].Str
+	self.ID = m["ID"].Str
+	self.IsEnable = m["IsEnable"].Bool
+	self.IsAbs = m["IsAbs"].Bool
+	self.X = m["X"].Num
+	self.Y = m["Y"].Num
+	self.W = m["W"].Num
+	self.H = m["H"].Num
+	self.IsVisible = m["IsVisible"].Bool
+	self.Text = m["Text"].Str
+	self.Color = m["Color"].Str
+	self.SelectNo = m["SelectNo"].Num
+	self.SelGridX = m["SelGridX"].Num
+	self.Action = m["Action"].Str
+
+	if prop, ok := m["Prop"]; ok {
+		if prop.Type != script.TypeLitMap {
+			return errors.New("Expected Prop to be MapType: " + string(prop.Type))
+		}
+	}
+	return nil
 }
 
 // **********************************************************************
