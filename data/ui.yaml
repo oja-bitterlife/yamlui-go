@@ -5,8 +5,10 @@
   H: 26
   children:
     - Type: "area"
-      MarginX: 2
-      MarginY: 1
+      W: 50
+      MarginX: 0
+      MarginY: 0
+      AlignCenterX: true
       children:
       - Type: "title"
         Y: 2

@@ -51,7 +51,8 @@ func (self *BTTitle) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 		}
 
 		// X座標：中央寄せ
-		startX := int(clip.AlignCenterIX(stringWidth(line)) - 1)
+		// startX := int(clip.AlignCenterIX(stringWidth(line)) - 1)
+		startX := int(clip.X)
 
 		for j, char := range line {
 			if startX+j < int(clip.X+clip.W) {

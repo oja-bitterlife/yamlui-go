@@ -25,6 +25,7 @@ tasks:
     desc: "Run"
     deps:
       - build
+      - convert
     cmds:
       - "{{.BIN_DIR}}/main"
 

@@ -281,7 +281,7 @@ type DrawIF interface {
 
 // クリップ操作が必要な時とか
 type DrawTreeIF interface {
-	DrawTree(ui *UIBase, clip Area)
+	DrawTree(ui *UIBase, clip Area, ctx DrawContext)
 }
 
 type DrawContext struct {
@@ -312,9 +312,9 @@ func (self *UIBase) callDraw(clip Area, ctx DrawContext) {
 	}
 }
 
-func (self *UIBase) callDrawTree(clip Area) {
+func (self *UIBase) callDrawTree(clip Area, ctx DrawContext) {
 	if self.drawTreeIF != nil {
-		self.drawTreeIF.DrawTree(self, clip)
+		self.drawTreeIF.DrawTree(self, clip, ctx)
 	} else {
 		self.drawTree(clip)
 	}
@@ -349,7 +349,7 @@ func (self *UIBase) Draw(screen Area) {
 	self.callDraw(area, ctx)
 
 	// 子のDrawを呼び出す
-	self.callDrawTree(area)
+	self.callDrawTree(area, ctx)
 }
 
 // 再帰実行
@@ -368,7 +368,7 @@ func (self *UIBase) drawTree(clip Area) {
 	for _, child := range self.children {
 		if child.IsVisible {
 			area := child.calcDrawArea(clip)
-			child.callDrawTree(area)
+			child.callDrawTree(area, ctx)
 		}
 	}
 }

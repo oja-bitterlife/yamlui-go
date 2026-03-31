@@ -55,10 +55,10 @@ func propINum(data map[string]script.Value, key string, def int) int {
 
 func propBool(data map[string]script.Value, key string, def bool) bool {
 	value, ok := data[key]
-	if !ok || value.Type == script.TypeNumber {
+	if !ok || value.Type != script.TypeBool {
 		return def
 	}
-	return def
+	return value.Bool
 }
 
 // ==================================================

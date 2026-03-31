@@ -51,9 +51,12 @@ func initialModel() model {
 	m.lib.RegisterRemap("title", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
 		return NewBTTitle(&m, ui, data).Base.Base, nil
 	})
+	m.lib.RegisterRemap("area", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return yamlui.NewUIArea(ui, data).Base, nil
+	})
 
 	// JSON を読み込んで UI を構築する
-	fileData, err := os.ReadFile("cmd/test1/ui.json")
+	fileData, err := os.ReadFile("bin/ui.json")
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
