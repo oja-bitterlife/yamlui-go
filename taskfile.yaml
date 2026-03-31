@@ -3,6 +3,9 @@ version: 3
 vars:
   VERSION: v0.0.1
   BIN_DIR: "bin"
+  DATA_DIR: "data"
+  UI_SRC_YAML: "ui.yaml"
+  UI_DIST_JSON: "ui.json"
 
 tasks:
   build:
@@ -24,6 +27,15 @@ tasks:
       - build
     cmds:
       - "{{.BIN_DIR}}/main"
+
+  convert:
+    desc: "Convert"
+    sources:
+      - "{{.DATA_DIR}}/{{.UI_SRC_YAML}}"
+    generates:
+      - "{{.BIN_DIR}}/{{.UI_DIST_JSON}}"
+    cmds:
+      - cat {{.DATA_DIR}}/{{.UI_SRC_YAML}} | yq -o=json > {{.BIN_DIR}}/{{.UI_DIST_JSON}}
 
   test:
     desc: "Test"
