@@ -1,6 +1,7 @@
 package script
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
 	"strings"
@@ -174,7 +175,8 @@ func fit(vm *VM, args []Value) (Value, error) {
 
 	// 一つ目が入力値、二つ目が入力の最小値、三つ目が入力の最大値、四つ目が出力の最小値、五つ目が出力の最大値
 	if values[0].Type != TypeNumber || values[1].Type != TypeNumber || values[2].Type != TypeNumber || values[3].Type != TypeNumber || values[4].Type != TypeNumber {
-		return Value{}, errors.New("invalid types for fit: " + values[0].Type.ToStr() + ", " + values[1].Type.ToStr() + ", " + values[2].Type.ToStr() + ", " + values[3].Type.ToStr() + ", " + values[4].Type.ToStr())
+		jsonArgs, _ := json.Marshal(values)
+		return Value{}, errors.New("fit: all arguments must be numbers: " + string(jsonArgs))
 	}
 	input := values[0].Num
 	inMin := values[1].Num

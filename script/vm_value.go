@@ -1,12 +1,17 @@
 package script
 
 import (
+	"bytes"
+	"encoding/json"
+	"errors"
 	"strconv"
 	"strings"
 )
 
-// ==================================================
+// **********************************************************************
 // 値の型定義
+// ==================================================
+// 値の種類
 type ValueType int
 
 const (
@@ -20,26 +25,6 @@ const (
 	TypeProperty // @i などの参照
 	TypeList     // 未評価リスト
 )
-
-// 値の型を文字列で返す. デバッグ用.
-func (vt ValueType) ToStr() string {
-	switch vt {
-	case TypeNumber:
-		return "Number"
-	case TypeBool:
-		return "Bool"
-	case TypeString:
-		return "String"
-	case TypeLitList:
-		return "LiteralList"
-	case TypeProperty:
-		return "Property"
-	case TypeList:
-		return "List"
-	default:
-		return "Unknown"
-	}
-}
 
 // ==================================================
 // Listに格納する型付きの値。リフレクションを避けるため全部入り
@@ -151,3 +136,68 @@ func (v Value) ConvertNumber() Value {
 		return NewNumber(0)
 	}
 }
+
+// **********************************************************************
+// Marshal/Unmarshal
+// json.Marshaler インターフェースの実装
+func (v Value) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+
+	switch v.Type {
+	case TypeNumber:
+		buf.WriteString(`{"Num":`)
+		// 数値を直接書き込み
+		b := buf.AvailableBuffer()
+		b = strconv.AppendFloat(b, v.Num, 'f', 4, 64)
+		buf.Write(b)
+		buf.WriteByte('}')
+
+	case TypeString, TypeProperty:
+		switch v.Type {
+		case TypeString:
+			buf.WriteString(`{"Str":`)
+		case TypeProperty:
+			buf.WriteString(`{"Prop":`)
+		}
+		// strconv.AppendQuote を使えば、AvailableBuffer に直接
+		// エスケープ済みの文字列 ("hello" など) を書き込めます！
+		b := buf.AvailableBuffer()
+		b = strconv.AppendQuote(b, v.Str)
+		buf.Write(b)
+		buf.WriteByte('}')
+
+	case TypeBool:
+		if v.Bool {
+			buf.WriteString(`{"Bool":true}`)
+		} else {
+			buf.WriteString(`{"Bool":false}`)
+		}
+	case TypeList, TypeLitList:
+		switch v.Type {
+		case TypeList:
+			buf.WriteString(`{"List":`)
+		case TypeLitList:
+			buf.WriteString(`{"Lit":`)
+		}
+		buf.WriteByte('[')
+		for i, item := range v.List {
+			if i > 0 {
+				buf.WriteByte(',')
+			}
+			// 再帰的に呼び出される
+			b, err := json.Marshal(item)
+			if err != nil {
+				return nil, err
+			}
+			buf.Write(b)
+		}
+		buf.WriteString(`]}`)
+	default:
+		return nil, errors.New("cannot marshal unknown type: " + strconv.Itoa(int(v.Type)))
+	}
+
+	return buf.Bytes(), nil
+}
+
+//func (v *Value) UnmarshalJSON(data []byte) error {
+//}
