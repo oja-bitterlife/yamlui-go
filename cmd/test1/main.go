@@ -64,6 +64,9 @@ func initialModel() model {
 
 	m.lib.Load(uiMap)
 
+	dump, _ := json.Marshal(m.lib.Root)
+	fmt.Printf("Dumped UI: %s\n", string(dump))
+
 	// win := NewBTWindow(&m)
 	// win.Base.Base.SetRect(0, 0, m.width, m.height)
 	// m.root.AddChild(win.Base.Base)

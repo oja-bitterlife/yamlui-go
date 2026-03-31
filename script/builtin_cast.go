@@ -45,7 +45,7 @@ func castStr(vm *VM, args []Value) (Value, error) {
 			}
 			return NewString("false"), nil
 		case TypeNumber:
-			return NewString(value.ToStr()), nil
+			return NewString(strconv.FormatFloat(value.Num, 'f', -1, 64)), nil
 		case TypeString:
 			return value, nil
 		default:

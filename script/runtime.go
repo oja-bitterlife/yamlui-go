@@ -39,8 +39,8 @@ func (runtime *Runtime) Run() (Value, error) {
 	var err error
 	for _, v := range runtime.ast {
 		// 深さのリセット
-		runtime.vm.vars["vm_depth"] = NewNumber(0)
-		runtime.vm.vars["vm_depth_max"] = NewNumber(0)
+		runtime.vm.vars.Map["vm_depth"] = NewNumber(0)
+		runtime.vm.vars.Map["vm_depth_max"] = NewNumber(0)
 
 		// 評価
 		lastVal, err = runtime.vm.Eval(v)

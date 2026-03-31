@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math"
+	"strconv"
 	"strings"
 )
 
@@ -118,7 +119,7 @@ func sqrt(vm *VM, args []Value) (Value, error) {
 		if arg0.Type == TypeNumber {
 			// 虚数は無しで
 			if arg0.Num < 0 {
-				return Value{}, errors.New("cannot calculate sqrt of negative number: " + arg0.ToStr())
+				return Value{}, errors.New("cannot calculate sqrt of negative number: " + strconv.FormatFloat(arg0.Num, 'f', 4, 64))
 			}
 			return NewNumber(math.Sqrt(arg0.Num)), nil
 		}

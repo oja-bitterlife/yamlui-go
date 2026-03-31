@@ -1,6 +1,7 @@
 package yamlui
 
 import (
+	"encoding/json"
 	"errors"
 )
 
@@ -76,12 +77,19 @@ func (self *YAMLUI) BuildUI(data map[string]any) (*UIBase, error) {
 	// ユーザー定義コンポーネントを生成
 	if remapFunc, ok := self.remapFuncs[Type]; ok {
 		// 登録されたリマップ関数でUIを構築
-		if remapUI, err := remapFunc(ui, data); err == nil {
-			remapUI.CopyProp(ui) // 共通プロパティをコピー
-			return remapUI, nil
-		} else {
+		remapUI, err := remapFunc(ui, data)
+		if err != nil {
 			return nil, err
 		}
+		// JSONを経由してプロパティを上書き
+		jsonData, err := json.Marshal(ui)
+		if err != nil {
+			return nil, err
+		}
+		json.Unmarshal(jsonData, remapUI)
+
+		// リマップ関数で構築されたUIを返す
+		return remapUI, nil
 	} else {
 		// 登録されたリマップ関数がない場合は、基本的なUIを返す
 		return ui, nil

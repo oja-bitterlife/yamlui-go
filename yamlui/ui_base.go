@@ -1,8 +1,10 @@
 package yamlui
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
+	"strconv"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -10,7 +12,7 @@ import (
 // **********************************************************************
 // UIの基本構造.これを保有して各UI構造体を作る
 type UIBase struct {
-	// Scriptで更新差せないもの
+	// Scriptで更新させないもの
 	Type  string
 	ID    string
 	Frame int
@@ -36,6 +38,9 @@ type UIBase struct {
 	SelGridX float64 // SelectGridで横の折り返し位置
 	Action   string  // 都度リセットされる
 
+	// 子要素が保存させたいもの
+	Prop map[string]script.Value
+
 	// 保存しないもの
 	// ----------------------------------------
 	children []*UIBase
@@ -48,21 +53,6 @@ type UIBase struct {
 	updateTreeIF UpdateTreeIF
 	drawIF       DrawIF
 	drawTreeIF   DrawTreeIF
-}
-
-func (self *UIBase) CopyProp(src *UIBase) {
-	self.IsEnable = src.IsEnable
-	self.IsAbs = src.IsAbs
-	self.X = src.X
-	self.Y = src.Y
-	self.W = src.W
-	self.H = src.H
-	self.IsVisible = src.IsVisible
-	self.Text = src.Text
-	self.Color = src.Color
-	self.SelectNo = src.SelectNo
-	self.SelGridX = src.SelGridX
-	self.Action = src.Action
 }
 
 // ==================================================
@@ -132,6 +122,60 @@ func (self *UIBase) GetRuntime() *script.Runtime {
 
 func (self *UIBase) SetVar(name string, value script.Value) {
 	self.script.GetVM().SetVar(name, value)
+}
+
+// UIBaseをJSONに変換する関数
+func (self *UIBase) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+
+	// 記録用のヘルパー（カンマ制御を内包）
+	first := true
+	write := func(key string, value []byte) {
+		if !first {
+			buf.WriteByte(',')
+		}
+		buf.WriteString(strconv.Quote(key))
+		buf.WriteByte(':')
+		buf.Write(value)
+		first = false
+	}
+
+	// 各フィールドの書き出し
+	write("Type", []byte(strconv.Quote(self.Type)))
+	write("ID", []byte(strconv.Quote(self.ID)))
+
+	// AppendBool(dst []byte, b bool) []byte
+	write("IsEnable", strconv.AppendBool(nil, self.IsEnable))
+	write("IsAbs", strconv.AppendBool(nil, self.IsAbs))
+
+	// AppendFloat(dst []byte, f float64, fmt byte, prec, bitSize int) []byte
+	write("X", strconv.AppendFloat(nil, self.X, 'f', 4, 64))
+	write("Y", strconv.AppendFloat(nil, self.Y, 'f', 4, 64))
+	write("Width", strconv.AppendFloat(nil, self.W, 'f', 4, 64))
+	write("Height", strconv.AppendFloat(nil, self.H, 'f', 4, 64))
+
+	write("IsVisible", strconv.AppendBool(nil, self.IsVisible))
+	write("Text", []byte(strconv.Quote(self.Text)))
+	write("Color", []byte(strconv.Quote(self.Color)))
+	write("SelectNo", strconv.AppendFloat(nil, self.SelectNo, 'f', 4, 64))
+	write("SelGridX", strconv.AppendFloat(nil, self.SelGridX, 'f', 4, 64))
+	write("Action", []byte(strconv.Quote(self.Action)))
+
+	// Prop (拡張フィールド) の書き出し
+	buf.WriteString(`", Prop":{`)
+	first = true
+	for k, v := range self.Prop {
+		jsonData, err := v.MarshalJSON() // []byte が返ってくる
+		if err != nil {
+			return nil, err
+		}
+		write(strconv.Quote(k), jsonData) // ここでカンマ制御もされる
+	}
+	buf.WriteByte('}')
+
+	buf.WriteByte('}') // 全体を閉じる
+	return buf.Bytes(), nil
 }
 
 // **********************************************************************

@@ -1,6 +1,7 @@
 package script
 
 import (
+	"bytes"
 	"errors"
 	"strconv"
 	"strings"
@@ -11,7 +12,7 @@ import (
 // ==================================================
 // 外部との連携用データ構造体
 type VM struct {
-	vars         map[string]Value
+	vars         Value
 	cmds         map[string]func(vm *VM, args []Value) (Value, error)
 	maxRecursion int // 再帰の最大深さ
 	maxRepeat    int // repeatの最大回数
@@ -20,11 +21,32 @@ type VM struct {
 // VMの初期化
 func NewVM() *VM {
 	return &VM{
-		vars:         make(map[string]Value),
+		vars:         NewLitMap(make(map[string]Value)),
 		cmds:         make(map[string]func(vm *VM, args []Value) (Value, error)),
 		maxRecursion: 64,
 		maxRepeat:    256,
 	}
+}
+
+// JSONでDumpする
+func (vm *VM) DumpVars() ([]byte, error) {
+	buf := bytes.Buffer{}
+	buf.WriteByte('{')
+	count := 0
+	for k, v := range vm.vars.Map {
+		if count > 0 {
+			buf.WriteByte(',')
+		}
+		buf.WriteString(strconv.Quote(k))
+		buf.WriteByte(':')
+		jsonData, err := v.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		buf.Write(jsonData)
+	}
+	buf.WriteByte('}')
+	return buf.Bytes(), nil
 }
 
 // コマンドを登録する関数
@@ -41,15 +63,15 @@ func (vm *VM) RegisterCmdList(cmds map[string]func(vm *VM, args []Value) (Value,
 
 // 変数を取得・設定する関数
 func (vm *VM) GetVar(name string) Value {
-	return vm.vars[name]
+	return vm.vars.Map[name]
 }
 
 func (vm *VM) GetVars() map[string]Value {
-	return vm.vars
+	return vm.vars.Map
 }
 
 func (vm *VM) SetVar(name string, value Value) {
-	vm.vars[name] = value
+	vm.vars.Map[name] = value
 }
 
 // デバッグ用cmds取得関数
@@ -66,7 +88,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeNumber, TypeString, TypeBool, TypeLitList:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
-		v = vm.vars[v.Str] // 変数の値を返す
+		v = vm.vars.Map[v.Str] // 変数の値を返す
 		if !v.IsLiteral() {
 			return Value{}, errors.New("expected literal value")
 		}
@@ -74,22 +96,22 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeList:
 		// 再帰の深さをチェック
 		// ----------------------------------------
-		depth := vm.vars["vm_depth"]
+		depth := vm.vars.Map["vm_depth"]
 		depth.Num++ // 深さを増やす
 		defer func() {
 			depth.Num-- // 深さを戻す
-			vm.vars["vm_depth"] = depth
+			vm.vars.Map["vm_depth"] = depth
 		}()
 		if int(depth.Num) >= vm.maxRecursion {
 			return Value{}, errors.New("maximum recursion depth exceeded")
 		}
-		vm.vars["vm_depth"] = depth
+		vm.vars.Map["vm_depth"] = depth
 
 		// デバッグ用: 過去の最大深さを更新
-		depthMax := vm.vars["vm_depth_max"]
+		depthMax := vm.vars.Map["vm_depth_max"]
 		if depth.Num > depthMax.Num {
 			depthMax.Num = depth.Num
-			vm.vars["vm_depth_max"] = depthMax
+			vm.vars.Map["vm_depth_max"] = depthMax
 		}
 
 		// ここで再帰
@@ -222,7 +244,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 		result = NewLitList(results)
 	}
 
-	vm.vars[target] = result
+	vm.vars.Map[target] = result
 	return result, nil
 }
 
@@ -297,7 +319,7 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 	results := make([]Value, count)
 	for i := range count {
 		// カウンタ変数を現在の値で更新
-		vm.vars[counterName] = Value{Type: TypeNumber, Num: float64(i)}
+		vm.vars.Map[counterName] = Value{Type: TypeNumber, Num: float64(i)}
 
 		// 第3引数：ブロックを評価
 		result, err := vm.Eval(args[2])

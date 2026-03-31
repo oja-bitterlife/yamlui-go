@@ -25,6 +25,16 @@ tasks:
     cmds:
       - "{{.BIN_DIR}}/main"
 
+  test:
+    desc: "Test"
+    sources:
+      - ./script/*.go
+      - ./builtin/*.go
+      - ./yamlui/*.go
+    cmds:
+      - go test -v ./...
+
+
   clean:
     desc: "Clean"
     cmds:
