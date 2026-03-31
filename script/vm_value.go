@@ -199,5 +199,77 @@ func (v Value) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-//func (v *Value) UnmarshalJSON(data []byte) error {
-//}
+// json.Unmarshaler インターフェースの実装
+// json.Unmarshalを使わず自前でパースする
+func (v *Value) UnmarshalJSON(data []byte) error {
+	// まずは {"Num":123} のような形式を想定して、キーと値を分割する
+	s := strings.TrimSpace(string(data))
+	if !strings.HasPrefix(s, `{"`) || !strings.HasSuffix(s, `}`) {
+		return errors.New("invalid JSON format for Value: " + s)
+	}
+	// {"Key":Value} の形式を想定して、キーと値を分割
+	s = strings.TrimPrefix(s, "{")
+	s = strings.TrimSuffix(s, "}")
+	parts := strings.SplitN(s, ":", 2)
+	if len(parts) != 2 {
+		return errors.New("invalid JSON format for Value: " + s)
+	}
+	key := strings.TrimSpace(parts[0])
+	valueStr := strings.TrimSpace(parts[1])
+
+	switch key {
+	case `"Num"`:
+		f, err := strconv.ParseFloat(valueStr, 64)
+		if err != nil {
+			return err
+		}
+		v.Type = TypeNumber
+		v.Num = f
+
+	case `"Str"`:
+		str, err := strconv.Unquote(valueStr)
+		if err != nil {
+			return err
+		}
+		v.Type = TypeString
+		v.Str = str
+
+	case `"Prop"`:
+		str, err := strconv.Unquote(valueStr)
+		if err != nil {
+			return err
+		}
+		v.Type = TypeProperty
+		v.Str = str
+
+	case `"Bool"`:
+		b, err := strconv.ParseBool(valueStr)
+		if err != nil {
+			return err
+		}
+		v.Type = TypeBool
+		v.Bool = b
+
+	case `"List"`, `"Lit"`:
+		if key == `"List"` {
+			v.Type = TypeList
+		} else {
+			v.Type = TypeLitList
+		}
+
+		if valueStr == "null" {
+			v.List = []Value{}
+		} else {
+			var items []Value
+			err := json.Unmarshal([]byte(valueStr), &items)
+			if err != nil {
+				return err
+			}
+			v.List = items
+		}
+	default:
+		return errors.New("unknown key in JSON for Value: " + key)
+	}
+
+	return nil
+}
