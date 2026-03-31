@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -10,6 +9,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
+	"github.com/oja-bitterlife/yamlui-go/yamlui_json"
 )
 
 type Cell struct {
@@ -53,18 +53,12 @@ func initialModel() model {
 	})
 
 	// JSON を読み込んで UI を構築する
-	data, err := os.ReadFile("cmd/test1/ui.json")
+	fileData, err := os.ReadFile("cmd/test1/ui.json")
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
-	// とりあえず普通にjsonのUnmarshal
-	var jsonData any
-	if err = json.Unmarshal(data, &jsonData); err != nil {
-		panic(fmt.Sprintf("Failed to parse JSON: %v", err))
-	}
-	valueData, err := yamlui.AnyToValue(jsonData)
+	data, err := yamlui_json.AnyJSONToValueJSON(fileData)
 
-	data, err = valueData.MarshalJSON()
 	if err := m.lib.Load(data); err != nil {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}

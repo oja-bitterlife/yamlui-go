@@ -1,6 +1,8 @@
 package yamlui
 
 import (
+	"errors"
+
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -70,9 +72,25 @@ func (self *YAMLUI) Load(data []byte) error {
 
 	// Loadで再帰的にUIを構築する
 	self.Root.children = []*UIBase{} // 既存の子要素をクリア
-	err := self.load(self.Root, value)
-	if err != nil {
-		return err
+
+	switch value.Type {
+	case script.TypeLitList:
+		// 最初が配列なら最初ですべてを子要素として追加する
+		for _, item := range value.List {
+			err := self.load(self.Root, item)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	case script.TypeLitMap:
+		// 最初がMapなら普通に登録していく
+		err := self.load(self.Root, value)
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("Expected top-level Value to be List or Map, got " + value.Type.String())
 	}
 
 	return nil
