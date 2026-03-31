@@ -3,7 +3,6 @@
 package script
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -12,7 +11,7 @@ import (
 // ==================================================
 // JSON化して出力する関数。普段はこれ
 func (v Value) Dump() {
-	jsonData, err := json.Marshal(v)
+	jsonData, err := v.MarshalJSON()
 	if err != nil {
 		fmt.Printf("Failed to marshal Value: %v\n", err)
 		return

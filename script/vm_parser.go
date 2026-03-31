@@ -1,7 +1,6 @@
 package script
 
 import (
-	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -114,7 +113,7 @@ func parseList(tn *Tokenizer, terminate byte) (Value, error) {
 			case TypeNumber, TypeString, TypeBool:
 				// OK
 			default:
-				jsonVal, _ := json.Marshal(val)
+				jsonVal, _ := val.MarshalJSON()
 				return Value{}, errors.New("invalid value in literal block: " + string(jsonVal))
 			}
 		}

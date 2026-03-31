@@ -1,7 +1,6 @@
 package script
 
 import (
-	"encoding/json"
 	"errors"
 	"strconv"
 )
@@ -15,7 +14,7 @@ var castCmds = map[string]func(*VM, []Value) (Value, error){
 }
 
 func castError(typeName string, v Value) error {
-	jsonValue, _ := json.Marshal(v)
+	jsonValue, _ := v.MarshalJSON()
 	return errors.New("cannot cast " + string(jsonValue) + " to " + typeName)
 }
 

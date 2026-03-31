@@ -1,7 +1,6 @@
 package script
 
 import (
-	"encoding/json"
 	"testing"
 )
 
@@ -18,14 +17,14 @@ func TestValue_UnmarshalJSON(t *testing.T) {
 	}
 
 	// 2. Marshal (Value -> JSON)
-	data, err := json.Marshal(orig)
+	data, err := orig.MarshalJSON()
 	if err != nil {
 		t.Fatalf("Failed to marshal: %v", err)
 	}
 
 	// 3. Unmarshal (JSON -> 新しい Value)
 	var restored Value
-	err = json.Unmarshal(data, &restored)
+	err = restored.UnmarshalJSON(data)
 	if err != nil {
 		t.Fatalf("Failed to unmarshal: %v", err)
 	}
@@ -55,7 +54,7 @@ func TestValue_UnmarshalJSON_Spaces(t *testing.T) {
 	// クレンジング（TrimSpace）が効いているか確認するテスト
 	input := `  {  "Num"  :  99.9  }  `
 	var v Value
-	if err := json.Unmarshal([]byte(input), &v); err != nil {
+	if err := v.UnmarshalJSON([]byte(input)); err != nil {
 		t.Fatalf("Failed to parse spaced JSON: %v", err)
 	}
 	if v.Type != TypeNumber || v.Num != 99.9 {
