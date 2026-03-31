@@ -1,10 +1,9 @@
 package yamlui
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
-	"strconv"
+	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -70,8 +69,10 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Color", script.NewString(self.Color))
 	vm.SetVar("@SelectNo", script.NewNumber(float64(self.SelectNo)))
 	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
-	// 都度リセット
-	vm.SetVar("@Action", script.NewString(""))
+	vm.SetVar("@Action", script.NewString(self.Action))
+	for k, v := range self.Prop {
+		vm.SetVar("@Prop."+k, v)
+	}
 }
 
 func (self *UIBase) loadFromVM(vm *script.VM) {
@@ -87,6 +88,13 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.SelectNo = vm.GetVar("@SelectNo").Num
 	self.SelGridX = vm.GetVar("@SelGridX").Num
 	self.Action = vm.GetVar("@Action").Str
+	for k, v := range vm.GetVars() {
+		prefix := "@Prop."
+		if after, ok := strings.CutPrefix(k, prefix); ok {
+			propKey := after
+			self.Prop[propKey] = v
+		}
+	}
 }
 
 // **********************************************************************
@@ -124,58 +132,25 @@ func (self *UIBase) SetVar(name string, value script.Value) {
 	self.script.GetVM().SetVar(name, value)
 }
 
-// UIBaseをJSONに変換する関数
-func (self *UIBase) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteByte('{')
-
-	// 記録用のヘルパー（カンマ制御を内包）
-	first := true
-	write := func(key string, value []byte) {
-		if !first {
-			buf.WriteByte(',')
-		}
-		buf.WriteString(strconv.Quote(key))
-		buf.WriteByte(':')
-		buf.Write(value)
-		first = false
-	}
-
-	// 各フィールドの書き出し
-	write("Type", []byte(strconv.Quote(self.Type)))
-	write("ID", []byte(strconv.Quote(self.ID)))
-
-	// AppendBool(dst []byte, b bool) []byte
-	write("IsEnable", strconv.AppendBool(nil, self.IsEnable))
-	write("IsAbs", strconv.AppendBool(nil, self.IsAbs))
-
-	// AppendFloat(dst []byte, f float64, fmt byte, prec, bitSize int) []byte
-	write("X", strconv.AppendFloat(nil, self.X, 'f', 4, 64))
-	write("Y", strconv.AppendFloat(nil, self.Y, 'f', 4, 64))
-	write("Width", strconv.AppendFloat(nil, self.W, 'f', 4, 64))
-	write("Height", strconv.AppendFloat(nil, self.H, 'f', 4, 64))
-
-	write("IsVisible", strconv.AppendBool(nil, self.IsVisible))
-	write("Text", []byte(strconv.Quote(self.Text)))
-	write("Color", []byte(strconv.Quote(self.Color)))
-	write("SelectNo", strconv.AppendFloat(nil, self.SelectNo, 'f', 4, 64))
-	write("SelGridX", strconv.AppendFloat(nil, self.SelGridX, 'f', 4, 64))
-	write("Action", []byte(strconv.Quote(self.Action)))
-
-	// Prop (拡張フィールド) の書き出し
-	buf.WriteString(`", Prop":{`)
-	first = true
-	for k, v := range self.Prop {
-		jsonData, err := v.MarshalJSON() // []byte が返ってくる
-		if err != nil {
-			return nil, err
-		}
-		write(strconv.Quote(k), jsonData) // ここでカンマ制御もされる
-	}
-	buf.WriteByte('}')
-
-	buf.WriteByte('}') // 全体を閉じる
-	return buf.Bytes(), nil
+// UIBaseをValueに変換する関数
+func (self *UIBase) ToValue() script.Value {
+	return script.NewLitMap(map[string]script.Value{
+		"Type":      script.NewString(self.Type),
+		"ID":        script.NewString(self.ID),
+		"IsEnable":  script.NewBool(self.IsEnable),
+		"IsAbs":     script.NewBool(self.IsAbs),
+		"X":         script.NewNumber(float64(self.X)),
+		"Y":         script.NewNumber(float64(self.Y)),
+		"W":         script.NewNumber(float64(self.W)),
+		"H":         script.NewNumber(float64(self.H)),
+		"IsVisible": script.NewBool(self.IsVisible),
+		"Text":      script.NewString(self.Text),
+		"Color":     script.NewString(self.Color),
+		"SelectNo":  script.NewNumber(float64(self.SelectNo)),
+		"SelGridX":  script.NewNumber(float64(self.SelGridX)),
+		"Action":    script.NewString(self.Action),
+		"Prop":      script.NewLitMap(self.Prop),
+	})
 }
 
 // **********************************************************************
