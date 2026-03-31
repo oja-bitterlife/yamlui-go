@@ -204,7 +204,7 @@ func (v Value) MarshalJSON() ([]byte, error) {
 func (v *Value) UnmarshalJSON(data []byte) error {
 	// まずは {"Num":123} のような形式を想定して、キーと値を分割する
 	s := strings.TrimSpace(string(data))
-	if !strings.HasPrefix(s, `{"`) || !strings.HasSuffix(s, `}`) {
+	if !strings.HasPrefix(s, "{") || !strings.HasSuffix(s, "}") {
 		return errors.New("invalid JSON format for Value: " + s)
 	}
 	// {"Key":Value} の形式を想定して、キーと値を分割
