@@ -64,7 +64,9 @@ func propBool(data map[string]script.Value, key string, def bool) bool {
 func (self *YAMLUI) Load(data []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
 	var value script.Value
-	value.UnmarshalJSON(data)
+	if err := value.UnmarshalJSON(data); err != nil {
+		return err
+	}
 
 	// Loadで再帰的にUIを構築する
 	self.Root.children = []*UIBase{} // 既存の子要素をクリア

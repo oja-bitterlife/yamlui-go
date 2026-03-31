@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -56,7 +57,17 @@ func initialModel() model {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
-	m.lib.Load(data)
+	// とりあえず普通にjsonのUnmarshal
+	var jsonData any
+	if err = json.Unmarshal(data, &jsonData); err != nil {
+		panic(fmt.Sprintf("Failed to parse JSON: %v", err))
+	}
+	valueData, err := yamlui.AnyToValue(jsonData)
+
+	data, err = valueData.MarshalJSON()
+	if err := m.lib.Load(data); err != nil {
+		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
+	}
 
 	// win := NewBTWindow(&m)
 	// win.Base.Base.SetRect(0, 0, m.width, m.height)
@@ -184,7 +195,8 @@ func (m model) getColor(c string) lipgloss.Color {
 }
 
 func main() {
-	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	// p := tea.NewProgram(initialModel(), tea.WithAltScreen())
+	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Error: %v", err)
 		os.Exit(1)

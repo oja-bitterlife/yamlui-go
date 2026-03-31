@@ -122,11 +122,12 @@ func (v *Value) parseValue(data []byte) (Value, error) {
 		return Value{}, errors.New("invalid JSON format: expected key-value pair")
 	}
 
-	key := bytes.TrimSpace(parts[0])
+	key, err := strconv.Unquote(string(bytes.TrimSpace(parts[0])))
+	if err != nil {
+		return Value{}, err
+	}
 	value := bytes.TrimSpace(parts[1])
 
-	key = bytes.TrimPrefix([]byte("\""), key)
-	key = bytes.TrimSuffix([]byte("\""), key)
 	switch string(key) {
 	case TypeNumberStr:
 		f, err := strconv.ParseFloat(string(value), 64)
@@ -171,7 +172,7 @@ func (v *Value) parseValue(data []byte) (Value, error) {
 		}
 		return NewLitMap(m), nil
 	default:
-		return Value{}, errors.New("invalid JSON format: unknown key " + string(key))
+		return Value{}, errors.New("invalid JSON format: unknown key \"" + string(key) + "\"")
 	}
 }
 
@@ -323,6 +324,8 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 }
 
 func (v *Value) UnmarshalJSON(data []byte) error {
+	data = bytes.TrimSpace(data)
+
 	if len(data) == 0 {
 		return errors.New("empty JSON data")
 	}
