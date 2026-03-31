@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
 
@@ -43,29 +43,20 @@ func initialModel() model {
 		}
 	}
 
-	// ここで JSON を読み込んで UI を構築するロジックを入れる
+	// UI構築の登録
+	m.lib.RegisterRemap("window", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTWindow(&m, ui, data).Base.Base, nil
+	})
+	m.lib.RegisterRemap("title", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTTitle(&m, ui, data).Base.Base, nil
+	})
+
+	// JSON を読み込んで UI を構築する
 	data, err := os.ReadFile("cmd/test1/ui.json")
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
-
-	var uiMap []map[string]any
-	if err := json.Unmarshal(data, &uiMap); err != nil {
-		panic(fmt.Sprintf("Failed to parse ui.json: %v", err))
-	}
-
-	// UI構築の登録
-	m.lib.RegisterRemap("window", func(ui *yamlui.UIBase, data map[string]any) (*yamlui.UIBase, error) {
-		return NewBTWindow(&m, ui, data).Base.Base, nil
-	})
-	m.lib.RegisterRemap("title", func(ui *yamlui.UIBase, data map[string]any) (*yamlui.UIBase, error) {
-		return NewBTTitle(&m, ui, data).Base.Base, nil
-	})
-
-	m.lib.Load(uiMap)
-
-	dump, _ := json.Marshal(m.lib.Root)
-	fmt.Printf("Dumped UI: %s\n", string(dump))
+	m.lib.Load(data)
 
 	// win := NewBTWindow(&m)
 	// win.Base.Base.SetRect(0, 0, m.width, m.height)

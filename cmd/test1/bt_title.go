@@ -1,13 +1,16 @@
 package main
 
-import "github.com/oja-bitterlife/yamlui-go/yamlui"
+import (
+	"github.com/oja-bitterlife/yamlui-go/script"
+	"github.com/oja-bitterlife/yamlui-go/yamlui"
+)
 
 type BTTitle struct {
 	Base  *yamlui.UILabel
 	model *model
 }
 
-func NewBTTitle(m *model, ui *yamlui.UIBase, data map[string]any) *BTTitle {
+func NewBTTitle(m *model, ui *yamlui.UIBase, data map[string]script.Value) *BTTitle {
 	title := &BTTitle{
 		Base:  yamlui.NewUILabel("YAMLUI"),
 		model: m,

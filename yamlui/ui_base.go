@@ -3,7 +3,6 @@ package yamlui
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"errors"
 	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -131,56 +130,6 @@ func (self *UIBase) GetRuntime() *script.Runtime {
 
 func (self *UIBase) SetVar(name string, value script.Value) {
 	self.script.GetVM().SetVar(name, value)
-}
-
-// UIBaseをValueに変換する関数
-func (self *UIBase) ToValue() script.Value {
-	return script.NewLitMap(map[string]script.Value{
-		"Type":      script.NewString(self.Type),
-		"ID":        script.NewString(self.ID),
-		"IsEnable":  script.NewBool(self.IsEnable),
-		"IsAbs":     script.NewBool(self.IsAbs),
-		"X":         script.NewNumber(float64(self.X)),
-		"Y":         script.NewNumber(float64(self.Y)),
-		"W":         script.NewNumber(float64(self.W)),
-		"H":         script.NewNumber(float64(self.H)),
-		"IsVisible": script.NewBool(self.IsVisible),
-		"Text":      script.NewString(self.Text),
-		"Color":     script.NewString(self.Color),
-		"SelectNo":  script.NewNumber(float64(self.SelectNo)),
-		"SelGridX":  script.NewNumber(float64(self.SelGridX)),
-		"Action":    script.NewString(self.Action),
-		"Prop":      script.NewLitMap(self.Prop),
-	})
-}
-
-func (self *UIBase) LoadFromValue(value script.Value) error {
-	if value.Type != script.TypeLitMap {
-		return errors.New("Expected Value to be MapType: " + string(value.Type))
-	}
-	m := value.Map
-
-	self.Type = m["Type"].Str
-	self.ID = m["ID"].Str
-	self.IsEnable = m["IsEnable"].Bool
-	self.IsAbs = m["IsAbs"].Bool
-	self.X = m["X"].Num
-	self.Y = m["Y"].Num
-	self.W = m["W"].Num
-	self.H = m["H"].Num
-	self.IsVisible = m["IsVisible"].Bool
-	self.Text = m["Text"].Str
-	self.Color = m["Color"].Str
-	self.SelectNo = m["SelectNo"].Num
-	self.SelGridX = m["SelGridX"].Num
-	self.Action = m["Action"].Str
-
-	if prop, ok := m["Prop"]; ok {
-		if prop.Type != script.TypeLitMap {
-			return errors.New("Expected Prop to be MapType: " + string(prop.Type))
-		}
-	}
-	return nil
 }
 
 // **********************************************************************

@@ -1,13 +1,16 @@
 package main
 
-import "github.com/oja-bitterlife/yamlui-go/yamlui"
+import (
+	"github.com/oja-bitterlife/yamlui-go/script"
+	"github.com/oja-bitterlife/yamlui-go/yamlui"
+)
 
 type BTWindow struct {
 	Base  *yamlui.UIWindow
 	model *model
 }
 
-func NewBTWindow(m *model, ui *yamlui.UIBase, data map[string]any) *BTWindow {
+func NewBTWindow(m *model, ui *yamlui.UIBase, data map[string]script.Value) *BTWindow {
 	window := &BTWindow{
 		Base:  yamlui.NewUIWindow(),
 		model: m,
