@@ -15,7 +15,6 @@ func (self *UIBase) ToValue() script.Value {
 		"Type":      script.NewString(self.Type),
 		"ID":        script.NewString(self.ID),
 		"IsEnable":  script.NewBool(self.IsEnable),
-		"IsAbs":     script.NewBool(self.IsAbs),
 		"X":         script.NewNumber(float64(self.X)),
 		"Y":         script.NewNumber(float64(self.Y)),
 		"W":         script.NewNumber(float64(self.W)),
@@ -47,9 +46,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 	if v, ok := m["IsEnable"]; ok {
 		self.IsEnable = v.Bool
-	}
-	if v, ok := m["IsAbs"]; ok {
-		self.IsAbs = v.Bool
 	}
 	if v, ok := m["X"]; ok {
 		self.X = v.Num

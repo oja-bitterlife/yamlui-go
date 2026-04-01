@@ -21,11 +21,10 @@ type UIBase struct {
 	IsEnable bool
 
 	// 座標
-	IsAbs bool
-	X     float64
-	Y     float64
-	W     float64
-	H     float64
+	X float64
+	Y float64
+	W float64
+	H float64
 
 	// 表示
 	IsVisible bool
@@ -59,7 +58,6 @@ type UIBase struct {
 func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Frame", script.NewNumber(float64(self.Frame)))
 	vm.SetVar("@IsEnable", script.NewBool(self.IsEnable))
-	vm.SetVar("@IsAbs", script.NewBool(self.IsAbs))
 	vm.SetVar("@X", script.NewNumber(float64(self.X)))
 	vm.SetVar("@Y", script.NewNumber(float64(self.Y)))
 	vm.SetVar("@Width", script.NewNumber(float64(self.W)))
@@ -77,7 +75,6 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 
 func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.IsEnable = vm.GetVar("@IsEnable").Bool
-	self.IsAbs = vm.GetVar("@IsAbs").Bool
 	self.X = vm.GetVar("@X").Num
 	self.Y = vm.GetVar("@Y").Num
 	self.W = vm.GetVar("@Width").Num

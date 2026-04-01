@@ -133,7 +133,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// キーが押されたらLispを実行して構造体を更新
-		err := m.lib.Root.Update(m.frame)
+		err := m.lib.Update(m.frame)
 		if err != nil {
 			fmt.Printf("Error executing script: %v\n", err)
 			return m, nil

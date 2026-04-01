@@ -2,14 +2,23 @@ package yamlui
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 type YAMLUI struct {
+	// UIツリー構築用
 	Root       *UIBase
 	remapFuncs map[string]func(string, *UIBase, map[string]script.Value) (*UIBase, error)
-	drawQueue  []DrawQueueItem
+
+	// Updateの時に使うもの
+	// EventQueue  []EventQueueItem
+	updateQueue []UpdateQueueItem
+
+	// Drawの時に使うもの
+	Screen    Area
+	drawQueue []DrawQueueItem
 }
 
 func NewYAMLUI() *YAMLUI {
@@ -136,15 +145,59 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 
 // **********************************************************************
 // 呼び出し口
+// func (self *YAMLUI) Init() error {
+// 	// 最初のフレームならOnInitを呼び出す
+// 	if self.onInitIF != nil {
+// 		lastErr = self.onInitIF.OnInit(self, ctx)
+// 	}
+// 	return nil
+// }
+
+// Update
+func (self *YAMLUI) Update(frame int) error {
+	self.updateQueue = []UpdateQueueItem{}
+
+	// 更新コンテキストを作成してUpdateTreeを呼び出す
+	// ----------------------------------------
+	var lastErr error
+	ctx := NewUpdateContext(self.Root, nil)
+	if err := self.Root.RecUpdateTree(self, frame, 0, ctx); err != nil {
+		lastErr = err
+	}
+
+	// drawQueueに溜まった描画命令を実行する
+	// ----------------------------------------
+	// Z順でソートする
+	slices.SortStableFunc(self.updateQueue, func(a, b UpdateQueueItem) int {
+		return a.z - b.z
+	})
+	// ソートされたqueueを順番に実行する
+	for _, item := range self.drawQueue {
+		item.drawIF.Draw(item.x, item.y, item.ctx)
+	}
+
+	return lastErr
+}
+
+// Draw
 func (self *YAMLUI) Draw(screen Area) {
+	self.Screen = screen
+
 	// drawQueueをクリア
 	self.drawQueue = []DrawQueueItem{}
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
+	// ----------------------------------------
 	ctx := NewDrawContext(self.Root, nil, screen)
-	self.Root.recDrawTree(self, 0, 0, 0, ctx)
+	self.Root.RecDrawTree(self, 0, 0, 0, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
+	// ----------------------------------------
+	// Z順でソートする
+	slices.SortStableFunc(self.drawQueue, func(a, b DrawQueueItem) int {
+		return a.z - b.z
+	})
+	// ソートされたqueueを順番に実行する
 	for _, item := range self.drawQueue {
 		item.drawIF.Draw(item.x, item.y, item.ctx)
 	}

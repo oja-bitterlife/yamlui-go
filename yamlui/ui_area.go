@@ -48,6 +48,9 @@ func NewUIArea(ui *UIBase, data map[string]script.Value) *UIArea {
 	area.AlignRight = propBool(data, "AlignRight", false)
 	area.AlignBottom = propBool(data, "AlignBottom", false)
 
+	// IsAbsのデフォルトはfalse
+	area.IsAbs = propBool(data, "IsAbs", false)
+
 	return area
 }
 
@@ -55,6 +58,12 @@ func (self *UIArea) DrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext) 
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
 	selfW, selfH := ctx.Base.Area().WH()
+
+	// 絶対座標対応
+	if self.IsAbs {
+		x = lib.Screen.X
+		y = lib.Screen.Y
+	}
 
 	// Align系のプロパティを考慮して、子の描画領域を計算する
 	offsetX := 0.0
@@ -94,5 +103,5 @@ func (self *UIArea) DrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext) 
 		H: selfH,
 	}.Clip(parentArea)
 
-	ctx.Base.recDrawTree(lib, alignX+left, alignY+top, z, ctx)
+	ctx.Base.RecDrawTree(lib, alignX+left, alignY+top, z, ctx)
 }
