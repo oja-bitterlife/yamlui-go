@@ -10,10 +10,13 @@ type BTWindow struct {
 	model *model
 }
 
-func NewBTWindow(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTWindow {
+func (self *BTWindow) GetBase() *yamlui.UIBase {
+	return self.Base.Base
+}
+
+func NewBTWindow(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTWindow {
 	window := &BTWindow{
-		Base:  yamlui.NewUIWindow(),
-		model: m,
+		Base: yamlui.NewUIWindow(componentName),
 	}
 	window.Base.Base.SetDrawIF(window)
 	return window

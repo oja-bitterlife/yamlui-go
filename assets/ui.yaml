@@ -1,20 +1,14 @@
 - Type: "window"
-  X: 0
-  Y: 0
   W: 68
   H: 26
   children:
     - Type: "area"
       W: 50  # 幅を決めないとAlignが効かない
-      MarginX: 0
-      MarginY: 0
       AlignCenterX: true
       children:
         - Type: "title"
-          X: 0
-          Y: 2
+          Y: 3
         - Type: "area"
-          X: 0
           Y: 14
           W: 16
           H: 2

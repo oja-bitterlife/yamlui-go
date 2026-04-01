@@ -15,9 +15,9 @@ type UIWindow struct {
 	State UIWindowState
 }
 
-func NewUIWindow() *UIWindow {
+func NewUIWindow(type_ string) *UIWindow {
 	window := &UIWindow{
-		Base:  NewUIBase("UIWindow"),
+		Base:  NewUIBase(type_),
 		State: UIWindowOpening,
 	}
 	return window

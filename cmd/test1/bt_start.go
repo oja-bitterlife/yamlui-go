@@ -13,7 +13,11 @@ type BTStart struct {
 	texts []string
 }
 
-func NewBTStart(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTStart {
+func (self *BTStart) GetBase() *yamlui.UIBase {
+	return self.Base.Base
+}
+
+func NewBTStart(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTStart {
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(data["Text"].Str, ",")
 	for i := range texts {
@@ -21,8 +25,7 @@ func NewBTStart(m *model, parent *yamlui.UIBase, data map[string]script.Value) *
 	}
 
 	selectUI := &BTStart{
-		Base:  yamlui.NewUISelect(len(texts), 1),
-		model: m,
+		Base:  yamlui.NewUISelect(componentName, len(texts), 1),
 		texts: texts,
 	}
 

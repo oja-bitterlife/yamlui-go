@@ -7,7 +7,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 	"github.com/oja-bitterlife/yamlui-go/yamlui_json"
 )
@@ -45,24 +44,12 @@ func initialModel() model {
 	}
 
 	// UI構築の登録
-	m.lib.RegisterRemap("window", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTWindow(&m, parent, data).Base.Base, nil
-	})
-	m.lib.RegisterRemap("title", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTTitle(&m, parent, data).Base.Base, nil
-	})
-	m.lib.RegisterRemap("area", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return yamlui.NewUIArea(parent, data).Base, nil
-	})
-	m.lib.RegisterRemap("start", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTStart(&m, parent, data).Base.Base, nil
-	})
-	m.lib.RegisterRemap("label", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTLabel(&m, parent, data).Base.Base, nil
-	})
-	m.lib.RegisterRemap("speed", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTSpeed(&m, parent, data).Base.Base, nil
-	})
+	yamlui.UIBuilder(m.lib, "window", NewBTWindow)
+	yamlui.UIBuilder(m.lib, "title", NewBTTitle)
+	yamlui.UIBuilder(m.lib, "area", yamlui.NewUIArea)
+	yamlui.UIBuilder(m.lib, "start", NewBTStart)
+	yamlui.UIBuilder(m.lib, "label", NewBTLabel)
+	yamlui.UIBuilder(m.lib, "speed", NewBTSpeed)
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")

@@ -4,7 +4,7 @@ import (
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
-type UIArea struct {
+type UILayout struct {
 	Base *UIBase
 	// Margin用
 	Margin       int
@@ -26,9 +26,13 @@ type UIArea struct {
 	IsAbs bool
 }
 
-func NewUIArea(ui *UIBase, data map[string]script.Value) *UIArea {
-	area := &UIArea{
-		Base: NewUIBase("area"),
+func (self *UILayout) GetBase() *UIBase {
+	return self.Base
+}
+
+func NewUIArea(type_ string, ui *UIBase, data map[string]script.Value) *UILayout {
+	area := &UILayout{
+		Base: NewUIBase(type_),
 	}
 	area.Base.drawTreeIF = area
 
@@ -54,7 +58,7 @@ func NewUIArea(ui *UIBase, data map[string]script.Value) *UIArea {
 	return area
 }
 
-func (self *UIArea) DrawTree(z int, x, y float64, ctx DrawContext) {
+func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
 	selfW, selfH := ctx.Base.Area().WH()

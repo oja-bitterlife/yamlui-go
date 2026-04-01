@@ -6,16 +6,19 @@ import (
 )
 
 type BTTitle struct {
-	Base  *yamlui.UILabel
+	Base  *yamlui.UIBase
 	model *model
 }
 
-func NewBTTitle(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTTitle {
+func (self *BTTitle) GetBase() *yamlui.UIBase {
+	return self.Base
+}
+
+func NewBTTitle(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTTitle {
 	title := &BTTitle{
-		Base:  yamlui.NewUILabel("YAMLUI"),
-		model: m,
+		Base: yamlui.NewUIBase(componentName),
 	}
-	title.Base.Base.SetDrawIF(title)
+	title.Base.SetDrawIF(title)
 	return title
 }
 

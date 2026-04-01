@@ -57,6 +57,25 @@ type UIBase struct {
 	drawTreeIF   DrawTreeIF
 }
 
+func NewUIBase(type_ string) *UIBase {
+	// 仮のIDを生成
+	b := make([]byte, 16) // 128bit
+	if _, err := rand.Read(b); err != nil {
+		panic(err)
+	}
+
+	ui := &UIBase{}
+	ui.Type = type_
+	ui.ID = hex.EncodeToString(b)
+	ui.IsEnable = true
+	ui.IsVisible = true
+	ui.Color = "system"
+	// とりあえず大きな値を入れておく
+	ui.W = 65536
+	ui.H = 65536
+	return ui
+}
+
 // ==================================================
 // VMとのやりとり
 func (self *UIBase) storeToVM(vm *script.VM) {
@@ -109,32 +128,13 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 
 // **********************************************************************
 // UIBaseの関数
-func NewUIBase(type_ string) *UIBase {
-	// 仮のIDを生成
-	b := make([]byte, 16) // 128bit
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-
-	ui := &UIBase{}
-	ui.Type = type_
-	ui.ID = hex.EncodeToString(b)
-	ui.IsEnable = true
-	ui.IsVisible = true
-	ui.Color = "system"
-	// とりあえず大きな値を入れておく
-	ui.W = 65536
-	ui.H = 65536
-	return ui
-}
-
 func (self *UIBase) SetScript(scriptSrc string) error {
 	var err error
 	self.script, err = script.Compile(scriptSrc)
 	return err
 }
 
-func (self *UIBase) GetRuntime() *script.Runtime {
+func (self *UIBase) GetScriptRuntime() *script.Runtime {
 	return self.script
 }
 

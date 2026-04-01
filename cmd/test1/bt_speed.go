@@ -13,7 +13,11 @@ type BTSpeed struct {
 	texts []string
 }
 
-func NewBTSpeed(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTSpeed {
+func (self *BTSpeed) GetBase() *yamlui.UIBase {
+	return self.Base.Base
+}
+
+func NewBTSpeed(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTSpeed {
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(data["Text"].Str, ",")
 	for i := range texts {
@@ -21,8 +25,7 @@ func NewBTSpeed(m *model, parent *yamlui.UIBase, data map[string]script.Value) *
 	}
 
 	selectUI := &BTSpeed{
-		Base:  yamlui.NewUISelect(len(texts), len(texts)),
-		model: m,
+		Base:  yamlui.NewUISelect(componentName, len(texts), len(texts)),
 		texts: texts,
 	}
 	selectUI.Base.Base.SetUpdateIF(selectUI)

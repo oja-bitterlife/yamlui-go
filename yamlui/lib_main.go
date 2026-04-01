@@ -37,6 +37,24 @@ func (self *YAMLUI) RegisterRemap(typeName string, fn func(type_ string, parent 
 	self.remapFuncs[typeName] = fn
 }
 
+// UIを構築するためのインターフェース
+type UIComponent interface {
+	GetBase() *UIBase
+}
+
+type UIComponentFactory[T UIComponent] func(componentName string, parent *UIBase, data map[string]script.Value) T
+
+func UIBuilder[T UIComponent](lib *YAMLUI, componentName string, factory UIComponentFactory[T]) {
+	lib.RegisterRemap(componentName,
+		// クロージャでUIComponentを構築
+		func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error) {
+			// Factoryで構築
+			component := factory(componentName, parent, data)
+			// インターフェース経由で Base を取り出して返す
+			return component.GetBase(), nil
+		})
+}
+
 // ==================================================
 // map解析
 // Mapの値を構造体に流し込むためのヘルパー関数
@@ -72,7 +90,7 @@ func PropBool(data map[string]script.Value, key string, def bool) bool {
 	return value.Bool
 }
 
-// ==================================================
+// **********************************************************************
 // UITreeの構築（再帰的に子要素も構築）
 func (self *YAMLUI) Load(data []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
@@ -203,6 +221,7 @@ func (self *YAMLUI) Update(frame int) []error {
 	return errorList
 }
 
+// ==================================================
 // Draw
 func (self *YAMLUI) Draw(screen Area) {
 	self.Screen = screen

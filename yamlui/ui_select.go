@@ -6,10 +6,6 @@ type UISelectItem struct {
 	Base *UIBase
 }
 
-func (self *UISelectItem) GetAction() string {
-	return self.Base.ScriptReturn
-}
-
 // **********************************************************************
 // 選択UI
 type UISelect struct {
@@ -18,9 +14,9 @@ type UISelect struct {
 	RowNum  int
 }
 
-func NewUISelect(itemNum, rowNum int) *UISelect {
+func NewUISelect(type_ string, itemNum, rowNum int) *UISelect {
 	selectUI := &UISelect{
-		Base:    NewUIBase("UISelect"),
+		Base:    NewUIBase(type_),
 		ItemNum: itemNum,
 		RowNum:  rowNum,
 	}

@@ -6,31 +6,22 @@ import (
 )
 
 type BTLabel struct {
-	Base  *yamlui.UILabel
+	Base  *yamlui.UIBase
 	model *model
+	texts []string
 }
 
-func NewBTLabel(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTLabel {
+func (self *BTLabel) GetBase() *yamlui.UIBase {
+	return self.Base
+}
+
+func NewBTLabel(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTLabel {
 	label := &BTLabel{
-		Base:  yamlui.NewUILabel("test"),
-		model: m,
+		Base: yamlui.NewUIBase(componentName),
 	}
-	label.Base.Base.SetDrawIF(label)
+	label.Base.SetDrawIF(label)
 	return label
 }
 
 func (self *BTLabel) Draw(x, y float64, ctx yamlui.DrawContext) {
-	drawY := int(y)
-	if ctx.Clip.IContainsY(drawY) == false {
-		return
-	}
-
-	for j, char := range ctx.Base.Text {
-		drawX := int(x) + j
-		if ctx.Clip.IContainsX(drawX) == false {
-			continue
-		}
-		self.model.canvas[drawY][drawX] = Cell{Rune: char, Color: "white"}
-	}
-
 }
