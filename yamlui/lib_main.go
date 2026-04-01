@@ -10,7 +10,7 @@ import (
 type YAMLUI struct {
 	// UIツリー構築用
 	Root       *UIBase
-	remapFuncs map[string]func(string, *UIBase, map[string]script.Value) (*UIBase, error)
+	remapFuncs map[string]func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)
 
 	// Updateの時に使うもの
 	frame int // システム時間
@@ -25,7 +25,7 @@ type YAMLUI struct {
 func NewYAMLUI() *YAMLUI {
 	return &YAMLUI{
 		Root:       NewUIBase("Root"),
-		remapFuncs: make(map[string]func(string, *UIBase, map[string]script.Value) (*UIBase, error)),
+		remapFuncs: make(map[string]func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)),
 	}
 }
 
@@ -33,7 +33,7 @@ func NewYAMLUI() *YAMLUI {
 // mapの解析
 // ==================================================
 // mapを解析して必要なデータを構造体に流し込むためのインターフェース
-func (self *YAMLUI) RegisterRemap(typeName string, fn func(string, *UIBase, map[string]script.Value) (*UIBase, error)) {
+func (self *YAMLUI) RegisterRemap(typeName string, fn func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)) {
 	self.remapFuncs[typeName] = fn
 }
 

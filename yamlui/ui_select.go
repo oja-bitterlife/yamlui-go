@@ -20,7 +20,7 @@ func NewUISelectItem(labal string) *UISelectItem {
 }
 
 func (self *UISelectItem) GetAction() string {
-	return self.Base.Action
+	return self.Base.ScriptReturn
 }
 
 // **********************************************************************
@@ -52,7 +52,7 @@ func (self *UISelect) GetSelectAction() string {
 	if err != nil {
 		return ""
 	}
-	return item.Base.Action
+	return item.Base.ScriptReturn
 }
 
 func (self *UISelect) GetSelectNo() int {

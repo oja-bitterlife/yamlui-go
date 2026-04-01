@@ -45,14 +45,17 @@ func initialModel() model {
 	}
 
 	// UI構築の登録
-	m.lib.RegisterRemap("window", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTWindow(&m, ui, data).Base.Base, nil
+	m.lib.RegisterRemap("window", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTWindow(&m, parent, data).Base.Base, nil
 	})
-	m.lib.RegisterRemap("title", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return NewBTTitle(&m, ui, data).Base.Base, nil
+	m.lib.RegisterRemap("title", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTTitle(&m, parent, data).Base.Base, nil
 	})
-	m.lib.RegisterRemap("area", func(type_ string, ui *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
-		return yamlui.NewUIArea(ui, data).Base, nil
+	m.lib.RegisterRemap("area", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return yamlui.NewUIArea(parent, data).Base, nil
+	})
+	m.lib.RegisterRemap("start", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTStart(&m, parent, data).Base.Base, nil
 	})
 
 	// JSON を読み込んで UI を構築する
@@ -66,19 +69,6 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
 
-	// win := NewBTWindow(&m)
-	// win.Base.Base.SetRect(0, 0, m.width, m.height)
-	// m.root.AddChild(win.Base.Base)
-	//
-	// margin := yamlui.NewUIArea()
-	// margin.MarginX = 2
-	// margin.MarginY = 1
-	// win.Base.Base.AddChild(margin.Base)
-	//
-	// title := NewBTTitle(&m)
-	// title.Base.Base.Y = 2
-	// margin.Base.AddChild(title.Base.Base)
-	//
 	// startSel := NewBTStart(&m, 1)
 	// startSel.Base.AddItem(yamlui.NewUISelectItem("START"))
 	// startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))

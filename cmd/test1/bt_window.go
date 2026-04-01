@@ -10,7 +10,7 @@ type BTWindow struct {
 	model *model
 }
 
-func NewBTWindow(m *model, ui *yamlui.UIBase, data map[string]script.Value) *BTWindow {
+func NewBTWindow(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTWindow {
 	window := &BTWindow{
 		Base:  yamlui.NewUIWindow(),
 		model: m,

@@ -6,7 +6,7 @@ type UIButton struct {
 
 func (button *UIButton) Update(ui *UIBase, frame int) {
 	// Actionがセットされたときの処理
-	if ui.Action != "" {
+	if ui.ScriptReturn != "" {
 	}
 }
 

@@ -10,6 +10,11 @@
       MarginY: 0
       AlignCenterX: true
       children:
-      - Type: "title"
-        X: 0
-        Y: 2
+        - Type: "title"
+          X: 0
+          Y: 2
+        - Type: "start"
+          X: 0
+          Y: 14
+          W: 16
+          H: 2

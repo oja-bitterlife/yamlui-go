@@ -11,13 +11,17 @@ import (
 // **********************************************************************
 // UIの基本構造.これを保有して各UI構造体を作る
 type UIBase struct {
+	// ==================================================
 	// Scriptで更新させないもの
 	Type        string
 	ID          string
-	UpdateCount int
+	UpdateCount int // @Frameとして送り込む
 
+	// Event
+	Events []string
+
+	// ==================================================
 	// スクリプトで更新できるプロパティ
-	// ----------------------------------------
 	IsEnable bool
 
 	// 座標
@@ -32,15 +36,15 @@ type UIBase struct {
 	Color     string // 使用するカラーの名称。system/msg/frameなどを想定
 
 	// インタラクティブなUIに必要なプロパティ
-	SelectNo float64
-	SelGridX float64 // SelectGridで横の折り返し位置
-	Action   string  // 都度リセットされる
+	SelectNo     float64
+	SelGridX     float64 // SelectGridで横の折り返し位置
+	ScriptReturn string  // 都度リセットされる
 
 	// 子要素が保存させたいもの
 	Prop map[string]script.Value
 
+	// ==================================================
 	// 保存しないもの
-	// ----------------------------------------
 	children []*UIBase
 	script   *script.Runtime
 
@@ -70,7 +74,11 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Color", script.NewString(self.Color))
 	vm.SetVar("@SelectNo", script.NewNumber(float64(self.SelectNo)))
 	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
-	vm.SetVar("@Action", script.NewString(self.Action))
+
+	// スクリプトからUIに伝えるためのものなので常に空文字を入れておく
+	vm.SetVar("@Return", script.NewString(""))
+
+	// PropはProp.をプレフィックスにして送る
 	for k, v := range self.Prop {
 		vm.SetVar("@Prop."+k, v)
 	}
@@ -88,10 +96,11 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.Color = vm.GetVar("@Color").Str
 	self.SelectNo = vm.GetVar("@SelectNo").Num
 	self.SelGridX = vm.GetVar("@SelGridX").Num
-	self.Action = vm.GetVar("@Action").Str
+	self.ScriptReturn = vm.GetVar("@Return").Str
+
+	// PropはProp.をプレフィックスにして受け取る
 	for k, v := range vm.GetVars() {
-		prefix := "@Prop."
-		if after, ok := strings.CutPrefix(k, prefix); ok {
+		if after, ok := strings.CutPrefix(k, "@Prop."); ok {
 			propKey := after
 			self.Prop[propKey] = v
 		}

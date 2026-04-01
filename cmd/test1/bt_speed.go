@@ -1,15 +1,18 @@
 package main
 
-import "github.com/oja-bitterlife/yamlui-go/yamlui"
+import (
+	"github.com/oja-bitterlife/yamlui-go/script"
+	"github.com/oja-bitterlife/yamlui-go/yamlui"
+)
 
 type BTSpeed struct {
 	Base  *yamlui.UISelect
 	model *model
 }
 
-func NewBTSpeed(m *model, rows int) *BTSpeed {
+func NewBTSpeed(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTSpeed {
 	selectUI := &BTSpeed{
-		Base:  yamlui.NewUISelect(rows),
+		Base:  yamlui.NewUISelect(3),
 		model: m,
 	}
 	selectUI.Base.Base.SetDrawIF(selectUI)

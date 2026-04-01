@@ -24,7 +24,7 @@ func (self *UIBase) ToValue() script.Value {
 		"Color":     script.NewString(self.Color),
 		"SelectNo":  script.NewNumber(float64(self.SelectNo)),
 		"SelGridX":  script.NewNumber(float64(self.SelGridX)),
-		"Action":    script.NewString(self.Action),
+		"Return":    script.NewString(self.ScriptReturn),
 		"Prop":      script.NewLitMap(self.Prop),
 	})
 }
@@ -74,13 +74,13 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	if v, ok := m["SelGridX"]; ok {
 		self.SelGridX = v.Num
 	}
-	if v, ok := m["Action"]; ok {
-		self.Action = v.Str
+	if v, ok := m["Return"]; ok {
+		self.ScriptReturn = v.Str
 	}
 
 	if prop, ok := m["Prop"]; ok {
 		if prop.Type != script.TypeLitMap {
-			return errors.New("Expected Prop to be MapType: " + string(prop.Type))
+			return errors.New("Expected Prop to be MapType: " + prop.Type.String())
 		}
 	}
 	return nil
