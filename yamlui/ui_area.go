@@ -33,23 +33,23 @@ func NewUIArea(ui *UIBase, data map[string]script.Value) *UIArea {
 	area.Base.drawTreeIF = area
 
 	// デフォルトはMargin=0
-	area.Margin = propINum(data, "Margin", 0)
-	area.MarginTop = propINum(data, "MarginTop", 0)
-	area.MarginBottom = propINum(data, "MarginBottom", 0)
-	area.MarginLeft = propINum(data, "MarginLeft", 0)
-	area.MarginRight = propINum(data, "MarginRight", 0)
-	area.MarginX = propINum(data, "MarginX", 0)
-	area.MarginY = propINum(data, "MarginY", 0)
+	area.Margin = PropINum(data, "Margin", 0)
+	area.MarginTop = PropINum(data, "MarginTop", 0)
+	area.MarginBottom = PropINum(data, "MarginBottom", 0)
+	area.MarginLeft = PropINum(data, "MarginLeft", 0)
+	area.MarginRight = PropINum(data, "MarginRight", 0)
+	area.MarginX = PropINum(data, "MarginX", 0)
+	area.MarginY = PropINum(data, "MarginY", 0)
 
 	// Align系のプロパティはデフォルトはfalse
-	area.AlignCenter = propBool(data, "AlignCenter", false)
-	area.AlignCenterX = propBool(data, "AlignCenterX", false)
-	area.AlignCenterY = propBool(data, "AlignCenterY", false)
-	area.AlignRight = propBool(data, "AlignRight", false)
-	area.AlignBottom = propBool(data, "AlignBottom", false)
+	area.AlignCenter = PropBool(data, "AlignCenter", false)
+	area.AlignCenterX = PropBool(data, "AlignCenterX", false)
+	area.AlignCenterY = PropBool(data, "AlignCenterY", false)
+	area.AlignRight = PropBool(data, "AlignRight", false)
+	area.AlignBottom = PropBool(data, "AlignBottom", false)
 
 	// IsAbsのデフォルトはfalse
-	area.IsAbs = propBool(data, "IsAbs", false)
+	area.IsAbs = PropBool(data, "IsAbs", false)
 
 	return area
 }

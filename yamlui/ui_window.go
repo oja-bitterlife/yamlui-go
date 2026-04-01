@@ -6,7 +6,7 @@ type UIWindow struct {
 
 func NewUIWindow() *UIWindow {
 	window := &UIWindow{
-		Base: NewUIBase("Window"),
+		Base: NewUIBase("UIWindow"),
 	}
 	return window
 }

@@ -12,7 +12,7 @@ func (button *UIButton) Update(ui *UIBase, frame int) {
 
 func NewUIButton(onAction func(action string, button *UIButton)) *UIButton {
 	button := &UIButton{
-		Base: NewUIBase("Button"),
+		Base: NewUIBase("UIButton"),
 	}
 
 	return button

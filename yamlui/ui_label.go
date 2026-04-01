@@ -6,7 +6,7 @@ type UILabel struct {
 
 func NewUILabel(text string) *UILabel {
 	label := &UILabel{
-		Base: NewUIBase("Label"),
+		Base: NewUIBase("UILabel"),
 	}
 	label.Base.Text = text
 	return label

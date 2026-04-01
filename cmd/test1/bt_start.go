@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
@@ -8,39 +10,47 @@ import (
 type BTStart struct {
 	Base  *yamlui.UISelect
 	model *model
+	texts []string
 }
 
 func NewBTStart(m *model, parent *yamlui.UIBase, data map[string]script.Value) *BTStart {
-	selectUI := &BTStart{
-		Base:  yamlui.NewUISelect(2),
-		model: m,
+	// ,区切りのTextを分解してTrimしてtextsに格納
+	texts := strings.Split(data["Text"].Str, ",")
+	for i := range texts {
+		texts[i] = strings.TrimSpace(texts[i])
 	}
+
+	selectUI := &BTStart{
+		Base:  yamlui.NewUISelect(len(texts), 1),
+		model: m,
+		texts: texts,
+	}
+
 	selectUI.Base.Base.SetDrawIF(selectUI)
 	return selectUI
 }
 
 func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
-	// clip.X = ctx.ParentArea.AlignCenterX(clip.W) // 1行あたり16文字分の幅を中央寄せ
 
-	for i, item := range self.Base.Items {
+	for i := range self.Base.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
 		if i >= int(ctx.Clip.H) {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := ctx.Clip.IY() + i/self.Base.Rows
-		x := ctx.Clip.IX() + (i % self.Base.Rows)
+		y := ctx.Clip.IY() + i/self.Base.RowNum
+		x := ctx.Clip.IX() + (i % self.Base.RowNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
-		prefix := "   "
+		line := "   "
 		if i == int(ctx.Base.SelectNo) {
-			prefix = "▶"
+			line = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}
 
 		// Canvas への書き込み（1文字ずつ。Label のロジックを再利用）
-		line := prefix + item.Base.Text
+		line += self.texts[i]
 		for j, char := range line {
 			// 横幅(clip.W)を超えないようにガード
 			if j >= int(ctx.Clip.W) {

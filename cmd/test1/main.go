@@ -57,6 +57,9 @@ func initialModel() model {
 	m.lib.RegisterRemap("start", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
 		return NewBTStart(&m, parent, data).Base.Base, nil
 	})
+	m.lib.RegisterRemap("label", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTLabel(&m, parent, data).Base.Base, nil
+	})
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")

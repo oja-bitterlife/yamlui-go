@@ -40,7 +40,7 @@ func (self *YAMLUI) RegisterRemap(typeName string, fn func(type_ string, parent 
 // ==================================================
 // map解析
 // Mapの値を構造体に流し込むためのヘルパー関数
-func propStr(data map[string]script.Value, key string, def string) string {
+func PropStr(data map[string]script.Value, key string, def string) string {
 	value, ok := data[key]
 	if !ok || value.Type != script.TypeString {
 		return def
@@ -48,7 +48,7 @@ func propStr(data map[string]script.Value, key string, def string) string {
 	return value.Str
 }
 
-func propNum(data map[string]script.Value, key string, def float64) float64 {
+func PropNum(data map[string]script.Value, key string, def float64) float64 {
 	value, ok := data[key]
 	if !ok || value.Type != script.TypeNumber {
 		return def
@@ -56,7 +56,7 @@ func propNum(data map[string]script.Value, key string, def float64) float64 {
 	return value.Num
 }
 
-func propINum(data map[string]script.Value, key string, def int) int {
+func PropINum(data map[string]script.Value, key string, def int) int {
 	value, ok := data[key]
 	if !ok || value.Type != script.TypeNumber {
 		return def
@@ -64,7 +64,7 @@ func propINum(data map[string]script.Value, key string, def int) int {
 	return int(value.Num)
 }
 
-func propBool(data map[string]script.Value, key string, def bool) bool {
+func PropBool(data map[string]script.Value, key string, def bool) bool {
 	value, ok := data[key]
 	if !ok || value.Type != script.TypeBool {
 		return def

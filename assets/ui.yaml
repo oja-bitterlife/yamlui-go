@@ -13,8 +13,12 @@
         - Type: "title"
           X: 0
           Y: 2
-        - Type: "start"
+        - Type: "area"
           X: 0
           Y: 14
           W: 16
           H: 2
+          AlignCenterX: true
+          children:
+            - Type: "start"
+              Text: "START, CONTINUE"

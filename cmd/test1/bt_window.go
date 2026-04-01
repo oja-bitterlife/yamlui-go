@@ -19,7 +19,7 @@ func NewBTWindow(m *model, parent *yamlui.UIBase, data map[string]script.Value) 
 	return window
 }
 
-func (w *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
+func (self *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
 	drawArea := ctx.Clip
 	myArea := yamlui.Area{
 		X: x,
@@ -62,8 +62,8 @@ func (w *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
 			}
 
 			// キャンバスの物理境界チェックをして書き込み
-			if dy >= 0 && dy < len(w.model.canvas) && dx >= 0 && dx < len(w.model.canvas[dy]) {
-				w.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
+			if dy >= 0 && dy < len(self.model.canvas) && dx >= 0 && dx < len(self.model.canvas[dy]) {
+				self.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
 			}
 		}
 	}
