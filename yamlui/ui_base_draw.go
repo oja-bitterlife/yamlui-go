@@ -8,15 +8,24 @@ type DrawIF interface {
 	Draw(x, y float64, ctx DrawContext)
 }
 
+// 直接DrawIFを呼び出すのではなく、DrawTreeの中でDrawQueueItemにしてキューに入れる
+type DrawQueueItem struct {
+	drawIF DrawIF
+	x      float64
+	y      float64
+	z      int
+	ctx    DrawContext
+}
+
 // Align操作が必要な時とか、DrawTreeを自前で実装したいときのインターフェース
 type DrawTreeIF interface {
-	DrawTree(x, y float64, ctx DrawContext)
+	DrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext)
 }
 
 type DrawContext struct {
 	Parent     *UIBase // 親のUI
 	ParentClip Area    // 親の描画領域（クリップされている）
-	State      *UIBase // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
+	Base       *UIBase // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
 	Clip       Area    // 自分が描画できる領域（クリップされている）
 }
 
@@ -61,59 +70,39 @@ func NewDrawContext(self *UIBase, parent *UIBase, parentClip Area) DrawContext {
 	return DrawContext{
 		Parent:     parent,
 		ParentClip: parentClip,
-		State:      self,
+		Base:       self,
 		Clip:       self.calcDrawArea(parentClip),
 	}
 }
 
-// ----------------------------------------
-// 描画IFの呼び出し
-func (self *UIBase) callDraw(x, y float64, ctx DrawContext) {
-	if self.IsVisible && self.drawIF != nil {
-		x, y := self.calcDrawPos(ctx.Parent.X, ctx.Parent.Y)
-		self.drawIF.Draw(x, y, ctx)
-	}
-}
-
-func (self *UIBase) callDrawTree(x, y float64, ctx DrawContext) {
-	if self.drawTreeIF != nil {
-		self.drawTreeIF.DrawTree(x, y, ctx)
-	} else {
-		self.drawTree(x, y, ctx)
-	}
-}
-
-// ----------------------------------------
-
-// 呼び出し口
-func (self *UIBase) Draw(screen Area) {
-	ctx := NewDrawContext(self, nil, screen)
-
-	// 先に自分を描画する
-	self.callDraw(0, 0, ctx)
-
-	// 子のDrawを呼び出す
-	self.callDrawTree(0, 0, ctx)
-}
-
-// 再帰実行
-func (self *UIBase) drawTree(x, y float64, ctx DrawContext) {
-
-	// 先に子のDrawを全部実行する
-	for _, child := range self.children {
-		if child.drawIF != nil && child.IsVisible {
-			childCtx := NewDrawContext(child, self, ctx.Clip)
-			childX, childY := child.calcDrawPos(x, y)
-			child.callDraw(childX, childY, childCtx)
-		}
-	}
-
-	// そのあとTreeを手繰る
+// ==================================================
+// DrawTreeの再帰実行
+func (self *UIBase) recDrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext) {
+	// 子供の描画
 	for _, child := range self.children {
 		if child.IsVisible {
+			// 描画座標やクリップ領域等を計算してコンテキストを作る
 			childCtx := NewDrawContext(child, self, ctx.Clip)
 			childX, childY := child.calcDrawPos(x, y)
-			child.callDrawTree(childX, childY, childCtx)
+
+			// 描画インターフェースがあれば描画キューに入れる
+			if child.drawIF != nil {
+				lib.drawQueue = append(lib.drawQueue, DrawQueueItem{
+					drawIF: child.drawIF,
+					x:      childX,
+					y:      childY,
+					z:      z,
+					ctx:    childCtx,
+				})
+			}
+
+			// 自前drawTreeがあればそちらを呼び出す
+			if child.drawTreeIF != nil {
+				child.drawTreeIF.DrawTree(lib, childX, childY, z+1, childCtx)
+			} else {
+				// なければ再帰的に子供を描画
+				child.recDrawTree(lib, childX, childY, z+1, childCtx)
+			}
 		}
 	}
 }

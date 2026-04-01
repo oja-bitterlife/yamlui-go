@@ -167,7 +167,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.lib.Root.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
+	m.lib.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
 
 	var b strings.Builder
 	for y := 0; y < len(m.canvas); y++ {

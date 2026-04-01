@@ -19,22 +19,24 @@ func NewBTWindow(m *model, ui *yamlui.UIBase, data map[string]script.Value) *BTW
 	return window
 }
 
-func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
-	// 1. 自分の本来の絶対座標領域を取得
-	myArea := ui.Area() // DrawTree で ui.X, ui.Y が絶対座標に更新されている前提
-
-	// 2. 親の制限(clip)と自分の領域(myArea)の重なり＝「実際に描画して良い範囲」
-	drawArea := myArea.Clip(clip)
+func (w *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
+	drawArea := ctx.Clip
+	myArea := yamlui.Area{
+		X: x,
+		Y: y,
+		W: ctx.Clip.W,
+		H: ctx.Clip.H,
+	}
 
 	// 3. 描画ループ
-	for y := int(drawArea.Top()); y < int(drawArea.Bottom()); y++ {
-		for x := int(drawArea.Left()); x < int(drawArea.Right()); x++ {
+	for dy := int(drawArea.Top()); dy < int(drawArea.Bottom()); dy++ {
+		for dx := int(drawArea.Left()); dx < int(drawArea.Right()); dx++ {
 
 			// 現在の (x, y) が「本来の自分の領域(myArea)」のどこに当たるかで文字を決める
-			isLeft := (x == myArea.ILeft())
-			isRight := (x == myArea.IRight()-1)
-			isTop := (y == myArea.ITop())
-			isBottom := (y == myArea.IBottom()-1)
+			isLeft := (dx == myArea.ILeft())
+			isRight := (dx == myArea.IRight()-1)
+			isTop := (dy == myArea.ITop())
+			isBottom := (dy == myArea.IBottom()-1)
 
 			var r rune
 			if isLeft && isTop {
@@ -60,8 +62,8 @@ func (w *BTWindow) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCont
 			}
 
 			// キャンバスの物理境界チェックをして書き込み
-			if y >= 0 && y < len(w.model.canvas) && x >= 0 && x < len(w.model.canvas[y]) {
-				w.model.canvas[y][x] = Cell{Rune: r, Color: "white"}
+			if dy >= 0 && dy < len(w.model.canvas) && dx >= 0 && dx < len(w.model.canvas[dy]) {
+				w.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
 			}
 		}
 	}

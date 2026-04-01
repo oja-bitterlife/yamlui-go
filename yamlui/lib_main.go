@@ -9,6 +9,7 @@ import (
 type YAMLUI struct {
 	Root       *UIBase
 	remapFuncs map[string]func(string, *UIBase, map[string]script.Value) (*UIBase, error)
+	drawQueue  []DrawQueueItem
 }
 
 func NewYAMLUI() *YAMLUI {
@@ -131,4 +132,20 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 	}
 
 	return nil
+}
+
+// **********************************************************************
+// 呼び出し口
+func (self *YAMLUI) Draw(screen Area) {
+	// drawQueueをクリア
+	self.drawQueue = []DrawQueueItem{}
+
+	// 描画コンテキストを作成してDrawTreeを呼び出す
+	ctx := NewDrawContext(self.Root, nil, screen)
+	self.Root.recDrawTree(self, 0, 0, 0, ctx)
+
+	// drawQueueに溜まった描画命令を実行する
+	for _, item := range self.drawQueue {
+		item.drawIF.Draw(item.x, item.y, item.ctx)
+	}
 }

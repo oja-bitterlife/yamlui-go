@@ -16,22 +16,22 @@ func NewBTStart(m *model, rows int) *BTSpeed {
 	return selectUI
 }
 
-func (self *BTStart) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
-	clip.X = ctx.ParentArea.AlignCenterX(clip.W) // 1行あたり16文字分の幅を中央寄せ
+func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
+	// clip.X = ctx.ParentArea.AlignCenterX(clip.W) // 1行あたり16文字分の幅を中央寄せ
 
 	for i, item := range self.Base.Items {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
-		if i >= int(clip.H) {
+		if i >= int(ctx.Clip.H) {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := clip.IY() + i/self.Base.Rows
-		x := clip.IX() + (i % self.Base.Rows)
+		y := ctx.Clip.IY() + i/self.Base.Rows
+		x := ctx.Clip.IX() + (i % self.Base.Rows)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "
-		if i == int(ui.SelectNo) {
+		if i == int(ctx.Base.SelectNo) {
 			prefix = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}
@@ -40,7 +40,7 @@ func (self *BTStart) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 		line := prefix + item.Base.Text
 		for j, char := range line {
 			// 横幅(clip.W)を超えないようにガード
-			if j >= int(clip.W) {
+			if j >= int(ctx.Clip.W) {
 				break
 			}
 			// Canvas の (x + j, y) に char を書き込む

@@ -14,12 +14,16 @@ type UIArea struct {
 	MarginRight  int
 	MarginX      int
 	MarginY      int
+
 	// Align系のプロパティ
 	AlignCenter  bool
 	AlignCenterX bool
 	AlignCenterY bool
 	AlignRight   bool
 	AlignBottom  bool
+
+	// 自分のXYは絶対座標
+	IsAbs bool
 }
 
 func NewUIArea(ui *UIBase, data map[string]script.Value) *UIArea {
@@ -47,10 +51,10 @@ func NewUIArea(ui *UIBase, data map[string]script.Value) *UIArea {
 	return area
 }
 
-func (self *UIArea) DrawTree(ui *UIBase, clip Area, ctx DrawContext) {
+func (self *UIArea) DrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext) {
 	// 面倒なので先にintにしておく
-	parentW, parentH := ctx.ParentArea.WH()
-	selfW, selfH := self.Base.Area().WH()
+	parentW, parentH := ctx.ParentClip.WH()
+	selfW, selfH := ctx.Base.Area().WH()
 
 	// Align系のプロパティを考慮して、子の描画領域を計算する
 	offsetX := 0.0
@@ -68,8 +72,8 @@ func (self *UIArea) DrawTree(ui *UIBase, clip Area, ctx DrawContext) {
 		offsetY = (parentH - selfH) / 2
 	}
 	// alignされた座標
-	alignX := self.Base.X + offsetX
-	alignY := self.Base.Y + offsetY
+	alignX := x + offsetX
+	alignY := y + offsetY
 
 	// マージンを考慮して、子の描画領域を計算する
 	left := float64(self.MarginLeft + self.MarginX + self.Margin)
@@ -78,17 +82,17 @@ func (self *UIArea) DrawTree(ui *UIBase, clip Area, ctx DrawContext) {
 	bottom := float64(self.MarginBottom + self.MarginY + self.Margin)
 
 	// Right/Bottomマージン分親のエリアから引いておく
-	parentArea := ctx.ParentArea
+	parentArea := ctx.ParentClip
 	parentArea.W -= right
 	parentArea.H -= bottom
 
 	// Left/Topマージン分座標をずらす
-	area := Area{
+	ctx.Clip = Area{
 		X: alignX + left,
 		Y: alignY + top,
 		W: selfW,
 		H: selfH,
 	}.Clip(parentArea)
 
-	ui.drawTree(area)
+	ctx.Base.recDrawTree(lib, alignX+left, alignY+top, z, ctx)
 }

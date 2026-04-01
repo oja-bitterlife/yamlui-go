@@ -16,9 +16,9 @@ func NewBTSpeed(m *model, rows int) *BTSpeed {
 	return selectUI
 }
 
-func (self *BTSpeed) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
-	clip.X = ctx.ParentArea.AlignCenterX(clip.W) // 1行あたり16文字分の幅を中央寄せ
-	clipX, clipY, clipW, clipH := clip.IRect()
+func (self *BTSpeed) Draw(x, y float64, ctx yamlui.DrawContext) {
+	x = ctx.ParentClip.AlignCenterX(ctx.Base.W) // 1行あたり16文字分の幅を中央寄せ
+	clipX, clipY, clipW, clipH := ctx.Clip.IRect()
 
 	for i, item := range self.Base.Items {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
@@ -32,7 +32,7 @@ func (self *BTSpeed) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "
-		if i == int(ui.SelectNo) {
+		if i == int(ctx.Base.SelectNo) {
 			prefix = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}

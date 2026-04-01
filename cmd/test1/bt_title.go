@@ -31,7 +31,7 @@ func stringWidth(s string) int {
 	return width
 }
 
-func (self *BTTitle) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawContext) {
+func (self *BTTitle) Draw(x, y float64, ctx yamlui.DrawContext) {
 	// 64x24のエリア内での描画
 	logo := []string{
 		` __     __      __  __  _      _    _  _____  _ `,
@@ -43,19 +43,19 @@ func (self *BTTitle) Draw(ui *yamlui.UIBase, clip yamlui.Area, ctx yamlui.DrawCo
 	}
 
 	// Y座標：上から 1/4 くらいの場所に置くと DQ っぽいです
-	startY := int(clip.Y + 2)
+	startY := int(y + 2)
 
 	for i, line := range logo {
-		if i >= int(clip.H) {
+		if i >= int(ctx.Clip.H) {
 			break
 		}
 
 		// X座標：中央寄せ
 		// startX := int(clip.AlignCenterIX(stringWidth(line)) - 1)
-		startX := int(clip.X)
+		startX := int(ctx.Clip.X)
 
 		for j, char := range line {
-			if startX+j < int(clip.X+clip.W) {
+			if startX+j < int(ctx.Clip.X+ctx.Clip.W) {
 				// Canvasにセット
 				self.model.canvas[startY+i][startX+j] = Cell{Rune: char, Color: "white"}
 			}
