@@ -120,12 +120,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Type == tea.KeyRight {
 			m.lib.AddEvent("key:right")
 		}
-		// if msg.Type == tea.KeyLeft {
-		// 	m.speedSel.Base.NextGridX(-1, selectToggle)
-		// }
-		// if msg.Type == tea.KeyRight {
-		// 	m.speedSel.Base.NextGridX(1, selectToggle)
-		// }
 	}
 
 	// Update

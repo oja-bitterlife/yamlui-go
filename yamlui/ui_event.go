@@ -24,6 +24,8 @@ func (self *YAMLUI) ClearEvents() {
 }
 
 // **********************************************************************
+// イベント処理
+// UpdateQueueのEventsにイベントを振り分ける
 func (self *YAMLUI) ProcessEvents() {
 	// Updateの後ろからイベント処理が可能かを確認する
 	checkEvents := self.EventQueue[:]

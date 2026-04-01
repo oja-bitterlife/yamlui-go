@@ -25,8 +25,22 @@ func NewBTSpeed(m *model, parent *yamlui.UIBase, data map[string]script.Value) *
 		model: m,
 		texts: texts,
 	}
+	selectUI.Base.Base.SetUpdateIF(selectUI)
 	selectUI.Base.Base.SetDrawIF(selectUI)
 	return selectUI
+}
+
+// Update
+func (self *BTSpeed) Update(ctx yamlui.UpdateContext) error {
+	for _, event := range ctx.Events {
+		if event == "key:left" {
+			self.Base.NextGridX(-1, true)
+		}
+		if event == "key:right" {
+			self.Base.NextGridX(1, true)
+		}
+	}
+	return nil
 }
 
 func (self *BTSpeed) Draw(x, y float64, ctx yamlui.DrawContext) {
