@@ -34,7 +34,7 @@ func (self *UIBase) ToValue() script.Value {
 // ValueからUIBaseに流し込む関数
 func (self *UIBase) LoadFromValue(value script.Value) error {
 	if value.Type != script.TypeLitMap {
-		return errors.New("Expected Value to be MapType: " + string(value.Type))
+		return errors.New("Expected Value to be MapType: " + value.Type.String())
 	}
 	m := value.Map
 
