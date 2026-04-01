@@ -5,7 +5,7 @@
   H: 26
   children:
     - Type: "area"
-      W: 50
+      W: 50  # 幅を決めないとAlignが効かない
       MarginX: 0
       MarginY: 0
       AlignCenterX: true

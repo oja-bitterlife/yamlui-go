@@ -42,23 +42,18 @@ func (self *BTTitle) Draw(x, y float64, ctx yamlui.DrawContext) {
 		`    |_| \__,_| |_|  |_||______|\____/ |_____|(_)`,
 	}
 
-	// Y座標：上から 1/4 くらいの場所に置くと DQ っぽいです
-	startY := int(y + 2)
-
 	for i, line := range logo {
-		if i >= int(ctx.Clip.H) {
-			break
+		drawY := int(y) + i
+		if drawY < ctx.Clip.ITop() || drawY >= ctx.Clip.IBottom() {
+			continue
 		}
 
-		// X座標：中央寄せ
-		// startX := int(clip.AlignCenterIX(stringWidth(line)) - 1)
-		startX := int(ctx.Clip.X)
-
 		for j, char := range line {
-			if startX+j < int(ctx.Clip.X+ctx.Clip.W) {
-				// Canvasにセット
-				self.model.canvas[startY+i][startX+j] = Cell{Rune: char, Color: "white"}
+			drawX := int(x) + j
+			if drawX < ctx.Clip.ILeft() || drawX >= ctx.Clip.IRight() {
+				continue
 			}
+			self.model.canvas[drawY][drawX] = Cell{Rune: char, Color: "white"}
 		}
 	}
 }

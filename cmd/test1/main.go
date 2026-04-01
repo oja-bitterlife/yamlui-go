@@ -180,7 +180,6 @@ func (m model) View() string {
 		b.WriteByte('\n')
 	}
 
-	// return style.Render(m.root.Text)
 	return b.String()
 }
 
