@@ -44,12 +44,23 @@ type UIComponent interface {
 
 type UIComponentFactory[T UIComponent] func(componentName string, parent *UIBase, data map[string]script.Value) T
 
-func UIBuilder[T UIComponent](lib *YAMLUI, componentName string, factory UIComponentFactory[T]) {
+func UIBuilder[T UIComponent](
+	lib *YAMLUI,
+	componentName string,
+	factory UIComponentFactory[T],
+	onCreated func(T)) {
+
 	lib.RegisterRemap(componentName,
 		// クロージャでUIComponentを構築
 		func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error) {
 			// Factoryで構築
 			component := factory(componentName, parent, data)
+
+			// onCreatedがnilでなければ呼び出す
+			if onCreated != nil {
+				onCreated(component)
+			}
+
 			// インターフェース経由で Base を取り出して返す
 			return component.GetBase(), nil
 		})

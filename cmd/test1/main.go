@@ -44,12 +44,12 @@ func initialModel() model {
 	}
 
 	// UI構築の登録
-	yamlui.UIBuilder(m.lib, "window", NewBTWindow)
-	yamlui.UIBuilder(m.lib, "title", NewBTTitle)
-	yamlui.UIBuilder(m.lib, "area", yamlui.NewUIArea)
-	yamlui.UIBuilder(m.lib, "start", NewBTStart)
-	yamlui.UIBuilder(m.lib, "label", NewBTLabel)
-	yamlui.UIBuilder(m.lib, "speed", NewBTSpeed)
+	yamlui.UIBuilder(m.lib, "window", NewBTWindow, func(ui *BTWindow) { ui.model = &m })
+	yamlui.UIBuilder(m.lib, "title", NewBTTitle, func(ui *BTTitle) { ui.model = &m })
+	yamlui.UIBuilder(m.lib, "area", yamlui.NewUIArea, nil)
+	yamlui.UIBuilder(m.lib, "start", NewBTStart, func(ui *BTStart) { ui.model = &m })
+	yamlui.UIBuilder(m.lib, "label", NewBTLabel, func(ui *BTLabel) { ui.model = &m })
+	yamlui.UIBuilder(m.lib, "speed", NewBTSpeed, func(ui *BTSpeed) { ui.model = &m })
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")
@@ -121,31 +121,29 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	for y := range m.canvas {
 		for x := range m.canvas[y] {
-			m.canvas[y][x] = Cell{Rune: ' ', Color: "white"}
+			m.canvas[y][x] = Cell{Rune: ' ', Color: "navy"}
 		}
 	}
 
 	m.lib.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
 
+	// 色の設定
+	bgStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color("#000080")). // 紺色背景
+		Foreground(lipgloss.Color("#FFFFFF"))  // 白文字
+
 	var b strings.Builder
-	for y := 0; y < len(m.canvas); y++ {
-		for x := 0; x < len(m.canvas[y]); x++ {
-			cell := m.canvas[y][x]
-			// ここで lipgloss などを使って色をつけても良いですが、
-			// まずはシンプルに文字だけ出すなら：
-			b.WriteRune(cell.Rune)
+	for y := range m.canvas {
+		var row strings.Builder
+		for x := range m.canvas[y] {
+			row.WriteRune(m.canvas[y][x].Rune)
 		}
-		b.WriteByte('\n')
+		// 1行まとめて紺色背景にする
+		line := bgStyle.Render(row.String())
+		b.WriteString(line + "\n")
 	}
 
 	return b.String()
-}
-
-func (m model) getColor(c string) lipgloss.Color {
-	if c == "system" {
-		return lipgloss.Color("86") // 例えば少し青みがかったシアンなど
-	}
-	return lipgloss.Color(c)
 }
 
 func main() {

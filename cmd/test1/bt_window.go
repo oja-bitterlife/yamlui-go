@@ -22,6 +22,10 @@ func NewBTWindow(componentName string, parent *yamlui.UIBase, data map[string]sc
 	return window
 }
 
+func (self *BTWindow) Init(ctx yamlui.UpdateContext) error {
+	return nil
+}
+
 func (self *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
 	drawArea := ctx.Clip
 	myArea := yamlui.Area{
