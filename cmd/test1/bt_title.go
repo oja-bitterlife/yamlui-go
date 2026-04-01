@@ -44,13 +44,13 @@ func (self *BTTitle) Draw(x, y float64, ctx yamlui.DrawContext) {
 
 	for i, line := range logo {
 		drawY := int(y) + i
-		if drawY < ctx.Clip.ITop() || drawY >= ctx.Clip.IBottom() {
+		if ctx.Clip.IContainsY(drawY) == false {
 			continue
 		}
 
 		for j, char := range line {
 			drawX := int(x) + j
-			if drawX < ctx.Clip.ILeft() || drawX >= ctx.Clip.IRight() {
+			if ctx.Clip.IContainsX(drawX) == false {
 				continue
 			}
 			self.model.canvas[drawY][drawX] = Cell{Rune: char, Color: "white"}

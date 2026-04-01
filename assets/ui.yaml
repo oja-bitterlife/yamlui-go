@@ -11,4 +11,5 @@
       AlignCenterX: true
       children:
       - Type: "title"
+        X: 0
         Y: 2

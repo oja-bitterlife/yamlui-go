@@ -147,7 +147,7 @@ func (self Area) AlignCenterX(w float64) float64 {
 	return self.X + (self.W-w)/2
 }
 
-func (self Area) AlignCenterIX(w int) float64 {
+func (self Area) IAlignCenterX(w int) float64 {
 	return self.X + (self.W-float64(w))/2
 }
 
@@ -155,7 +155,7 @@ func (self Area) AlignCenterY(h float64) float64 {
 	return self.Y + (self.H-h)/2
 }
 
-func (self Area) AlignCenterIY(h int) float64 {
+func (self Area) IAlignCenterY(h int) float64 {
 	return self.Y + (self.H-float64(h))/2
 }
 
@@ -163,15 +163,15 @@ func (self Area) AlignCenter(w, h float64) (x, y float64) {
 	return self.AlignCenterX(w), self.AlignCenterY(h)
 }
 
-func (self Area) AlignCenterI(w, h int) (x, y float64) {
-	return self.AlignCenterIX(w), self.AlignCenterIY(h)
+func (self Area) IAlignCenter(w, h int) (x, y float64) {
+	return self.IAlignCenterX(w), self.IAlignCenterY(h)
 }
 
 func (self Area) AlignRight(w float64) float64 {
 	return self.X + self.W - w
 }
 
-func (self Area) AlignIRight(w int) float64 {
+func (self Area) IAlignRight(w int) float64 {
 	return self.X + self.W - float64(w)
 }
 
@@ -179,7 +179,7 @@ func (self Area) AlignBottom(h float64) float64 {
 	return self.Y + self.H - h
 }
 
-func (self Area) AlignIBottom(h int) float64 {
+func (self Area) IAlignBottom(h int) float64 {
 	return self.Y + self.H - float64(h)
 }
 
@@ -187,8 +187,8 @@ func (self Area) AlignRightBottom(w, h float64) (x, y float64) {
 	return self.AlignRight(w), self.AlignBottom(h)
 }
 
-func (self Area) AlignIRightBottom(w, h int) (x, y float64) {
-	return self.AlignIRight(w), self.AlignIBottom(h)
+func (self Area) IAlignRightBottom(w, h int) (x, y float64) {
+	return self.IAlignRight(w), self.IAlignBottom(h)
 }
 
 // ==================================================
@@ -237,6 +237,22 @@ func (self Area) Contains(x, y float64) bool {
 
 func (self Area) IContains(x, y int) bool {
 	return self.Contains(float64(x), float64(y))
+}
+
+func (self Area) ContainsX(x float64) bool {
+	return x >= self.Left() && x < self.Right()
+}
+
+func (self Area) IContainsX(x int) bool {
+	return self.ContainsX(float64(x))
+}
+
+func (self Area) ContainsY(y float64) bool {
+	return y >= self.Top() && y < self.Bottom()
+}
+
+func (self Area) IContainsY(y int) bool {
+	return self.ContainsY(float64(y))
 }
 
 func (self Area) IsEmpty() bool {
