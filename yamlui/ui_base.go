@@ -158,3 +158,15 @@ func (self *UIBase) RemoveChild(child *UIBase) {
 		}
 	}
 }
+
+func (self *UIBase) FindChildByID(id string) *UIBase {
+	for _, c := range self.children {
+		if c.ID == id {
+			return c
+		}
+		if found := c.FindChildByID(id); found != nil {
+			return found
+		}
+	}
+	return nil
+}

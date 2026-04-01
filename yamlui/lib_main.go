@@ -13,8 +13,8 @@ type YAMLUI struct {
 	remapFuncs map[string]func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)
 
 	// Updateの時に使うもの
-	frame int // システム時間
-	// EventQueue  []EventQueueItem
+	frame       int // システム時間
+	EventQueue  []string
 	updateQueue []UpdateQueueItem
 
 	// Drawの時に使うもの
@@ -178,6 +178,9 @@ func (self *YAMLUI) Update(frame int) []error {
 			}
 		}
 	}
+
+	// イベントの処理
+	self.ProcessEvents()
 
 	// ソートされたqueueを順番に実行する
 	for _, item := range self.updateQueue {

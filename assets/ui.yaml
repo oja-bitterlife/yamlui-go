@@ -22,6 +22,7 @@
           children:
             - Type: "start"
               Text: "START, CONTINUE"
+              Events: ["key:up", "key:down"]
         - Type: "label"
           Text: "-MESSAGE SPEAD-"
           X: 16
@@ -30,3 +31,4 @@
           X: 3 
           Y: 20
           Text: "SLOW, NORMAL, FAST"
+          Events: ["key:left", "key:right"]

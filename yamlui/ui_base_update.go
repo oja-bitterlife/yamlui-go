@@ -26,7 +26,8 @@ type UpdateQueueItem struct {
 type UpdateContext struct {
 	Lib    *YAMLUI
 	Parent *UIBase
-	Base   *UIBase // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
+	Base   *UIBase  // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
+	Events []string // 受信したイベントのリスト
 }
 
 func (self *UIBase) SetUpdateIF(updateIF UpdateIF) {

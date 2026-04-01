@@ -96,11 +96,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.frame++ // フレームを進める
 
-	// キーが押されたらLispを実行して構造体を更新
-	errorList := m.lib.Update(m.frame)
-	for _, err := range errorList {
-		fmt.Printf("Error during update: %v\n", err)
-	}
+	m.lib.ClearEvents() // イベントをクリア
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -110,21 +106,32 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		// 縦方向の移動 (NextGridY)
-		// selectToggle := true
-		// if msg.Type == tea.KeyUp {
-		// 	m.startSel.Base.NextGridY(-1, selectToggle)
-		// }
-		// if msg.Type == tea.KeyDown {
-		// 	m.startSel.Base.NextGridY(1, selectToggle)
-		// }
-		//
+		if msg.Type == tea.KeyUp {
+			m.lib.AddEvent("key:up")
+		}
+		if msg.Type == tea.KeyDown {
+			m.lib.AddEvent("key:down")
+		}
+
 		// // 横方向の移動 (NextGridX)
+		if msg.Type == tea.KeyLeft {
+			m.lib.AddEvent("key:left")
+		}
+		if msg.Type == tea.KeyRight {
+			m.lib.AddEvent("key:right")
+		}
 		// if msg.Type == tea.KeyLeft {
 		// 	m.speedSel.Base.NextGridX(-1, selectToggle)
 		// }
 		// if msg.Type == tea.KeyRight {
 		// 	m.speedSel.Base.NextGridX(1, selectToggle)
 		// }
+	}
+
+	// Update
+	errorList := m.lib.Update(m.frame)
+	for _, err := range errorList {
+		fmt.Printf("Error during update: %v\n", err)
 	}
 
 	return m, nil

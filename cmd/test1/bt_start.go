@@ -27,9 +27,24 @@ func NewBTStart(m *model, parent *yamlui.UIBase, data map[string]script.Value) *
 	}
 
 	selectUI.Base.Base.SetDrawIF(selectUI)
+	selectUI.Base.Base.SetUpdateIF(selectUI)
 	return selectUI
 }
 
+// Update
+func (self *BTStart) Update(ctx yamlui.UpdateContext) error {
+	for _, event := range ctx.Events {
+		if event == "key:up" {
+			self.Base.NextGridY(-1, true)
+		}
+		if event == "key:down" {
+			self.Base.NextGridY(1, true)
+		}
+	}
+	return nil
+}
+
+// Draw
 func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
 
 	for i := range self.Base.ItemNum {

@@ -11,21 +11,29 @@ import (
 // ==================================================
 // UIBaseをValueに変換する関数
 func (self *UIBase) ToValue() script.Value {
+	// EventsはValueのリストに変換する
+	events := make([]script.Value, len(self.Events))
+	for i, event := range self.Events {
+		events[i] = script.NewString(event)
+	}
+
 	return script.NewLitMap(map[string]script.Value{
-		"Type":      script.NewString(self.Type),
-		"ID":        script.NewString(self.ID),
-		"IsEnable":  script.NewBool(self.IsEnable),
-		"X":         script.NewNumber(float64(self.X)),
-		"Y":         script.NewNumber(float64(self.Y)),
-		"W":         script.NewNumber(float64(self.W)),
-		"H":         script.NewNumber(float64(self.H)),
-		"IsVisible": script.NewBool(self.IsVisible),
-		"Text":      script.NewString(self.Text),
-		"Color":     script.NewString(self.Color),
-		"SelectNo":  script.NewNumber(float64(self.SelectNo)),
-		"SelGridX":  script.NewNumber(float64(self.SelGridX)),
-		"Return":    script.NewString(self.ScriptReturn),
-		"Prop":      script.NewLitMap(self.Prop),
+		"Type":        script.NewString(self.Type),
+		"ID":          script.NewString(self.ID),
+		"UpdateCount": script.NewNumber(float64(self.UpdateCount)),
+		"Events":      script.NewLitList(events),
+		"IsEnable":    script.NewBool(self.IsEnable),
+		"X":           script.NewNumber(float64(self.X)),
+		"Y":           script.NewNumber(float64(self.Y)),
+		"W":           script.NewNumber(float64(self.W)),
+		"H":           script.NewNumber(float64(self.H)),
+		"IsVisible":   script.NewBool(self.IsVisible),
+		"Text":        script.NewString(self.Text),
+		"Color":       script.NewString(self.Color),
+		"SelectNo":    script.NewNumber(float64(self.SelectNo)),
+		"SelGridX":    script.NewNumber(float64(self.SelGridX)),
+		"Return":      script.NewString(self.ScriptReturn),
+		"Prop":        script.NewLitMap(self.Prop),
 	})
 }
 
@@ -43,6 +51,22 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 	if v, ok := m["ID"]; ok {
 		self.ID = v.Str
+	}
+	if v, ok := m["UpdateCount"]; ok {
+		self.UpdateCount = int(v.Num)
+	}
+	if v, ok := m["Events"]; ok {
+		if v.Type != script.TypeLitList {
+			return errors.New("Expected Events to be ListType: " + v.Type.String())
+		}
+		events := make([]string, len(v.List))
+		for i, eventVal := range v.List {
+			if eventVal.Type != script.TypeString {
+				return errors.New("Expected each Event to be StringType: " + eventVal.Type.String())
+			}
+			events[i] = eventVal.Str
+		}
+		self.Events = events
 	}
 	if v, ok := m["IsEnable"]; ok {
 		self.IsEnable = v.Bool
