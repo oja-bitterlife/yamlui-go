@@ -13,7 +13,7 @@ type UpdateIF interface {
 }
 
 type UpdateTreeIF interface {
-	UpdateTree(z int, ctx UpdateContext) error
+	UpdateTree(z int, ctx UpdateContext) []error
 }
 
 // 直接DrawIFを呼び出すのではなく、UpdateTreeの中でUpdateQueueItemにしてキューに入れる
@@ -49,8 +49,8 @@ func NewUpdateContext(lib *YAMLUI, self *UIBase, parent *UIBase) UpdateContext {
 }
 
 // 再帰実行
-func (self *UIBase) RecUpdateTree(z int, ctx UpdateContext) error {
-	var lastErr error
+func (self *UIBase) RecUpdateTree(z int, ctx UpdateContext) []error {
+	errorList := []error{}
 
 	// 子供の更新
 	for _, child := range self.children {
@@ -68,17 +68,17 @@ func (self *UIBase) RecUpdateTree(z int, ctx UpdateContext) error {
 			}
 
 			// UpdateTreeIFがあればそちらを呼び出す。なければ再帰的に呼び出す
-			if self.updateTreeIF != nil {
-				if err := self.updateTreeIF.UpdateTree(z+1, ctx); err != nil {
-					lastErr = err
+			if child.updateTreeIF != nil {
+				if err := child.updateTreeIF.UpdateTree(z+1, ctx); err != nil {
+					errorList = append(errorList, err...)
 				}
 			} else {
-				if err := self.RecUpdateTree(z+1, ctx); err != nil {
-					lastErr = err
+				if err := child.RecUpdateTree(z+1, ctx); err != nil {
+					errorList = append(errorList, err...)
 				}
 			}
 		}
 	}
 
-	return lastErr
+	return errorList
 }

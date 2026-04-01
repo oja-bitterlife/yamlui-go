@@ -125,6 +125,12 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.frame++ // フレームを進める
 
+	// キーが押されたらLispを実行して構造体を更新
+	errorList := m.lib.Update(m.frame)
+	for _, err := range errorList {
+		fmt.Printf("Error during update: %v\n", err)
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		// 'q' か 'ctrl+c' で終了
@@ -132,29 +138,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
-		// キーが押されたらLispを実行して構造体を更新
-		err := m.lib.Update(m.frame)
-		if err != nil {
-			fmt.Printf("Error executing script: %v\n", err)
-			return m, nil
-		}
-
 		// 縦方向の移動 (NextGridY)
-		selectToggle := true
-		if msg.Type == tea.KeyUp {
-			m.startSel.Base.NextGridY(-1, selectToggle)
-		}
-		if msg.Type == tea.KeyDown {
-			m.startSel.Base.NextGridY(1, selectToggle)
-		}
-
-		// 横方向の移動 (NextGridX)
-		if msg.Type == tea.KeyLeft {
-			m.speedSel.Base.NextGridX(-1, selectToggle)
-		}
-		if msg.Type == tea.KeyRight {
-			m.speedSel.Base.NextGridX(1, selectToggle)
-		}
+		// selectToggle := true
+		// if msg.Type == tea.KeyUp {
+		// 	m.startSel.Base.NextGridY(-1, selectToggle)
+		// }
+		// if msg.Type == tea.KeyDown {
+		// 	m.startSel.Base.NextGridY(1, selectToggle)
+		// }
+		//
+		// // 横方向の移動 (NextGridX)
+		// if msg.Type == tea.KeyLeft {
+		// 	m.speedSel.Base.NextGridX(-1, selectToggle)
+		// }
+		// if msg.Type == tea.KeyRight {
+		// 	m.speedSel.Base.NextGridX(1, selectToggle)
+		// }
 	}
 
 	return m, nil

@@ -146,16 +146,10 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 
 // **********************************************************************
 // 呼び出し口
-// func (self *YAMLUI) Init() error {
-// 	// 最初のフレームならOnInitを呼び出す
-// 	if self.onInitIF != nil {
-// 		lastErr = self.onInitIF.OnInit(self, ctx)
-// 	}
-// 	return nil
-// }
-
 // Update
-func (self *YAMLUI) Update(frame int) error {
+func (self *YAMLUI) Update(frame int) []error {
+	errorList := []error{}
+
 	self.frame = frame
 
 	// updateQueueをクリア
@@ -163,10 +157,9 @@ func (self *YAMLUI) Update(frame int) error {
 
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
-	var lastErr error
 	ctx := NewUpdateContext(self, self.Root, nil)
 	if err := self.Root.RecUpdateTree(0, ctx); err != nil {
-		lastErr = err
+		errorList = append(errorList, err...)
 	}
 
 	// drawQueueに溜まった描画命令を実行する
@@ -181,7 +174,7 @@ func (self *YAMLUI) Update(frame int) error {
 		uiBase := item.ctx.Base
 		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
 			if err := uiBase.onInitIF.OnInit(item.ctx); err != nil {
-				lastErr = err
+				errorList = append(errorList, err)
 			}
 		}
 	}
@@ -195,7 +188,7 @@ func (self *YAMLUI) Update(frame int) error {
 		if uiBase.script != nil {
 			uiBase.storeToVM(uiBase.script.GetVM())
 			if _, err := uiBase.script.Run(); err != nil {
-				lastErr = err
+				errorList = append(errorList, err)
 			}
 			uiBase.loadFromVM(uiBase.script.GetVM())
 		}
@@ -204,7 +197,7 @@ func (self *YAMLUI) Update(frame int) error {
 		uiBase.UpdateCount++
 	}
 
-	return lastErr
+	return errorList
 }
 
 // Draw
