@@ -22,3 +22,11 @@
           children:
             - Type: "start"
               Text: "START, CONTINUE"
+        - Type: "label"
+          Text: "-MESSAGE SPEAD-"
+          X: 16
+          Y: 19
+        - Type: "speed"
+          X: 3 
+          Y: 20
+          Text: "SLOW, NORMAL, FAST"

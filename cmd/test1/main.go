@@ -60,6 +60,9 @@ func initialModel() model {
 	m.lib.RegisterRemap("label", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
 		return NewBTLabel(&m, parent, data).Base.Base, nil
 	})
+	m.lib.RegisterRemap("speed", func(type_ string, parent *yamlui.UIBase, data map[string]script.Value) (*yamlui.UIBase, error) {
+		return NewBTSpeed(&m, parent, data).Base.Base, nil
+	})
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")
@@ -71,31 +74,6 @@ func initialModel() model {
 	if err := m.lib.Load(data); err != nil {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
-
-	// startSel := NewBTStart(&m, 1)
-	// startSel.Base.AddItem(yamlui.NewUISelectItem("START"))
-	// startSel.Base.AddItem(yamlui.NewUISelectItem("CONTINUE"))
-	// startSel.Base.Base.SetArea(margin.Base.Area())
-	// win.Base.Base.AddChild(startSel.Base.Base)
-	// startSel.Base.Base.SetRect(0, 14, 16, 2)
-	// m.startSel = startSel
-	//
-	// speedArea := yamlui.NewUIArea()
-	// speedArea.Base.X = 12
-	// speedArea.Base.Y = 19
-	// win.Base.Base.AddChild(speedArea.Base)
-	//
-	// sppedLabel := NewBTLabel(&m, "-MESSAGE SPEED-")
-	// sppedLabel.Base.Base.X = 13
-	// speedArea.Base.AddChild(sppedLabel.Base.Base)
-	//
-	// speedSel := NewBTSpeed(&m, 3)
-	// speedSel.Base.Base.Y = 1
-	// speedSel.Base.AddItem(yamlui.NewUISelectItem("SLOW"))
-	// speedSel.Base.AddItem(yamlui.NewUISelectItem("NORMAL"))
-	// speedSel.Base.AddItem(yamlui.NewUISelectItem("FAST"))
-	// speedArea.Base.AddChild(speedSel.Base.Base)
-	// m.speedSel = speedSel
 
 	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
 	// 	scriptSrc := `
