@@ -12,9 +12,9 @@ import (
 // UIの基本構造.これを保有して各UI構造体を作る
 type UIBase struct {
 	// Scriptで更新させないもの
-	Type  string
-	ID    string
-	Frame int
+	Type        string
+	ID          string
+	UpdateCount int
 
 	// スクリプトで更新できるプロパティ
 	// ----------------------------------------
@@ -56,7 +56,10 @@ type UIBase struct {
 // ==================================================
 // VMとのやりとり
 func (self *UIBase) storeToVM(vm *script.VM) {
-	vm.SetVar("@Frame", script.NewNumber(float64(self.Frame)))
+	// スクリプトで使うFrameはUpdateCountを入れる
+	vm.SetVar("@Frame", script.NewNumber(float64(self.UpdateCount)))
+
+	// プロパティの送信
 	vm.SetVar("@IsEnable", script.NewBool(self.IsEnable))
 	vm.SetVar("@X", script.NewNumber(float64(self.X)))
 	vm.SetVar("@Y", script.NewNumber(float64(self.Y)))
@@ -74,6 +77,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 }
 
 func (self *UIBase) loadFromVM(vm *script.VM) {
+	// プロパティの受信
 	self.IsEnable = vm.GetVar("@IsEnable").Bool
 	self.X = vm.GetVar("@X").Num
 	self.Y = vm.GetVar("@Y").Num

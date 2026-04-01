@@ -19,10 +19,11 @@ type DrawQueueItem struct {
 
 // Align操作が必要な時とか、DrawTreeを自前で実装したいときのインターフェース
 type DrawTreeIF interface {
-	DrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext)
+	DrawTree(z int, x, y float64, ctx DrawContext)
 }
 
 type DrawContext struct {
+	Lib        *YAMLUI // ライブラリ全体へのアクセス
 	Parent     *UIBase // 親のUI
 	ParentClip Area    // 親の描画領域（クリップされている）
 	Base       *UIBase // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
@@ -40,8 +41,9 @@ func (self *UIBase) SetDrawTreeIF(drawTreeIF DrawTreeIF) {
 // ==================================================
 // DrawTreeの再帰実行
 // コンテキスト作成
-func NewDrawContext(self *UIBase, parent *UIBase, parentClip Area) DrawContext {
+func NewDrawContext(lib *YAMLUI, self *UIBase, parent *UIBase, parentClip Area) DrawContext {
 	return DrawContext{
+		Lib:        lib,
 		Parent:     parent,
 		ParentClip: parentClip,
 		Base:       self,
@@ -54,17 +56,17 @@ func NewDrawContext(self *UIBase, parent *UIBase, parentClip Area) DrawContext {
 	}
 }
 
-func (self *UIBase) RecDrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContext) {
+func (self *UIBase) RecDrawTree(z int, x, y float64, ctx DrawContext) {
 	// 子供の描画
 	for _, child := range self.children {
 		if child.IsVisible {
 			// 描画座標やクリップ領域等を計算してコンテキストを作る
-			childCtx := NewDrawContext(child, self, ctx.Clip)
+			childCtx := NewDrawContext(ctx.Lib, child, self, ctx.Clip)
 			childX, childY := x+child.X, y+child.Y
 
 			// 描画インターフェースがあれば描画キューに入れる
 			if child.drawIF != nil {
-				lib.drawQueue = append(lib.drawQueue, DrawQueueItem{
+				ctx.Lib.drawQueue = append(ctx.Lib.drawQueue, DrawQueueItem{
 					drawIF: child.drawIF,
 					x:      childX,
 					y:      childY,
@@ -75,10 +77,10 @@ func (self *UIBase) RecDrawTree(lib *YAMLUI, x, y float64, z int, ctx DrawContex
 
 			// 自前drawTreeがあればそちらを呼び出す
 			if child.drawTreeIF != nil {
-				child.drawTreeIF.DrawTree(lib, childX, childY, z+1, childCtx)
+				child.drawTreeIF.DrawTree(z+1, childX, childY, childCtx)
 			} else {
 				// なければ再帰的に子供を描画
-				child.RecDrawTree(lib, childX, childY, z+1, childCtx)
+				child.RecDrawTree(z+1, childX, childY, childCtx)
 			}
 		}
 	}

@@ -13,6 +13,7 @@ type YAMLUI struct {
 	remapFuncs map[string]func(string, *UIBase, map[string]script.Value) (*UIBase, error)
 
 	// Updateの時に使うもの
+	frame int // システム時間
 	// EventQueue  []EventQueueItem
 	updateQueue []UpdateQueueItem
 
@@ -155,13 +156,16 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 
 // Update
 func (self *YAMLUI) Update(frame int) error {
+	self.frame = frame
+
+	// updateQueueをクリア
 	self.updateQueue = []UpdateQueueItem{}
 
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
 	var lastErr error
-	ctx := NewUpdateContext(self.Root, nil)
-	if err := self.Root.RecUpdateTree(self, frame, 0, ctx); err != nil {
+	ctx := NewUpdateContext(self, self.Root, nil)
+	if err := self.Root.RecUpdateTree(0, ctx); err != nil {
 		lastErr = err
 	}
 
@@ -171,9 +175,33 @@ func (self *YAMLUI) Update(frame int) error {
 	slices.SortStableFunc(self.updateQueue, func(a, b UpdateQueueItem) int {
 		return a.z - b.z
 	})
+
+	// UpdateCountが0のときはInitとみなしてOnInitを呼び出す
+	for _, item := range self.updateQueue {
+		uiBase := item.ctx.Base
+		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
+			if err := uiBase.onInitIF.OnInit(item.ctx); err != nil {
+				lastErr = err
+			}
+		}
+	}
+
 	// ソートされたqueueを順番に実行する
-	for _, item := range self.drawQueue {
-		item.drawIF.Draw(item.x, item.y, item.ctx)
+	for _, item := range self.updateQueue {
+		item.UpdateIF.Update(item.ctx)
+
+		// UIの更新後スクリプトがあれば走らせる
+		uiBase := item.ctx.Base
+		if uiBase.script != nil {
+			uiBase.storeToVM(uiBase.script.GetVM())
+			if _, err := uiBase.script.Run(); err != nil {
+				lastErr = err
+			}
+			uiBase.loadFromVM(uiBase.script.GetVM())
+		}
+
+		// 実行カウントを進める
+		uiBase.UpdateCount++
 	}
 
 	return lastErr
@@ -188,8 +216,8 @@ func (self *YAMLUI) Draw(screen Area) {
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewDrawContext(self.Root, nil, screen)
-	self.Root.RecDrawTree(self, 0, 0, 0, ctx)
+	ctx := NewDrawContext(self, self.Root, nil, screen)
+	self.Root.RecDrawTree(0, 0, 0, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
 	// ----------------------------------------
