@@ -33,15 +33,21 @@ func (self *YAMLUI) ProcessEvents() {
 		remainEvents := []string{} // マッチしなかったイベントをためておくリスト
 		for _, event := range checkEvents {
 			// 受信設定と一致したイベントがあるか確認する
+			matchedAny := false
 			for _, wildStr := range self.updateQueue[i].ctx.Base.Events {
 				// ワイルドカード(path.Match)でマッチング
 				if match, _ := path.Match(wildStr, event); match {
-					// マッチしたらイベント処理を登録
-					self.updateQueue[i].ctx.Events = append(self.updateQueue[i].ctx.Events, event)
-				} else {
-					// マッチしなかったイベントは次のUIで確認するために残しておく
-					remainEvents = append(remainEvents, event)
+					matchedAny = true
+					break // 1つでもマッチしたらこのUIのもの！
 				}
+			}
+
+			// マッチしたイベントはこのUIで処理するためにctx.Eventsに追加する
+			if matchedAny {
+				self.updateQueue[i].ctx.Events = append(self.updateQueue[i].ctx.Events, event)
+			} else {
+				// マッチしなかったイベントは次のUIで確認するために残しておく
+				remainEvents = append(remainEvents, event)
 			}
 		}
 		checkEvents = remainEvents // 次のUIではマッチしなかったイベントだけを確認する
