@@ -21,7 +21,7 @@ func (self *BTTitle) GetUIBase() *yamlui.UIBase {
 	return self.UIBase
 }
 
-func (self *BTTitle) Clone() *BTTitle {
+func (self *BTTitle) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	return &BTTitle{
 		UIBase: self.UIBase.Clone(),
 		model:  self.model,
@@ -33,17 +33,17 @@ func (self *BTTitle) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBa
 	return nil
 }
 
-func stringWidth(s string) int {
-	width := 0
-	for _, r := range s {
-		if r <= 127 {
-			width += 1
-		} else {
-			width += 1
-		}
-	}
-	return width
-}
+// func stringWidth(s string) int {
+// 	width := 0
+// 	for _, r := range s {
+// 		if r <= 127 {
+// 			width += 1
+// 		} else {
+// 			width += 1
+// 		}
+// 	}
+// 	return width
+// }
 
 func (self *BTTitle) Draw(x, y float64, ctx yamlui.DrawContext) {
 	// 64x24のエリア内での描画

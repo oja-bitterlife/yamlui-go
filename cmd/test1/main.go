@@ -44,7 +44,7 @@ func initialModel() model {
 	}
 
 	// UI構築の登録
-	// m.lib.UIBuild("window", NewBTWindow(lib.model))
+	m.lib.UIBuild("window", NewBTWindow(&m))
 	// yamlui.UIBuilder(m.lib, "window", NewBTWindow, func(ui *BTWindow) { ui.model = &m })
 	// yamlui.UIBuilder(m.lib, "title", NewBTTitle, func(ui *BTTitle) { ui.model = &m })
 	// yamlui.UIBuilder(m.lib, "area", yamlui.NewUIArea, nil)

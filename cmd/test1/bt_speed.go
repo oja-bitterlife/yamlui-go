@@ -24,9 +24,9 @@ func (self *BTSpeed) GetUIBase() *yamlui.UIBase {
 	return self.SelBase.UIBase
 }
 
-func (self *BTSpeed) Clone() *BTSpeed {
+func (self *BTSpeed) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	return &BTSpeed{
-		SelBase: self.SelBase.Clone(),
+		SelBase: self.SelBase.Clone().(*yamlui.UISelect),
 		model:   self.model,
 		texts:   self.texts,
 	}

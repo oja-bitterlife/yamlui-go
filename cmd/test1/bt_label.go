@@ -20,7 +20,7 @@ func (self *BTLabel) GetUIBase() *yamlui.UIBase {
 	return self.UIBase
 }
 
-func (self *BTLabel) Clone() *BTLabel {
+func (self *BTLabel) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	return &BTLabel{
 		UIBase: self.UIBase.Clone(),
 		model:  self.model,

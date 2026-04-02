@@ -34,7 +34,7 @@ func NewYAMLUI() *YAMLUI {
 // ==================================================
 type UIComponent[T any] interface {
 	GetUIBase() *UIBase
-	Clone() UIComponent[T]
+	Clone() UIComponent[*UIBase]
 	Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error
 }
 

@@ -21,7 +21,7 @@ func (self *UIEmpty) GetUIBase() *UIBase {
 	return self.UIBase
 }
 
-func (self *UIEmpty) Clone() *UIEmpty {
+func (self *UIEmpty) Clone() UIComponent[*UIBase] {
 	return &UIEmpty{
 		UIBase: self.UIBase.Clone(),
 	}

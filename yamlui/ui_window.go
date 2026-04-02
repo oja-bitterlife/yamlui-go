@@ -31,7 +31,7 @@ func (self *UIWindow) GetUIBase() *UIBase {
 	return self.UIBase
 }
 
-func (self *UIWindow) Clone() *UIWindow {
+func (self *UIWindow) Clone() UIComponent[*UIBase] {
 	return &UIWindow{
 		UIBase: self.UIBase.Clone(),
 		State:  self.State,
