@@ -201,8 +201,11 @@ func (self *YAMLUI) Update(frame int) []error {
 		uiBase := item.ctx.Base
 		if uiBase.script != nil {
 			uiBase.storeToVM(uiBase.script.GetVM())
-			if _, err := uiBase.script.Run(); err != nil {
+			if result, err := uiBase.script.Run(); err != nil {
 				errorList = append(errorList, err)
+			} else {
+				// スクリプトの実行結果をUIBaseに保存しておく
+				uiBase.ScriptResult = result
 			}
 			uiBase.loadFromVM(uiBase.script.GetVM())
 		}

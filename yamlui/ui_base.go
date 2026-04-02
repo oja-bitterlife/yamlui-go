@@ -37,9 +37,12 @@ type UIBase struct {
 	Color     string // 使用するカラーの名称。system/msg/frameなどを想定
 
 	// インタラクティブなUIに必要なプロパティ
-	SelectNo     float64
-	SelGridX     float64 // SelectGridで横の折り返し位置
-	ScriptReturn string  // 都度リセットされる
+	SelectNo float64
+	SelGridX float64 // SelectGridで横の折り返し位置
+
+	// 都度リセットされる
+	Action       string       // どのイベントが発生したか。イベント名を入れる
+	ScriptResult script.Value // スクリプトの評価結果
 
 	// 子要素が保存させたいもの
 	Prop map[string]script.Value
@@ -136,7 +139,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
 
 	// スクリプトからUIに伝えるためのものなので常に空文字を入れておく
-	vm.SetVar("@Return", script.NewString(""))
+	vm.SetVar("@Action", script.NewString(""))
 
 	// PropはProp.をプレフィックスにして送る
 	for k, v := range self.Prop {
@@ -156,7 +159,7 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.Color = vm.GetVar("@Color").Str
 	self.SelectNo = vm.GetVar("@SelectNo").Num
 	self.SelGridX = vm.GetVar("@SelGridX").Num
-	self.ScriptReturn = vm.GetVar("@Return").Str
+	self.Action = vm.GetVar("@Action").Str
 
 	// PropはProp.をプレフィックスにして受け取る
 	for k, v := range vm.GetVars() {
