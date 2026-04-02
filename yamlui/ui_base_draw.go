@@ -26,7 +26,6 @@ type DrawContext struct {
 	Lib        *YAMLUI // ライブラリ全体へのアクセス
 	Parent     *UIBase // 親のUI
 	ParentClip Area    // 親の描画領域（クリップされている）
-	Base       *UIBase // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
 	Clip       Area    // 自分が描画できる領域（クリップされている）
 }
 
@@ -46,7 +45,6 @@ func NewDrawContext(lib *YAMLUI, self *UIBase, parent *UIBase, parentClip Area) 
 		Lib:        lib,
 		Parent:     parent,
 		ParentClip: parentClip,
-		Base:       self,
 		Clip: Area{
 			X: parentClip.X + self.X,
 			Y: parentClip.Y + self.Y,

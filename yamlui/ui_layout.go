@@ -75,7 +75,7 @@ func (self *UILayout) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[
 func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
-	selfW, selfH := ctx.Base.Area().WH()
+	selfW, selfH := self.GetUIBase().Area().WH()
 
 	// 絶対座標対応
 	if self.IsAbs {
@@ -122,5 +122,5 @@ func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 	}.Clip(parentArea)
 
 	// 元のDrawTreeを呼び出す
-	ctx.Base.RecDrawTree(z, alignX+left, alignY+top, ctx)
+	self.GetUIBase().RecDrawTree(z, alignX+left, alignY+top, ctx)
 }

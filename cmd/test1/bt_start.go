@@ -78,7 +78,7 @@ func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "
-		if i == int(ctx.Base.SelectNo) {
+		if i == int(self.GetUIBase().SelectNo) {
 			line = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}
