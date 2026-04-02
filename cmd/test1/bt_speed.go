@@ -33,6 +33,10 @@ func (self *BTSpeed) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 }
 
 func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
+	if err := self.SelBase.Setup(lib, type_, parent, data); err != nil { // super call
+		return err
+	}
+
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(data["Text"].Str, ",")
 	for i := range texts {

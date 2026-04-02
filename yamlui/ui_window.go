@@ -39,5 +39,5 @@ func (self *UIWindow) Clone() UIComponent[*UIBase] {
 }
 
 func (self *UIWindow) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
-	return nil
+	return self.UIBase.Setup(lib, type_, parent, data) // super call
 }

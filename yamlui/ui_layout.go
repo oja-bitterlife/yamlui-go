@@ -46,6 +46,11 @@ func (self *UILayout) Clone() UIComponent[*UIBase] {
 }
 
 func (self *UILayout) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
+	if err := self.UIBase.Setup(lib, type_, parent, data); err != nil { // super call
+		return err
+	}
+
+	// DrawTreeIFをセット
 	self.UIBase.SetDrawTreeIF(self)
 
 	// デフォルトはMargin=0

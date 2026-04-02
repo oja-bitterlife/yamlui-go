@@ -29,6 +29,10 @@ func (self *BTTitle) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 }
 
 func (self *BTTitle) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
+	if err := self.UIBase.Setup(lib, type_, parent, data); err != nil { // super call
+		return err
+	}
+
 	self.UIBase.SetDrawIF(self)
 	return nil
 }

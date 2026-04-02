@@ -82,8 +82,12 @@ func NewUIBase() *UIBase {
 	return ui
 }
 
-// ==================================================
-// Clone
+// **********************************************************************
+// UIComponentIFの実装
+func (self *UIBase) GetUIBase() *UIBase {
+	return self
+}
+
 func (self *UIBase) Clone() *UIBase {
 	clone := *self
 
@@ -106,6 +110,11 @@ func (self *UIBase) Clone() *UIBase {
 	}
 
 	return &clone
+}
+
+func (self *UIBase) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
+	// 基本的にはUIBaseは何もしない。今後のための予約
+	return nil
 }
 
 // **********************************************************************
