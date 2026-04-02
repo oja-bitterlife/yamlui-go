@@ -201,12 +201,18 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// ソートされたqueueを順番に実行する
 	for _, item := range self.updateQueue {
+		uiBase := item.ctx.Base
+
 		// Updateを呼び出す
 		item.UpdateIF.Update(item.ctx)
+		// ActionはUpdateイベントなので、Updateの実行後にイベントが発生していればイベントキューに追加する
+		if strings.TrimSpace(uiBase.Action) != "" {
+			// 次のUIの更新でイベントが処理される
+			self.AddEvent(uiBase.Action)
+		}
 
 		// Update後スクリプトがあれば走らせる
 		// ----------------------------------------
-		uiBase := item.ctx.Base
 		if uiBase.script != nil {
 			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
 			uiBase.storeToVM(uiBase.script.GetVM())
@@ -221,7 +227,7 @@ func (self *YAMLUI) Update(frame int) []error {
 			// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
 			uiBase.loadFromVM(uiBase.script.GetVM())
 
-			// Actionはスクリプトイベントなので、スクリプトの実行後にイベントが発生していればイベントキューに追加する
+			// ScriptActionはスクリプトイベントなので、スクリプトの実行後にイベントが発生していればイベントキューに追加する
 			if strings.TrimSpace(uiBase.ScriptAction) != "" {
 				// 次のUIの更新でイベントが処理される
 				self.AddEvent(uiBase.ScriptAction)

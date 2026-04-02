@@ -17,7 +17,7 @@
             - Type: "start"
               Text: "START, CONTINUE"
               RowsNum: 1
-              Events: ["key:up", "key:down"]
+              Events: ["key:up", "key:down", "key:enter"]
         - Type: "label"
           Text: "-MESSAGE SPEAD-"
           X: 16

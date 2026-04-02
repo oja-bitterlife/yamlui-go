@@ -105,6 +105,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Type == tea.KeyRight {
 			m.lib.AddEvent("key:right")
 		}
+
+		// Enterキーで選択
+		if msg.Type == tea.KeyEnter {
+			m.lib.AddEvent("key:enter")
+		}
 	}
 
 	// Update
