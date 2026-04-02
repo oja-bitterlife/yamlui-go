@@ -1,5 +1,7 @@
 package yamlui
 
+import "github.com/oja-bitterlife/yamlui-go/script"
+
 // ウインドウの状態
 type UIWindowState int
 
@@ -11,14 +13,31 @@ const (
 )
 
 type UIWindow struct {
-	Base  *UIBase
-	State UIWindowState
+	UIBase *UIBase
+	State  UIWindowState
 }
 
-func NewUIWindow(type_ string) *UIWindow {
+func NewUIWindow() *UIWindow {
 	window := &UIWindow{
-		Base:  NewUIBase(type_),
-		State: UIWindowOpening,
+		UIBase: NewUIBase(),
+		State:  UIWindowOpening,
 	}
 	return window
+}
+
+// **********************************************************************
+// UIComponentIFの実装
+func (self *UIWindow) GetUIBase() *UIBase {
+	return self.UIBase
+}
+
+func (self *UIWindow) Clone() *UIWindow {
+	return &UIWindow{
+		UIBase: self.UIBase.Clone(),
+		State:  self.State,
+	}
+}
+
+func (self *UIWindow) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
+	return nil
 }

@@ -18,7 +18,6 @@ func (self *UIBase) ToValue() script.Value {
 	}
 
 	return script.NewLitMap(map[string]script.Value{
-		"Type":        script.NewString(self.Type),
 		"ID":          script.NewString(self.ID),
 		"UpdateCount": script.NewNumber(float64(self.UpdateCount)),
 		"Events":      script.NewLitList(events),
@@ -46,9 +45,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	m := value.Map
 
 	// キーがあれば流し込む。なければデフォルト値のまま
-	if v, ok := m["Type"]; ok {
-		self.Type = v.Str
-	}
 	if v, ok := m["ID"]; ok {
 		self.ID = v.Str
 	}

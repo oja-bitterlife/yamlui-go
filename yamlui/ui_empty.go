@@ -1,15 +1,32 @@
 package yamlui
 
+import "github.com/oja-bitterlife/yamlui-go/script"
+
 // 何もしないUI
 // 仮構築用
 
 type UIEmpty struct {
-	Base *UIBase
+	UIBase *UIBase
 }
 
-func NewUIEmpty(type_ string) *UIEmpty {
-	empty := &UIEmpty{
-		Base: NewUIBase(type_),
+func NewUIEmpty() *UIEmpty {
+	return &UIEmpty{
+		UIBase: NewUIBase(),
 	}
-	return empty
+}
+
+// ==================================================
+// UIComponentIFの実装
+func (self *UIEmpty) GetUIBase() *UIBase {
+	return self.UIBase
+}
+
+func (self *UIEmpty) Clone() *UIEmpty {
+	return &UIEmpty{
+		UIBase: self.UIBase.Clone(),
+	}
+}
+
+func (self *UIEmpty) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
+	return nil
 }

@@ -9,8 +9,8 @@ import (
 
 type YAMLUI struct {
 	// UIツリー構築用
-	Root       *UIBase
-	remapFuncs map[string]func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)
+	Root   *UIBase
+	refObj map[string]UIComponent[*UIBase]
 
 	// Updateの時に使うもの
 	frame       int // システム時間
@@ -24,50 +24,23 @@ type YAMLUI struct {
 
 func NewYAMLUI() *YAMLUI {
 	return &YAMLUI{
-		Root:       NewUIBase("Root"),
-		remapFuncs: make(map[string]func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)),
+		Root:   NewUIBase(),
+		refObj: make(map[string]UIComponent[*UIBase]),
 	}
 }
 
 // **********************************************************************
-// mapの解析
+// UIのJSONをUnmarshalしたmap[string]ValueのTypeごとにインスタンスを割り当て
 // ==================================================
-// mapを解析して必要なデータを構造体に流し込むためのインターフェース
-func (self *YAMLUI) RegisterRemap(typeName string, fn func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error)) {
-	self.remapFuncs[typeName] = fn
+type UIComponent[T any] interface {
+	GetUIBase() *UIBase
+	Clone() UIComponent[T]
+	Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error
 }
 
-type UICloneable[T any] interface {
-	UIClone() T
-}
-
-// UIを構築するためのインターフェース
-type UIComponent interface {
-	GetBase() *UIBase
-}
-
-type UIComponentFactory[T UIComponent] func(componentName string, parent *UIBase, data map[string]script.Value) T
-
-func UIBuilder[T UIComponent](
-	lib *YAMLUI,
-	componentName string,
-	factory UIComponentFactory[T],
-	onCreated func(T)) {
-
-	lib.RegisterRemap(componentName,
-		// クロージャでUIComponentを構築
-		func(type_ string, parent *UIBase, data map[string]script.Value) (*UIBase, error) {
-			// Factoryで構築
-			component := factory(componentName, parent, data)
-
-			// onCreatedがnilでなければ呼び出す
-			if onCreated != nil {
-				onCreated(component)
-			}
-
-			// インターフェース経由で Base を取り出して返す
-			return component.GetBase(), nil
-		})
+// Loadのときに、Typeを見て、登録されたUICloneableからUIBaseを複製して構築するためのインターフェース
+func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
+	self.refObj[type_] = refObj
 }
 
 // ==================================================
@@ -147,19 +120,24 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 
 	// Typeを見て、リマップ関数があればそれで構築
 	type_ := value.Map["Type"].Str
-	if remapFunc, ok := self.remapFuncs[type_]; ok {
-		// 登録されたリマップ関数でUIを構築
-		ui, err = remapFunc(type_, parent, value.Map)
-		if err != nil {
+	if refObj, ok := self.refObj[type_]; ok {
+		// 登録されたUICloneableからUIを複製して構築
+		component := refObj.Clone()
+		ui = component.GetUIBase()
+		ui.LoadFromValue(value) // プロパティを流し込む
+
+		// Setup関数でさらに細かい構築を行う
+		if err = component.Setup(self, type_, parent, value.Map); err != nil {
 			return err
 		}
 	} else {
-		// 登録されたリマップ関数がない場合は、基本的なUIを構築
-		ui = NewUIBase(type_)
+		// 登録されたUICloneableがない場合は、基本的なUIを構築
+		ui = NewUIBase()
+		ui.LoadFromValue(value) // プロパティを流し込む
 	}
 
-	ui.LoadFromValue(value) // プロパティを流し込む
-	parent.AddChild(ui)     // 親ノードに追加
+	// 構築したUIを親に追加
+	parent.AddChild(ui)
 
 	// ここで再帰的に UI を構築するロジックを入れる
 	children, ok := value.Map["children"]

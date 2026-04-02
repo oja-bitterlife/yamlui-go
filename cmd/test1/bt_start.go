@@ -8,40 +8,56 @@ import (
 )
 
 type BTStart struct {
-	Base  *yamlui.UISelect
-	model *model
-	texts []string
+	SelBase *yamlui.UISelect
+	model   *model
+	texts   []string
 }
 
-func (self *BTStart) GetBase() *yamlui.UIBase {
-	return self.Base.Base
+func NewBTStart(model *model) *BTStart {
+	return &BTStart{
+		SelBase: yamlui.NewUISelect(0, 1), // ItemNumは後でSetupで設定する
+		model:   model,
+	}
 }
 
-func NewBTStart(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTStart {
+func (self *BTStart) GetUIBase() *yamlui.UIBase {
+	return self.SelBase.UIBase
+}
+
+func (self *BTStart) Clone() *BTStart {
+	return &BTStart{
+		SelBase: self.SelBase.Clone(),
+		model:   self.model,
+		texts:   self.texts,
+	}
+}
+
+func (self *BTStart) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(data["Text"].Str, ",")
 	for i := range texts {
 		texts[i] = strings.TrimSpace(texts[i])
 	}
+	self.texts = texts
 
-	selectUI := &BTStart{
-		Base:  yamlui.NewUISelect(componentName, len(texts), 1),
-		texts: texts,
-	}
+	// ItemNumをtextsの数に設定
+	self.SelBase.ItemNum = len(texts)
+	self.SelBase.RowNum = max(int(data["RowNum"].Num), 1) // RowNumは1以上にする
 
-	selectUI.Base.Base.SetDrawIF(selectUI)
-	selectUI.Base.Base.SetUpdateIF(selectUI)
-	return selectUI
+	self.SelBase.UIBase.SetDrawIF(self)
+	self.SelBase.UIBase.SetUpdateIF(self)
+
+	return nil
 }
 
 // Update
 func (self *BTStart) Update(ctx yamlui.UpdateContext) error {
 	for _, event := range ctx.Events {
 		if event == "key:up" {
-			self.Base.NextGridY(-1, true)
+			self.SelBase.NextGridY(-1, true)
 		}
 		if event == "key:down" {
-			self.Base.NextGridY(1, true)
+			self.SelBase.NextGridY(1, true)
 		}
 	}
 	return nil
@@ -50,15 +66,15 @@ func (self *BTStart) Update(ctx yamlui.UpdateContext) error {
 // Draw
 func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
 
-	for i := range self.Base.ItemNum {
+	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
 		if i >= int(ctx.Clip.H) {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := ctx.Clip.IY() + i/self.Base.RowNum
-		x := ctx.Clip.IX() + (i % self.Base.RowNum)
+		y := ctx.Clip.IY() + i/self.SelBase.RowNum
+		x := ctx.Clip.IX() + (i % self.SelBase.RowNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "

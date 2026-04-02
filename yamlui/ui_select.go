@@ -1,41 +1,53 @@
 package yamlui
 
-// **********************************************************************
-// 選択アイテム
-type UISelectItem struct {
-	Base *UIBase
-}
+import "github.com/oja-bitterlife/yamlui-go/script"
 
 // **********************************************************************
 // 選択UI
 type UISelect struct {
-	Base    *UIBase
+	UIBase  *UIBase
 	ItemNum int
 	RowNum  int
 }
 
-func NewUISelect(type_ string, itemNum, rowNum int) *UISelect {
-	selectUI := &UISelect{
-		Base:    NewUIBase(type_),
+func NewUISelect(itemNum, rowNum int) *UISelect {
+	return &UISelect{
+		UIBase:  NewUIBase(),
 		ItemNum: itemNum,
 		RowNum:  rowNum,
 	}
-	return selectUI
 }
 
 func (self *UISelect) GetSelectNo() int {
-	return int(self.Base.SelectNo)
+	return int(self.UIBase.SelectNo)
 }
 
 func (self *UISelect) SetSelectNo(selectNo int) {
-	self.Base.SelectNo = float64(selectNo)
+	self.UIBase.SelectNo = float64(selectNo)
 }
 
-// ==================================================
+// **********************************************************************
+// UIComponentIFの実装
+func (self *UISelect) GetUIBase() *UIBase {
+	return self.UIBase
+}
+
+func (self *UISelect) Clone() *UISelect {
+	return &UISelect{
+		UIBase:  self.UIBase.Clone(),
+		ItemNum: self.ItemNum,
+		RowNum:  self.RowNum,
+	}
+}
+
+func (self *UISelect) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
+	return nil
+}
+
+// **********************************************************************
 // 選択の操作
 // step: 移動量（正の数で下/右、負の数で上/左）
 // toggle: trueなら端から端へループ、falseなら端で止まる
-
 // 単純な移動（リストで選択肢を配置している場合の移動）
 func (self *UISelect) Next(step int, toggle bool) {
 	if self.RowNum == 0 { // 0で割るのを防止

@@ -15,7 +15,6 @@ import (
 type UIBase struct {
 	// ==================================================
 	// Scriptで更新させないもの
-	Type        string
 	ID          string
 	UpdateCount int // @Frameとして送り込む
 
@@ -59,7 +58,7 @@ type UIBase struct {
 	drawTreeIF   DrawTreeIF
 }
 
-func NewUIBase(type_ string) *UIBase {
+func NewUIBase() *UIBase {
 	// 仮のIDを生成
 	b := make([]byte, 16) // 128bit
 	if _, err := rand.Read(b); err != nil {
@@ -67,7 +66,6 @@ func NewUIBase(type_ string) *UIBase {
 	}
 
 	ui := &UIBase{}
-	ui.Type = type_
 	ui.ID = hex.EncodeToString(b)
 	ui.IsEnable = true
 	ui.IsVisible = true
@@ -75,10 +73,18 @@ func NewUIBase(type_ string) *UIBase {
 	// とりあえず大きな値を入れておく
 	ui.W = 65536
 	ui.H = 65536
+
+	// map/sliceを初期化しておく
+	ui.Events = []string{}
+	ui.Prop = make(map[string]script.Value)
+	ui.children = []*UIBase{}
+
 	return ui
 }
 
-func (self *UIBase) UIClone() *UIBase {
+// ==================================================
+// Clone
+func (self *UIBase) Clone() *UIBase {
 	clone := *self
 
 	// PropとEventsは標準ライブラリのCloneでOK
@@ -90,7 +96,7 @@ func (self *UIBase) UIClone() *UIBase {
 		clone.children = make([]*UIBase, len(self.children))
 		for i, child := range self.children {
 			// 子要素の UIClone を呼び、新しい個体として登録する
-			clone.children[i] = child.UIClone()
+			clone.children[i] = child.Clone()
 		}
 	}
 
@@ -102,7 +108,7 @@ func (self *UIBase) UIClone() *UIBase {
 	return &clone
 }
 
-// ==================================================
+// **********************************************************************
 // VMとのやりとり
 func (self *UIBase) storeToVM(vm *script.VM) {
 	// スクリプトで使うFrameはUpdateCountを入れる

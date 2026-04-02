@@ -27,27 +27,6 @@ func NewVM() *VM {
 	}
 }
 
-// JSONでDumpする
-// func (vm *VM) DumpVars() ([]byte, error) {
-// 	buf := bytes.Buffer{}
-// 	buf.WriteByte('{')
-// 	count := 0
-// 	for k, v := range vm.vars.Map {
-// 		if count > 0 {
-// 			buf.WriteByte(',')
-// 		}
-// 		buf.WriteString(strconv.Quote(k))
-// 		buf.WriteByte(':')
-// 		jsonData, err := v.MarshalJSON()
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		buf.Write(jsonData)
-// 	}
-// 	buf.WriteByte('}')
-// 	return buf.Bytes(), nil
-// }
-
 // コマンドを登録する関数
 // ----------------------------------------
 func (vm *VM) RegisterCmd(name string, fn func(vm *VM, args []Value) (Value, error)) {

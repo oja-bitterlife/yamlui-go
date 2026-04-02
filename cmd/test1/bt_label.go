@@ -6,22 +6,32 @@ import (
 )
 
 type BTLabel struct {
-	Base  *yamlui.UIBase
-	model *model
-	texts []string
+	UIBase *yamlui.UIBase
+	model  *model
 }
 
-func (self *BTLabel) GetBase() *yamlui.UIBase {
-	return self.Base
-}
-
-func NewBTLabel(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTLabel {
-	label := &BTLabel{
-		Base: yamlui.NewUIBase(componentName),
+func NewBTLabel() *BTLabel {
+	return &BTLabel{
+		UIBase: yamlui.NewUIBase(),
 	}
-	label.Base.SetDrawIF(label)
-	return label
+}
+
+func (self *BTLabel) GetUIBase() *yamlui.UIBase {
+	return self.UIBase
+}
+
+func (self *BTLabel) Clone() *BTLabel {
+	return &BTLabel{
+		UIBase: self.UIBase.Clone(),
+		model:  self.model,
+	}
+}
+
+func (self *BTLabel) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
+	self.UIBase.SetDrawIF(self)
+	return nil
 }
 
 func (self *BTLabel) Draw(x, y float64, ctx yamlui.DrawContext) {
+	panic("BTLabel.Draw is not implemented yet")
 }

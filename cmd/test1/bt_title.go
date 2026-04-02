@@ -6,23 +6,31 @@ import (
 )
 
 type BTTitle struct {
-	Base  *yamlui.UIBase
-	model *model
+	UIBase *yamlui.UIBase
+	model  *model
 }
 
-// func (self *BTTitle) UIClone() *BTTitle {
-// }
-
-func (self *BTTitle) GetBase() *yamlui.UIBase {
-	return self.Base
-}
-
-func NewBTTitle(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTTitle {
-	title := &BTTitle{
-		Base: yamlui.NewUIBase(componentName),
+func NewBTTitle(model *model) *BTTitle {
+	return &BTTitle{
+		UIBase: yamlui.NewUIBase(),
+		model:  model,
 	}
-	title.Base.SetDrawIF(title)
-	return title
+}
+
+func (self *BTTitle) GetUIBase() *yamlui.UIBase {
+	return self.UIBase
+}
+
+func (self *BTTitle) Clone() *BTTitle {
+	return &BTTitle{
+		UIBase: self.UIBase.Clone(),
+		model:  self.model,
+	}
+}
+
+func (self *BTTitle) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
+	self.UIBase.SetDrawIF(self)
+	return nil
 }
 
 func stringWidth(s string) int {

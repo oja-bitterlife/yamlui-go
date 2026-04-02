@@ -6,23 +6,32 @@ import (
 )
 
 type BTWindow struct {
-	Base  *yamlui.UIWindow
-	model *model
+	WinBase *yamlui.UIWindow
+	model   *model
 }
 
-func (self *BTWindow) GetBase() *yamlui.UIBase {
-	return self.Base.Base
-}
-
-func NewBTWindow(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTWindow {
-	window := &BTWindow{
-		Base: yamlui.NewUIWindow(componentName),
+func NewBTWindow(m *model) *BTWindow {
+	return &BTWindow{
+		WinBase: yamlui.NewUIWindow(),
+		model:   m,
 	}
-	window.Base.Base.SetDrawIF(window)
-	return window
 }
 
-func (self *BTWindow) Init(ctx yamlui.UpdateContext) error {
+// **********************************************************************
+// UIComponentIFの実装
+func (self *BTWindow) GetUIBase() *yamlui.UIBase {
+	return self.WinBase.UIBase
+}
+
+func (self *BTWindow) Clone() *BTWindow {
+	return &BTWindow{
+		WinBase: self.WinBase.Clone(),
+		model:   self.model,
+	}
+}
+
+func (self *BTWindow) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
+	self.WinBase.UIBase.SetDrawIF(self)
 	return nil
 }
 

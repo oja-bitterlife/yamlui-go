@@ -8,39 +8,56 @@ import (
 )
 
 type BTSpeed struct {
-	Base  *yamlui.UISelect
-	model *model
-	texts []string
+	SelBase *yamlui.UISelect
+	model   *model
+	texts   []string
 }
 
-func (self *BTSpeed) GetBase() *yamlui.UIBase {
-	return self.Base.Base
+func NewBTSpeed(model *model) *BTSpeed {
+	return &BTSpeed{
+		SelBase: yamlui.NewUISelect(0, 1), // ItemNumは後でSetupで設定する
+		model:   model,
+	}
 }
 
-func NewBTSpeed(componentName string, parent *yamlui.UIBase, data map[string]script.Value) *BTSpeed {
+func (self *BTSpeed) GetUIBase() *yamlui.UIBase {
+	return self.SelBase.UIBase
+}
+
+func (self *BTSpeed) Clone() *BTSpeed {
+	return &BTSpeed{
+		SelBase: self.SelBase.Clone(),
+		model:   self.model,
+		texts:   self.texts,
+	}
+}
+
+func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(data["Text"].Str, ",")
 	for i := range texts {
 		texts[i] = strings.TrimSpace(texts[i])
 	}
+	self.texts = texts
 
-	selectUI := &BTSpeed{
-		Base:  yamlui.NewUISelect(componentName, len(texts), len(texts)),
-		texts: texts,
-	}
-	selectUI.Base.Base.SetUpdateIF(selectUI)
-	selectUI.Base.Base.SetDrawIF(selectUI)
-	return selectUI
+	// ItemNumをtextsの数に設定
+	self.SelBase.ItemNum = len(texts)
+	self.SelBase.RowNum = max(int(data["RowNum"].Num), 1) // RowNumは1以上にする
+
+	self.SelBase.UIBase.SetUpdateIF(self)
+	self.SelBase.UIBase.SetDrawIF(self)
+
+	return nil
 }
 
 // Update
 func (self *BTSpeed) Update(ctx yamlui.UpdateContext) error {
 	for _, event := range ctx.Events {
 		if event == "key:left" {
-			self.Base.NextGridX(-1, true)
+			self.SelBase.NextGridX(-1, true)
 		}
 		if event == "key:right" {
-			self.Base.NextGridX(1, true)
+			self.SelBase.NextGridX(1, true)
 		}
 	}
 	return nil
@@ -49,15 +66,15 @@ func (self *BTSpeed) Update(ctx yamlui.UpdateContext) error {
 func (self *BTSpeed) Draw(x, y float64, ctx yamlui.DrawContext) {
 	clipW, clipH := ctx.Clip.IWH()
 
-	for i := range self.Base.ItemNum {
+	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
-		if i/self.Base.RowNum >= clipH {
+		if i/self.SelBase.RowNum >= clipH {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		drawX := x + float64(i%self.Base.RowNum)*15 // 1行あたり16文字分の幅を確保
-		drawY := y + float64(i/self.Base.RowNum)
+		drawX := x + float64(i%self.SelBase.RowNum)*15 // 1行あたり16文字分の幅を確保
+		drawY := y + float64(i/self.SelBase.RowNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "

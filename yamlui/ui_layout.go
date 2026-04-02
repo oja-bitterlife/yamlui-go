@@ -5,7 +5,8 @@ import (
 )
 
 type UILayout struct {
-	Base *UIBase
+	UIBase *UIBase
+
 	// Margin用
 	Margin       int
 	MarginTop    int
@@ -26,38 +27,51 @@ type UILayout struct {
 	IsAbs bool
 }
 
-func (self *UILayout) GetBase() *UIBase {
-	return self.Base
+func NewUILayout() *UILayout {
+	return &UILayout{
+		UIBase: NewUIBase(),
+	}
 }
 
-func NewUIArea(type_ string, ui *UIBase, data map[string]script.Value) *UILayout {
-	area := &UILayout{
-		Base: NewUIBase(type_),
-	}
-	area.Base.drawTreeIF = area
+// **********************************************************************
+// UIComponentIFの実装
+func (self *UILayout) GetUIBase() *UIBase {
+	return self.UIBase
+}
+
+func (self *UILayout) Clone() *UILayout {
+	newLayout := *self
+	newLayout.UIBase = self.UIBase.Clone()
+	return &newLayout
+}
+
+func (self *UILayout) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
+	self.UIBase.SetDrawTreeIF(self)
 
 	// デフォルトはMargin=0
-	area.Margin = PropINum(data, "Margin", 0)
-	area.MarginTop = PropINum(data, "MarginTop", 0)
-	area.MarginBottom = PropINum(data, "MarginBottom", 0)
-	area.MarginLeft = PropINum(data, "MarginLeft", 0)
-	area.MarginRight = PropINum(data, "MarginRight", 0)
-	area.MarginX = PropINum(data, "MarginX", 0)
-	area.MarginY = PropINum(data, "MarginY", 0)
+	self.Margin = PropINum(data, "Margin", 0)
+	self.MarginTop = PropINum(data, "MarginTop", 0)
+	self.MarginBottom = PropINum(data, "MarginBottom", 0)
+	self.MarginLeft = PropINum(data, "MarginLeft", 0)
+	self.MarginRight = PropINum(data, "MarginRight", 0)
+	self.MarginX = PropINum(data, "MarginX", 0)
+	self.MarginY = PropINum(data, "MarginY", 0)
 
 	// Align系のプロパティはデフォルトはfalse
-	area.AlignCenter = PropBool(data, "AlignCenter", false)
-	area.AlignCenterX = PropBool(data, "AlignCenterX", false)
-	area.AlignCenterY = PropBool(data, "AlignCenterY", false)
-	area.AlignRight = PropBool(data, "AlignRight", false)
-	area.AlignBottom = PropBool(data, "AlignBottom", false)
+	self.AlignCenter = PropBool(data, "AlignCenter", false)
+	self.AlignCenterX = PropBool(data, "AlignCenterX", false)
+	self.AlignCenterY = PropBool(data, "AlignCenterY", false)
+	self.AlignRight = PropBool(data, "AlignRight", false)
+	self.AlignBottom = PropBool(data, "AlignBottom", false)
 
 	// IsAbsのデフォルトはfalse
-	area.IsAbs = PropBool(data, "IsAbs", false)
+	self.IsAbs = PropBool(data, "IsAbs", false)
 
-	return area
+	return nil
 }
 
+// **********************************************************************
+// DrawTreeのOverride
 func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
@@ -107,5 +121,6 @@ func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 		H: selfH,
 	}.Clip(parentArea)
 
+	// 元のDrawTreeを呼び出す
 	ctx.Base.RecDrawTree(z, alignX+left, alignY+top, ctx)
 }
