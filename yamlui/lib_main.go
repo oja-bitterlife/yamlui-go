@@ -3,6 +3,7 @@ package yamlui
 import (
 	"errors"
 	"slices"
+	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -190,24 +191,37 @@ func (self *YAMLUI) Update(frame int) []error {
 		}
 	}
 
-	// イベントの処理
+	// イベントをUpdateの前に処理し、Updateにイベントを通知する
 	self.ProcessEvents()
+	self.ClearEvents() // 終わったらイベントキューをクリア
 
 	// ソートされたqueueを順番に実行する
 	for _, item := range self.updateQueue {
+		// Updateを呼び出す
 		item.UpdateIF.Update(item.ctx)
 
-		// UIの更新後スクリプトがあれば走らせる
+		// Update後スクリプトがあれば走らせる
+		// ----------------------------------------
 		uiBase := item.ctx.Base
 		if uiBase.script != nil {
+			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
 			uiBase.storeToVM(uiBase.script.GetVM())
+
+			// スクリプトを実行
 			if result, err := uiBase.script.Run(); err != nil {
 				errorList = append(errorList, err)
 			} else {
-				// スクリプトの実行結果をUIBaseに保存しておく
 				uiBase.ScriptResult = result
 			}
+
+			// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
 			uiBase.loadFromVM(uiBase.script.GetVM())
+
+			// Actionはスクリプトイベントなので、スクリプトの実行後にイベントが発生していればイベントキューに追加する
+			if strings.TrimSpace(uiBase.ScriptAction) != "" {
+				// 次のUIの更新でイベントが処理される
+				self.AddEvent(uiBase.ScriptAction)
+			}
 		}
 
 		// 実行カウントを進める

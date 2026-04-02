@@ -63,6 +63,9 @@ func (self *BTStart) Update(ctx yamlui.UpdateContext) error {
 		if event == "key:down" {
 			self.SelBase.NextGridY(1, true)
 		}
+		if event == "key:enter" {
+			ctx.Lib.AddEvent(self.texts[self.SelBase.GetSelectNo()])
+		}
 	}
 	return nil
 }

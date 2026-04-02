@@ -83,8 +83,6 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.frame++ // フレームを進める
 
-	m.lib.ClearEvents() // イベントをクリア
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		// 'q' か 'ctrl+c' で終了
