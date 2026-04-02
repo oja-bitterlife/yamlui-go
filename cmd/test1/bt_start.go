@@ -42,7 +42,7 @@ func (self *BTStart) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBa
 
 	// ItemNumをtextsの数に設定
 	self.SelBase.ItemNum = len(texts)
-	self.SelBase.RowNum = max(int(data["RowNum"].Num), 1) // RowNumは1以上にする
+	self.SelBase.RowsNum = max(int(data["RowsNum"].Num), 1) // RowsNumは1以上にする
 
 	self.SelBase.UIBase.SetDrawIF(self)
 	self.SelBase.UIBase.SetUpdateIF(self)
@@ -73,8 +73,8 @@ func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := ctx.Clip.IY() + i/self.SelBase.RowNum
-		x := ctx.Clip.IX() + (i % self.SelBase.RowNum)
+		y := ctx.Clip.IY() + i/self.SelBase.RowsNum
+		x := ctx.Clip.IX() + (i % self.SelBase.RowsNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "

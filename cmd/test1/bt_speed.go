@@ -42,7 +42,7 @@ func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBa
 
 	// ItemNumをtextsの数に設定
 	self.SelBase.ItemNum = len(texts)
-	self.SelBase.RowNum = max(int(data["RowNum"].Num), 1) // RowNumは1以上にする
+	self.SelBase.RowsNum = max(int(data["RowsNum"].Num), 1) // RowsNumは1以上にする
 
 	self.SelBase.UIBase.SetUpdateIF(self)
 	self.SelBase.UIBase.SetDrawIF(self)
@@ -68,13 +68,13 @@ func (self *BTSpeed) Draw(x, y float64, ctx yamlui.DrawContext) {
 
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
-		if i/self.SelBase.RowNum >= clipH {
+		if i/self.SelBase.RowsNum >= clipH {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		drawX := x + float64(i%self.SelBase.RowNum)*15 // 1行あたり16文字分の幅を確保
-		drawY := y + float64(i/self.SelBase.RowNum)
+		drawX := x + float64(i%self.SelBase.RowsNum)*15 // 1行あたり16文字分の幅を確保
+		drawY := y + float64(i/self.SelBase.RowsNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "

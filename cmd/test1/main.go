@@ -45,12 +45,11 @@ func initialModel() model {
 
 	// UI構築の登録
 	m.lib.UIBuild("window", NewBTWindow(&m))
-	// yamlui.UIBuilder(m.lib, "window", NewBTWindow, func(ui *BTWindow) { ui.model = &m })
-	// yamlui.UIBuilder(m.lib, "title", NewBTTitle, func(ui *BTTitle) { ui.model = &m })
-	// yamlui.UIBuilder(m.lib, "area", yamlui.NewUIArea, nil)
-	// yamlui.UIBuilder(m.lib, "start", NewBTStart, func(ui *BTStart) { ui.model = &m })
-	// yamlui.UIBuilder(m.lib, "label", NewBTLabel, func(ui *BTLabel) { ui.model = &m })
-	// yamlui.UIBuilder(m.lib, "speed", NewBTSpeed, func(ui *BTSpeed) { ui.model = &m })
+	m.lib.UIBuild("title", NewBTTitle(&m))
+	m.lib.UIBuild("area", yamlui.NewUILayout())
+	m.lib.UIBuild("start", NewBTStart(&m))
+	m.lib.UIBuild("label", NewBTLabel(&m))
+	m.lib.UIBuild("speed", NewBTSpeed(&m))
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")

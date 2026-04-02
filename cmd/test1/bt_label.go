@@ -10,9 +10,10 @@ type BTLabel struct {
 	model  *model
 }
 
-func NewBTLabel() *BTLabel {
+func NewBTLabel(m *model) *BTLabel {
 	return &BTLabel{
 		UIBase: yamlui.NewUIBase(),
+		model:  m,
 	}
 }
 
@@ -33,5 +34,21 @@ func (self *BTLabel) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBa
 }
 
 func (self *BTLabel) Draw(x, y float64, ctx yamlui.DrawContext) {
-	panic("BTLabel.Draw is not implemented yet")
+	if x < 0 || y < 0 {
+		return // 負の座標は描画しない
+	}
+	if x >= ctx.Clip.Right() || y >= ctx.Clip.Bottom() {
+		return // クリップ範囲外は描画しない
+	}
+
+	line := self.UIBase.Text
+	for j, char := range line {
+		// 横幅(clip.W)を超えないようにガード
+		if j >= int(ctx.Clip.W) {
+			break
+		}
+		// Canvas の (x + j, y) に char を書き込む
+		// m.Canvas.Set(x + j, y, char)
+		self.model.canvas[int(y)][int(x)+j] = Cell{Rune: char, Color: "white"}
+	}
 }

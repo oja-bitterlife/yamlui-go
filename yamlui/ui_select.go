@@ -7,14 +7,14 @@ import "github.com/oja-bitterlife/yamlui-go/script"
 type UISelect struct {
 	UIBase  *UIBase
 	ItemNum int
-	RowNum  int
+	RowsNum int
 }
 
-func NewUISelect(itemNum, rowNum int) *UISelect {
+func NewUISelect(itemNum, rowsNum int) *UISelect {
 	return &UISelect{
 		UIBase:  NewUIBase(),
 		ItemNum: itemNum,
-		RowNum:  rowNum,
+		RowsNum: rowsNum,
 	}
 }
 
@@ -36,7 +36,7 @@ func (self *UISelect) Clone() UIComponent[*UIBase] {
 	return &UISelect{
 		UIBase:  self.UIBase.Clone(),
 		ItemNum: self.ItemNum,
-		RowNum:  self.RowNum,
+		RowsNum: self.RowsNum,
 	}
 }
 
@@ -50,7 +50,7 @@ func (self *UISelect) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[
 // toggle: trueなら端から端へループ、falseなら端で止まる
 // 単純な移動（リストで選択肢を配置している場合の移動）
 func (self *UISelect) Next(step int, toggle bool) {
-	if self.RowNum == 0 { // 0で割るのを防止
+	if self.RowsNum == 0 { // 0で割るのを防止
 		return
 	}
 
@@ -67,38 +67,38 @@ func (self *UISelect) Next(step int, toggle bool) {
 
 // グリッドX移動（RowsでItemを折り返している場合の移動）
 func (self *UISelect) NextGridX(step int, toggle bool) {
-	if self.RowNum == 0 { // 0で割るのを防止
+	if self.RowsNum == 0 { // 0で割るのを防止
 		return
 	}
 
-	gridX := self.GetSelectNo() % self.RowNum
-	gridY := self.GetSelectNo() / self.RowNum
+	gridX := self.GetSelectNo() % self.RowsNum
+	gridY := self.GetSelectNo() / self.RowsNum
 	gridX += step
 
 	if toggle {
-		gridX = (self.RowNum + gridX) % self.RowNum
-		if gridY*self.RowNum+gridX >= self.ItemNum {
+		gridX = (self.RowsNum + gridX) % self.RowsNum
+		if gridY*self.RowsNum+gridX >= self.ItemNum {
 			gridX = 0
 		}
 	} else {
-		gridX = min(max(gridX, 0), self.RowNum-1)
-		if gridY*self.RowNum+gridX >= self.ItemNum {
-			gridX = (self.ItemNum - 1) % self.RowNum
+		gridX = min(max(gridX, 0), self.RowsNum-1)
+		if gridY*self.RowsNum+gridX >= self.ItemNum {
+			gridX = (self.ItemNum - 1) % self.RowsNum
 		}
 	}
 
-	self.SetSelectNo(gridY*self.RowNum + gridX)
+	self.SetSelectNo(gridY*self.RowsNum + gridX)
 }
 
 // グリッドY移動（RowsでItemを折り返している場合の移動）
 func (self *UISelect) NextGridY(step int, toggle bool) {
-	if self.RowNum == 0 { // 0で割るのを防止
+	if self.RowsNum == 0 { // 0で割るのを防止
 		return
 	}
 
-	gridX := self.GetSelectNo() % self.RowNum
-	gridY := self.GetSelectNo() / self.RowNum
-	lineNum := (self.ItemNum + self.RowNum - 1) / self.RowNum
+	gridX := self.GetSelectNo() % self.RowsNum
+	gridY := self.GetSelectNo() / self.RowsNum
+	lineNum := (self.ItemNum + self.RowsNum - 1) / self.RowsNum
 	gridY += step
 
 	if toggle {
@@ -106,9 +106,9 @@ func (self *UISelect) NextGridY(step int, toggle bool) {
 	} else {
 		gridY = min(max(gridY, 0), lineNum-1)
 	}
-	if gridY*self.RowNum+gridX >= self.ItemNum {
-		gridX = (self.ItemNum - 1) % self.RowNum
+	if gridY*self.RowsNum+gridX >= self.ItemNum {
+		gridX = (self.ItemNum - 1) % self.RowsNum
 	}
 
-	self.SetSelectNo(gridY*self.RowNum + gridX)
+	self.SetSelectNo(gridY*self.RowsNum + gridX)
 }
