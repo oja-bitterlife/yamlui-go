@@ -31,6 +31,7 @@ func (self *UIBase) ToValue() script.Value {
 		"Color":        script.NewString(self.Color),
 		"SelectNo":     script.NewNumber(float64(self.SelectNo)),
 		"SelGridX":     script.NewNumber(float64(self.SelGridX)),
+		"Action":       script.NewString(self.Action),
 		"ScriptAction": script.NewString(self.ScriptAction),
 		"ScriptResult": self.ScriptResult,
 		"Prop":         script.NewLitMap(self.Prop),
@@ -94,6 +95,9 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 	if v, ok := m["SelGridX"]; ok {
 		self.SelGridX = v.Num
+	}
+	if v, ok := m["Action"]; ok {
+		self.Action = v.Str
 	}
 	if v, ok := m["ScriptAction"]; ok {
 		self.ScriptAction = v.Str

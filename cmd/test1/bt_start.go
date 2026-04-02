@@ -64,7 +64,7 @@ func (self *BTStart) Update(ctx yamlui.UpdateContext) error {
 			self.SelBase.NextGridY(1, true)
 		}
 		if event == "key:enter" {
-			ctx.Lib.AddEvent(self.texts[self.SelBase.GetSelectNo()])
+			self.GetUIBase().Action = self.texts[int(self.GetUIBase().SelectNo)]
 		}
 	}
 	return nil

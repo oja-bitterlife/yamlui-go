@@ -2,6 +2,7 @@ package yamlui
 
 import (
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 
@@ -193,6 +194,9 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
 	self.ProcessEvents()
+	if len(self.EventQueue) > 0 {
+		fmt.Printf("Warning: Unprocessed events remain in the queue: %v\n", self.EventQueue)
+	}
 	self.ClearEvents() // 終わったらイベントキューをクリア
 
 	// ソートされたqueueを順番に実行する

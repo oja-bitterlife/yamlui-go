@@ -39,7 +39,7 @@ type UIBase struct {
 	// インタラクティブなUIに必要なプロパティ
 	SelectNo float64
 	SelGridX float64 // SelectGridで横の折り返し位置
-	// Action   string  // 直接EventをAddすればいいのでActionは廃止
+	Action   string  // UIで発生したイベント名。複数発生させる場合はAddEventを使う
 
 	// 都度リセットされる
 	ScriptAction string       // スクリプト中に@Actionへ発生したイベント名を入れる
@@ -140,7 +140,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
 
 	// スクリプトからUIに伝えるためのものなので常に空文字を入れておく
-	vm.SetVar("@Action", script.NewString(""))
+	vm.SetVar("@Action", script.NewString("")) // ScriptActionだと長いので@Actionで
 
 	// PropはProp.をプレフィックスにして送る
 	for k, v := range self.Prop {

@@ -54,4 +54,5 @@ func (self *YAMLUI) ProcessEvents() {
 		}
 		checkEvents = remainEvents // 次のUIではマッチしなかったイベントだけを確認する
 	}
+	self.EventQueue = checkEvents // 最後までマッチしなかったイベントは残しておく
 }
