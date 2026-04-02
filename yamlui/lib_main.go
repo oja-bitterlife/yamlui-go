@@ -168,7 +168,7 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewUpdateContext(self, self.Root, nil)
+	ctx := NewUpdateContext(self, self.Root)
 	if err := self.Root.RecUpdateTree(0, ctx); err != nil {
 		errorList = append(errorList, err...)
 	}

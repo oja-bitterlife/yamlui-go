@@ -25,8 +25,7 @@ type UpdateQueueItem struct {
 
 type UpdateContext struct {
 	Lib    *YAMLUI
-	Parent *UIBase
-	Base   *UIBase  // 基底のUIBaseを入れてXYWH等に直接アクセスできるようにする
+	Base   *UIBase
 	Events []string // 受信したイベントのリスト
 }
 
@@ -41,11 +40,10 @@ func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
 // ==================================================
 // Update実行
 // コンテキスト作成
-func NewUpdateContext(lib *YAMLUI, self *UIBase, parent *UIBase) UpdateContext {
+func NewUpdateContext(lib *YAMLUI, self *UIBase) UpdateContext {
 	return UpdateContext{
-		Lib:    lib,
-		Parent: parent,
-		Base:   self,
+		Lib:  lib,
+		Base: self,
 	}
 }
 
@@ -57,7 +55,7 @@ func (self *UIBase) RecUpdateTree(z int, ctx UpdateContext) []error {
 	for _, child := range self.children {
 		if child.IsEnable {
 			// 更新コンテキストを作成
-			childCtx := NewUpdateContext(ctx.Lib, child, self)
+			childCtx := NewUpdateContext(ctx.Lib, child)
 
 			// 更新インターフェースがあれば更新キューに入れる
 			if child.updateIF != nil {
