@@ -3,6 +3,8 @@ package yamlui
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"maps"
+	"slices"
 	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -74,6 +76,30 @@ func NewUIBase(type_ string) *UIBase {
 	ui.W = 65536
 	ui.H = 65536
 	return ui
+}
+
+func (self *UIBase) UIClone() *UIBase {
+	clone := *self
+
+	// PropとEventsは標準ライブラリのCloneでOK
+	clone.Prop = maps.Clone(self.Prop)
+	clone.Events = slices.Clone(self.Events)
+
+	// UIBaseのポインタは再帰的にUICloneする
+	if self.children != nil {
+		clone.children = make([]*UIBase, len(self.children))
+		for i, child := range self.children {
+			// 子要素の UIClone を呼び、新しい個体として登録する
+			clone.children[i] = child.UIClone()
+		}
+	}
+
+	// scriptはRuntimeがCloneを持っている
+	if self.script != nil {
+		clone.script = self.script.Clone()
+	}
+
+	return &clone
 }
 
 // ==================================================

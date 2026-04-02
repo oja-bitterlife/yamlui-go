@@ -37,6 +37,10 @@ func (self *YAMLUI) RegisterRemap(typeName string, fn func(type_ string, parent 
 	self.remapFuncs[typeName] = fn
 }
 
+type UICloneable[T any] interface {
+	UIClone() T
+}
+
 // UIを構築するためのインターフェース
 type UIComponent interface {
 	GetBase() *UIBase

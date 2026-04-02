@@ -10,6 +10,9 @@ type BTTitle struct {
 	model *model
 }
 
+// func (self *BTTitle) UIClone() *BTTitle {
+// }
+
 func (self *BTTitle) GetBase() *yamlui.UIBase {
 	return self.Base
 }

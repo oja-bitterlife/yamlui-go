@@ -5,7 +5,7 @@ import (
 )
 
 type Runtime struct {
-	vm  *VM
+	vm  *VM // vm_evaluator.goで定義したVM
 	ast []Value
 }
 
@@ -63,4 +63,20 @@ func (runtime *Runtime) GetAST() Value {
 
 func (runtime *Runtime) GetVar(name string) Value {
 	return runtime.vm.GetVar(name)
+}
+
+// クローンを作成
+func (runtime *Runtime) Clone() *Runtime {
+	newVM := *runtime.vm // vars以外はコピーでいい
+
+	// varsはJSONを経由してクローンを作成
+	vmVarsJSON, _ := runtime.vm.vars.MarshalJSON()
+	newVM.vars.UnmarshalJSON(vmVarsJSON)
+
+	// 新しいRuntimeを作成
+	newRuntime := &Runtime{
+		vm:  &newVM,
+		ast: runtime.ast, // ASTは不変なのでそのまま参照を渡す
+	}
+	return newRuntime
 }
