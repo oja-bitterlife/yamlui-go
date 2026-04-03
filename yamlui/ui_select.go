@@ -40,7 +40,7 @@ func (self *UISelect) Clone() UIComponent[*UIBase] {
 	}
 }
 
-func (self *UISelect) Setup(type_ string, data map[string]script.Value) error {
+func (self *UISelect) Setup(type_ string, data script.ValueMap) error {
 	return self.UIBase.Setup(type_, data) // super call
 }
 

@@ -42,7 +42,7 @@ type UIBase struct {
 	Action   string  // UI処理で発生したイベントを入れる
 
 	// 子要素が保存させたいもの
-	Prop map[string]script.Value
+	Prop map[string]script.Value // PropはValueMap型と意味が違うのでmapそのままで
 
 	// ==================================================
 	// 保存しないもの
@@ -76,7 +76,7 @@ func NewUIBase() *UIBase {
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
-	ui.Prop = make(map[string]script.Value)
+	ui.Prop = make(map[string]script.Value) // ValueMapにはしない
 	ui.children = []*UIBase{}
 
 	return ui
@@ -112,7 +112,7 @@ func (self *UIBase) Clone() *UIBase {
 	return &clone
 }
 
-func (self *UIBase) Setup(type_ string, data map[string]script.Value) error {
+func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 	// 基本的にはUIBaseは何もしない。今後のための予約
 	return nil
 }

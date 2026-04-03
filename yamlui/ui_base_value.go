@@ -17,7 +17,7 @@ func (self *UIBase) ToValue() script.Value {
 		events[i] = script.NewString(event)
 	}
 
-	return script.NewLitMap(map[string]script.Value{
+	return script.NewLitMap(script.ValueMap{
 		"ID":          script.NewString(self.ID),
 		"UpdateCount": script.NewNumber(float64(self.UpdateCount)),
 		"Events":      script.NewLitList(events),

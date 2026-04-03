@@ -38,6 +38,6 @@ func (self *UIWindow) Clone() UIComponent[*UIBase] {
 	}
 }
 
-func (self *UIWindow) Setup(type_ string, data map[string]script.Value) error {
+func (self *UIWindow) Setup(type_ string, data script.ValueMap) error {
 	return self.UIBase.Setup(type_, data) // super call
 }

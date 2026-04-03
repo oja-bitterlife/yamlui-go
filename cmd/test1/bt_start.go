@@ -32,7 +32,7 @@ func (self *BTStart) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	}
 }
 
-func (self *BTStart) Setup(type_ string, data map[string]script.Value) error {
+func (self *BTStart) Setup(type_ string, data script.ValueMap) error {
 	if err := self.SelBase.Setup(type_, data); err != nil { // super call
 		return err
 	}

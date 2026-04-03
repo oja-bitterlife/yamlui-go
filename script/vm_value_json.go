@@ -278,7 +278,7 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 	data = bytes.TrimPrefix(data, []byte("{"))
 	data = bytes.TrimSuffix(data, []byte("}"))
 
-	m := make(map[string]Value)
+	m := NewValueMap()
 
 	// キーと値のペアを処理
 	current := 0

@@ -34,12 +34,12 @@ func (self *YAMLUI) FindByID(id string) *UIBase {
 }
 
 // **********************************************************************
-// UIのJSONをUnmarshalしたmap[string]ValueのTypeごとにインスタンスを割り当て
+// UIのJSONをUnmarshalしたValueMap(map[string]Value)のTypeごとにインスタンスを割り当て
 // ==================================================
 type UIComponent[T any] interface {
 	GetUIBase() *UIBase
 	Clone() UIComponent[*UIBase]
-	Setup(type_ string, data map[string]script.Value) error
+	Setup(type_ string, data script.ValueMap) error
 }
 
 // LoadのときにTypeを見て登録されたUICloneableからUIBaseを複製して構築するインターフェース
@@ -50,38 +50,6 @@ func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
 // ==================================================
 // map解析
 // Mapの値を構造体に流し込むためのヘルパー関数
-func PropStr(data map[string]script.Value, key string, def string) string {
-	value, ok := data[key]
-	if !ok || value.Type != script.TypeString {
-		return def
-	}
-	return value.Str
-}
-
-func PropNum(data map[string]script.Value, key string, def float64) float64 {
-	value, ok := data[key]
-	if !ok || value.Type != script.TypeNumber {
-		return def
-	}
-	return value.Num
-}
-
-func PropINum(data map[string]script.Value, key string, def int) int {
-	value, ok := data[key]
-	if !ok || value.Type != script.TypeNumber {
-		return def
-	}
-	return int(value.Num)
-}
-
-func PropBool(data map[string]script.Value, key string, def bool) bool {
-	value, ok := data[key]
-	if !ok || value.Type != script.TypeBool {
-		return def
-	}
-	return value.Bool
-}
-
 // **********************************************************************
 // UITreeの構築（再帰的に子要素も構築）
 func (self *YAMLUI) Load(data []byte) error {

@@ -45,7 +45,7 @@ func (self *UILayout) Clone() UIComponent[*UIBase] {
 	return &newLayout
 }
 
-func (self *UILayout) Setup(type_ string, data map[string]script.Value) error {
+func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 	if err := self.UIBase.Setup(type_, data); err != nil { // super call
 		return err
 	}
@@ -54,23 +54,23 @@ func (self *UILayout) Setup(type_ string, data map[string]script.Value) error {
 	self.UIBase.SetDrawTreeIF(self)
 
 	// デフォルトはMargin=0
-	self.Margin = PropINum(data, "Margin", 0)
-	self.MarginTop = PropINum(data, "MarginTop", 0)
-	self.MarginBottom = PropINum(data, "MarginBottom", 0)
-	self.MarginLeft = PropINum(data, "MarginLeft", 0)
-	self.MarginRight = PropINum(data, "MarginRight", 0)
-	self.MarginX = PropINum(data, "MarginX", 0)
-	self.MarginY = PropINum(data, "MarginY", 0)
+	self.Margin = data.GetInt("Margin", 0)
+	self.MarginTop = data.GetInt("MarginTop", 0)
+	self.MarginBottom = data.GetInt("MarginBottom", 0)
+	self.MarginLeft = data.GetInt("MarginLeft", 0)
+	self.MarginRight = data.GetInt("MarginRight", 0)
+	self.MarginX = data.GetInt("MarginX", 0)
+	self.MarginY = data.GetInt("MarginY", 0)
 
 	// Align系のプロパティはデフォルトはfalse
-	self.AlignCenter = PropBool(data, "AlignCenter", false)
-	self.AlignCenterX = PropBool(data, "AlignCenterX", false)
-	self.AlignCenterY = PropBool(data, "AlignCenterY", false)
-	self.AlignRight = PropBool(data, "AlignRight", false)
-	self.AlignBottom = PropBool(data, "AlignBottom", false)
+	self.AlignCenter = data.GetBool("AlignCenter", false)
+	self.AlignCenterX = data.GetBool("AlignCenterX", false)
+	self.AlignCenterY = data.GetBool("AlignCenterY", false)
+	self.AlignRight = data.GetBool("AlignRight", false)
+	self.AlignBottom = data.GetBool("AlignBottom", false)
 
 	// IsAbsのデフォルトはfalse
-	self.IsAbs = PropBool(data, "IsAbs", false)
+	self.IsAbs = data.GetBool("IsAbs", false)
 
 	return nil
 }

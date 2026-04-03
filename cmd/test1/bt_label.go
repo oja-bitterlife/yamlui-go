@@ -28,7 +28,7 @@ func (self *BTLabel) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	}
 }
 
-func (self *BTLabel) Setup(type_ string, data map[string]script.Value) error {
+func (self *BTLabel) Setup(type_ string, data script.ValueMap) error {
 	if err := self.UIBase.Setup(type_, data); err != nil { // super call
 		return err
 	}

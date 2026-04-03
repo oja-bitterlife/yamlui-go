@@ -27,6 +27,6 @@ func (self *UIEmpty) Clone() UIComponent[*UIBase] {
 	}
 }
 
-func (self *UIEmpty) Setup(type_ string, data map[string]script.Value) error {
+func (self *UIEmpty) Setup(type_ string, data script.ValueMap) error {
 	return self.UIBase.Setup(type_, data) // super call
 }

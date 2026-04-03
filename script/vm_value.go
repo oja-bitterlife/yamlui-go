@@ -68,7 +68,7 @@ type Value struct {
 
 	// リスト構造 (S式や、分解済みの文字列フラグメント)
 	List []Value
-	Map  map[string]Value
+	Map  ValueMap
 }
 
 func (v Value) String() string {
@@ -81,13 +81,13 @@ func (v Value) String() string {
 
 // ==================================================
 // 値の生成関数
-func NewNumber(f float64) Value          { return Value{Type: TypeNumber, Num: f} }
-func NewBool(b bool) Value               { return Value{Type: TypeBool, Bool: b} }
-func NewString(s string) Value           { return Value{Type: TypeString, Str: s} }
-func NewLitList(v []Value) Value         { return Value{Type: TypeLitList, List: v} }
-func NewLitMap(v map[string]Value) Value { return Value{Type: TypeLitMap, Map: v} }
-func NewProperty(s string) Value         { return Value{Type: TypeProperty, Str: s} }
-func NewList(v []Value) Value            { return Value{Type: TypeList, List: v} }
+func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
+func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
+func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
+func NewLitList(v []Value) Value { return Value{Type: TypeLitList, List: v} }
+func NewLitMap(v ValueMap) Value { return Value{Type: TypeLitMap, Map: v} }
+func NewProperty(s string) Value { return Value{Type: TypeProperty, Str: s} }
+func NewList(v []Value) Value    { return Value{Type: TypeList, List: v} }
 
 // ==================================================
 // リテラルチェック
@@ -120,8 +120,10 @@ func (v Value) ConvertBool() Value {
 		return NewBool(v.Num != 0)
 	case TypeString:
 		return NewBool(strings.ToLower(v.Str) == "true")
-	case TypeLitList, TypeList, TypeLitMap:
+	case TypeLitList, TypeList:
 		return NewBool(len(v.List) > 0)
+	case TypeLitMap:
+		return NewBool(len(v.Map) > 0)
 	default:
 		return NewBool(false)
 	}
@@ -143,8 +145,10 @@ func (v Value) ConvertNumber() Value {
 			return NewNumber(0)
 		}
 		return NewNumber(f)
-	case TypeLitList, TypeList, TypeLitMap:
+	case TypeLitList, TypeList:
 		return NewNumber(float64(len(v.List)))
+	case TypeLitMap:
+		return NewNumber(float64(len(v.Map)))
 	default:
 		return NewNumber(0)
 	}

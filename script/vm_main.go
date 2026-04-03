@@ -14,7 +14,7 @@ type VM struct {
 // VMの初期化
 func NewVM() *VM {
 	return &VM{
-		vars:         NewLitMap(make(map[string]Value)),
+		vars:         NewLitMap(NewValueMap()),
 		cmds:         make(map[string]func(vm *VM, args []Value) (Value, error)),
 		maxRecursion: 64,
 		maxRepeat:    256,
