@@ -92,6 +92,11 @@ func (runtime *Runtime) GetVM() *VM {
 	return runtime.vm
 }
 
+// コマンドを追加するショートカット
+func (runtime *Runtime) RegisterCmd(name string, fn func(vm *VM, args []Value) (Value, error)) {
+	runtime.vm.RegisterCmd(name, fn)
+}
+
 func (runtime *Runtime) GetAST() Value {
 	return NewList(runtime.ast)
 }

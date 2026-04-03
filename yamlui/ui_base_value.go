@@ -116,6 +116,9 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 			return errors.New("Failed to compile script: " + err.Error())
 		}
 		self.script = runtime
+
+		// UI用のCmdをセットする
+		self.setUIScriptCmds()
 	}
 
 	return nil

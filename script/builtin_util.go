@@ -7,18 +7,26 @@ import (
 
 // ==================================================
 // 組み込みコマンドの登録
+// mapを渡して複数のコマンドを登録する
+func registerCmdList(vm *VM, cmds map[string]func(vm *VM, args []Value) (Value, error)) {
+	for name, fn := range cmds {
+		vm.RegisterCmd(name, fn)
+	}
+}
+
+// 組み込みコマンドをまとめて登録
 func SetBuiltinCmds(vm *VM) {
 	// 数学関数を追加
-	vm.RegisterCmdList(mathCmds)
+	registerCmdList(vm, mathCmds)
 
 	// 円関数を追加
-	vm.RegisterCmdList(circularCmds)
+	registerCmdList(vm, circularCmds)
 
 	// 比較系関数を追加
-	vm.RegisterCmdList(compareCmds)
+	registerCmdList(vm, compareCmds)
 
 	// キャスト系関数を追加
-	vm.RegisterCmdList(castCmds)
+	registerCmdList(vm, castCmds)
 }
 
 // ==================================================

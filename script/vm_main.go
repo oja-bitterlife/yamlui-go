@@ -27,13 +27,6 @@ func (vm *VM) RegisterCmd(name string, fn func(vm *VM, args []Value) (Value, err
 	vm.cmds[name] = fn
 }
 
-// mapを渡して複数のコマンドを登録する
-func (vm *VM) RegisterCmdList(cmds map[string]func(vm *VM, args []Value) (Value, error)) {
-	for name, fn := range cmds {
-		vm.RegisterCmd(name, fn)
-	}
-}
-
 // デバッグ用cmds取得関数
 func (vm *VM) GetCmds() map[string]func(vm *VM, args []Value) (Value, error) {
 	return vm.cmds
