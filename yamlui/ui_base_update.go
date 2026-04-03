@@ -85,6 +85,7 @@ func (self *YAMLUI) Update(frame int) []error {
 		if uiBase.script != nil {
 			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
 			uiBase.storeToVM(uiBase.script.GetVM())
+			uiBase.storeScriptEvent(item.Events) // @UIEventを追加
 
 			// スクリプトを実行
 			if err := uiBase.script.Run(); err != nil {

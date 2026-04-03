@@ -42,6 +42,10 @@ func (vm *VM) GetVars() map[string]Value {
 	return vm.vars.Map
 }
 
+func (vm *VM) ClearVars() {
+	vm.vars = NewLitMap(NewValueMap())
+}
+
 func (vm *VM) SetVar(name string, value Value) {
 	vm.vars.Map[name] = value
 }

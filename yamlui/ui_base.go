@@ -120,6 +120,9 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 // **********************************************************************
 // VMとのやりとり
 func (self *UIBase) storeToVM(vm *script.VM) {
+	// 既存の変数をクリア
+	vm.ClearVars()
+
 	// スクリプトで使うFrameはUpdateCountを入れる
 	vm.SetVar("@Frame", script.NewNumber(float64(self.UpdateCount)))
 

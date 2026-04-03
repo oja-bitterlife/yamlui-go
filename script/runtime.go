@@ -87,7 +87,7 @@ func (runtime *Runtime) Run() error {
 }
 
 // **********************************************************************
-// Getter
+// Getter/Setter
 func (runtime *Runtime) GetVM() *VM {
 	return runtime.vm
 }
@@ -103,4 +103,8 @@ func (runtime *Runtime) GetAST() Value {
 
 func (runtime *Runtime) GetVar(name string) Value {
 	return runtime.vm.GetVar(name)
+}
+
+func (runtime *Runtime) SetVar(name string, value Value) {
+	runtime.vm.SetVar(name, value)
 }

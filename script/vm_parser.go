@@ -51,7 +51,7 @@ func parseToken(tn *Tokenizer, token []byte) (Value, error) {
 		return parseList(tn, '}')
 	case ')', '}':
 		return Value{}, errors.New("unexpected '" + string(token[0]) + "'")
-	case '"':
+	case '"', '\'':
 		// 前後の " を除去して文字列に
 		if len(token) < 2 {
 			return Value{}, errors.New("invalid string")
