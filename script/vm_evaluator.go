@@ -130,6 +130,11 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 			return Value{}, errors.New("do cannot be used with '!' prefix")
 		}
 		return vm.do(args)
+	case "if":
+		if cmd != cleanCmd {
+			return Value{}, errors.New("if cannot be used with '!' prefix")
+		}
+		return vm.if_(args)
 	}
 
 	// コマンドに応じた処理を実装
@@ -275,4 +280,27 @@ func (vm *VM) do(args []Value) (Value, error) {
 		}
 	}
 	return lastVal, nil
+}
+
+// 最初の引数を評価して、その値に応じたケースを実行する
+func (vm *VM) if_(args []Value) (Value, error) {
+	if len(args) < 2 || len(args) > 3 {
+		return Value{}, errors.New("if requires condition, true case, and optional false case")
+	}
+
+	// 最初の引数は評価する式
+	condVal, err := vm.Eval(args[0])
+	if err != nil {
+		return Value{}, err
+	}
+	if condVal.Type != TypeBool {
+		return Value{}, errors.New("if condition must be a boolean")
+	}
+
+	// 引数が2つの場合は、条件が真のときのケースとみなす。偽のときは nil を返す
+	if len(args) == 2 {
+		// argsのお尻に偽のときのケースとして nil を追加する
+		args = append(args, Value{})
+	}
+	return vm.switch_(args)
 }

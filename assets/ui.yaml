@@ -18,6 +18,8 @@
               Text: "START, CONTINUE"
               RowsNum: 1
               Events: ["key:up", "key:down", "key:enter"]
+              script: >
+                (if (!event 'key:enter') (set @Action "START"))
         - Type: "label"
           Text: "-MESSAGE SPEAD-"
           X: 16
