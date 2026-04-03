@@ -7,20 +7,20 @@ import (
 // **********************************************************************
 // イベント管理
 func (self *YAMLUI) AddEvent(event string) {
-	self.EventQueue = append(self.EventQueue, event)
+	self.eventQueue = append(self.eventQueue, event)
 }
 
 func (self *YAMLUI) RemoveEvent(event string) {
-	for i, e := range self.EventQueue {
+	for i, e := range self.eventQueue {
 		if e == event {
-			self.EventQueue = append(self.EventQueue[:i], self.EventQueue[i+1:]...)
+			self.eventQueue = append(self.eventQueue[:i], self.eventQueue[i+1:]...)
 			return
 		}
 	}
 }
 
 func (self *YAMLUI) ClearEvents() {
-	self.EventQueue = []string{}
+	self.eventQueue = []string{}
 }
 
 // **********************************************************************
@@ -28,15 +28,13 @@ func (self *YAMLUI) ClearEvents() {
 // UpdateQueueのEventsにイベントを振り分ける
 func (self *YAMLUI) ProcessEvents() {
 	// Updateの後ろからイベント処理が可能かを確認する
-	checkEvents := self.EventQueue[:]
+	checkEvents := self.eventQueue[:]
 	for i := len(self.updateQueue) - 1; i >= 0; i-- {
-		self.updateQueue[i].ctx.Events = []string{} // イベントリストを初期化
-
 		remainEvents := []string{} // マッチしなかったイベントをためておくリスト
 		for _, event := range checkEvents {
 			// 受信設定と一致したイベントがあるか確認する
 			matchedAny := false
-			for _, wildStr := range self.updateQueue[i].ctx.Base.Events {
+			for _, wildStr := range self.updateQueue[i].UpdateIF.GetUIBase().Events {
 				// ワイルドカード(path.Match)でマッチング
 				if match, _ := path.Match(wildStr, event); match {
 					matchedAny = true
@@ -44,9 +42,9 @@ func (self *YAMLUI) ProcessEvents() {
 				}
 			}
 
-			// マッチしたイベントはこのUIで処理するためにctx.Eventsに追加する
+			// マッチしたイベントはupdateQueueのEventsに保存する
 			if matchedAny {
-				self.updateQueue[i].ctx.Events = append(self.updateQueue[i].ctx.Events, event)
+				self.updateQueue[i].Events = append(self.updateQueue[i].Events, event)
 			} else {
 				// マッチしなかったイベントは次のUIで確認するために残しておく
 				remainEvents = append(remainEvents, event)
@@ -54,5 +52,5 @@ func (self *YAMLUI) ProcessEvents() {
 		}
 		checkEvents = remainEvents // 次のUIではマッチしなかったイベントだけを確認する
 	}
-	self.EventQueue = checkEvents // 最後までマッチしなかったイベントは残しておく
+	self.eventQueue = checkEvents // 最後までマッチしなかったイベントは残しておく
 }

@@ -40,8 +40,8 @@ func (self *UISelect) Clone() UIComponent[*UIBase] {
 	}
 }
 
-func (self *UISelect) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
-	return self.UIBase.Setup(lib, type_, parent, data) // super call
+func (self *UISelect) Setup(type_ string, data map[string]script.Value) error {
+	return self.UIBase.Setup(type_, data) // super call
 }
 
 // **********************************************************************

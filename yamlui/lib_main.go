@@ -9,12 +9,12 @@ import (
 
 type YAMLUI struct {
 	// UIツリー構築用
-	Root   *UIBase
-	refObj map[string]UIComponent[*UIBase]
+	root   *UIBase
+	refObj map[string]UIComponent[*UIBase] // Component生成用リファレンスオブジェクト
 
 	// Updateの時に使うもの
-	frame       int // システム時間
-	EventQueue  []string
+	SystemFrame int // システム時間
+	eventQueue  []string
 	updateQueue []UpdateQueueItem
 
 	// Drawの時に使うもの
@@ -24,7 +24,7 @@ type YAMLUI struct {
 
 func NewYAMLUI() *YAMLUI {
 	return &YAMLUI{
-		Root:   NewUIBase(),
+		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 	}
 }
@@ -35,10 +35,10 @@ func NewYAMLUI() *YAMLUI {
 type UIComponent[T any] interface {
 	GetUIBase() *UIBase
 	Clone() UIComponent[*UIBase]
-	Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error
+	Setup(type_ string, data map[string]script.Value) error
 }
 
-// Loadのときに、Typeを見て、登録されたUICloneableからUIBaseを複製して構築するためのインターフェース
+// LoadのときにTypeを見て登録されたUICloneableからUIBaseを複製して構築するインターフェース
 func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
 	self.refObj[type_] = refObj
 }
@@ -88,13 +88,13 @@ func (self *YAMLUI) Load(data []byte) error {
 	}
 
 	// Loadで再帰的にUIを構築する
-	self.Root.children = []*UIBase{} // 既存の子要素をクリア
+	self.root.children = []*UIBase{} // 既存の子要素をクリア
 
 	switch value.Type {
 	case script.TypeLitList:
 		// 最初が配列なら最初ですべてを子要素として追加する
 		for _, item := range value.List {
-			err := self.load(self.Root, item)
+			err := self.load(self.root, item)
 			if err != nil {
 				return err
 			}
@@ -102,7 +102,7 @@ func (self *YAMLUI) Load(data []byte) error {
 		return nil
 	case script.TypeLitMap:
 		// 最初がMapなら普通に登録していく
-		err := self.load(self.Root, value)
+		err := self.load(self.root, value)
 		if err != nil {
 			return err
 		}
@@ -127,7 +127,7 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 		ui.LoadFromValue(value) // プロパティを流し込む
 
 		// Setup関数でさらに細かい構築を行う
-		if err = component.Setup(self, type_, parent, value.Map); err != nil {
+		if err = component.Setup(type_, value.Map); err != nil {
 			return err
 		}
 	} else {
@@ -161,15 +161,14 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 func (self *YAMLUI) Update(frame int) []error {
 	errorList := []error{}
 
-	self.frame = frame
+	self.SystemFrame = frame
 
 	// updateQueueをクリア
 	self.updateQueue = []UpdateQueueItem{}
 
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewUpdateContext(self, self.Root)
-	if err := self.Root.RecUpdateTree(0, ctx); err != nil {
+	if err := self.root.RecUpdateTree(self, 0, nil); err != nil {
 		errorList = append(errorList, err...)
 	}
 
@@ -182,9 +181,9 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// UpdateCountが0のときはInitとみなしてOnInitを呼び出す
 	for _, item := range self.updateQueue {
-		uiBase := item.ctx.Base
+		uiBase := item.UpdateIF.GetUIBase()
 		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
-			if err := uiBase.onInitIF.OnInit(item.ctx); err != nil {
+			if err := uiBase.onInitIF.OnInit(self); err != nil {
 				errorList = append(errorList, err)
 			}
 		}
@@ -196,11 +195,12 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// ソートされたqueueを順番に実行する
 	for _, item := range self.updateQueue {
-		uiBase := item.ctx.Base
+		uiBase := item.UpdateIF.GetUIBase()
 		uiBase.Action = "" // Actionをクリアしておく
 
 		// Updateを呼び出す
-		item.UpdateIF.Update(item.ctx)
+		// ----------------------------------------
+		item.UpdateIF.Update(self, item.Events)
 
 		// Update後スクリプトがあれば走らせる
 		// ----------------------------------------
@@ -217,6 +217,8 @@ func (self *YAMLUI) Update(frame int) []error {
 			uiBase.loadFromVM(uiBase.script.GetVM())
 		}
 
+		// Update後処理
+		// ----------------------------------------
 		// Updateの実行後にイベントが発生(Action!="")していればキューに追加
 		if uiBase.Action != "" {
 			self.AddEvent(uiBase.Action)
@@ -239,8 +241,8 @@ func (self *YAMLUI) Draw(screen Area) {
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewDrawContext(self, self.Root, nil, screen)
-	self.Root.RecDrawTree(0, 0, 0, ctx)
+	ctx := NewDrawContext(self, self.root, nil, screen)
+	self.root.RecDrawTree(0, 0, 0, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
 	// ----------------------------------------

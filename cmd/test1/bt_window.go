@@ -31,8 +31,8 @@ func (self *BTWindow) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	}
 }
 
-func (self *BTWindow) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
-	if err := self.WinBase.Setup(lib, type_, parent, data); err != nil { // super call
+func (self *BTWindow) Setup(type_ string, data map[string]script.Value) error {
+	if err := self.WinBase.Setup(type_, data); err != nil { // super call
 		return err
 	}
 

@@ -32,8 +32,8 @@ func (self *BTSpeed) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	}
 }
 
-func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBase, data map[string]script.Value) error {
-	if err := self.SelBase.Setup(lib, type_, parent, data); err != nil { // super call
+func (self *BTSpeed) Setup(type_ string, data map[string]script.Value) error {
+	if err := self.SelBase.Setup(type_, data); err != nil { // super call
 		return err
 	}
 
@@ -55,8 +55,8 @@ func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string, parent *yamlui.UIBa
 }
 
 // Update
-func (self *BTSpeed) Update(ctx yamlui.UpdateContext) error {
-	for _, event := range ctx.Events {
+func (self *BTSpeed) Update(lib *yamlui.YAMLUI, events []string) error {
+	for _, event := range events {
 		if event == "key:left" {
 			self.SelBase.NextGridX(-1, true)
 		}

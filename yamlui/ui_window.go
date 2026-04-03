@@ -38,6 +38,6 @@ func (self *UIWindow) Clone() UIComponent[*UIBase] {
 	}
 }
 
-func (self *UIWindow) Setup(lib *YAMLUI, type_ string, parent *UIBase, data map[string]script.Value) error {
-	return self.UIBase.Setup(lib, type_, parent, data) // super call
+func (self *UIWindow) Setup(type_ string, data map[string]script.Value) error {
+	return self.UIBase.Setup(type_, data) // super call
 }

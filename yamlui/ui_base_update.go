@@ -5,28 +5,23 @@ package yamlui
 // ----------------------------------------
 // Updateのインターフェース
 type OnInitIF interface {
-	OnInit(ctx UpdateContext) error
+	OnInit(lib *YAMLUI) error
 }
 
 type UpdateIF interface {
-	Update(ctx UpdateContext) error
+	Update(lib *YAMLUI, events []string) error
+	GetUIBase() *UIBase
 }
 
 type UpdateTreeIF interface {
-	UpdateTree(z int, ctx UpdateContext) []error
+	UpdateTree(lib *YAMLUI, z int, parent *UIBase) []error
 }
 
 // 直接DrawIFを呼び出すのではなく、UpdateTreeの中でUpdateQueueItemにしてキューに入れる
 type UpdateQueueItem struct {
 	UpdateIF UpdateIF
 	z        int
-	ctx      UpdateContext
-}
-
-type UpdateContext struct {
-	Lib    *YAMLUI
-	Base   *UIBase
-	Events []string // 受信したイベントのリスト
+	Events   []string
 }
 
 func (self *UIBase) SetUpdateIF(updateIF UpdateIF) {
@@ -39,40 +34,29 @@ func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
 
 // ==================================================
 // Update実行
-// コンテキスト作成
-func NewUpdateContext(lib *YAMLUI, self *UIBase) UpdateContext {
-	return UpdateContext{
-		Lib:  lib,
-		Base: self,
-	}
-}
-
 // 再帰実行
-func (self *UIBase) RecUpdateTree(z int, ctx UpdateContext) []error {
+func (self *UIBase) RecUpdateTree(lib *YAMLUI, z int, parent *UIBase) []error {
 	errorList := []error{}
 
 	// 子供の更新
 	for _, child := range self.children {
 		if child.IsEnable {
-			// 更新コンテキストを作成
-			childCtx := NewUpdateContext(ctx.Lib, child)
-
 			// 更新インターフェースがあれば更新キューに入れる
 			if child.updateIF != nil {
-				ctx.Lib.updateQueue = append(ctx.Lib.updateQueue, UpdateQueueItem{
+				lib.updateQueue = append(lib.updateQueue, UpdateQueueItem{
 					UpdateIF: child.updateIF,
 					z:        z,
-					ctx:      childCtx,
+					Events:   []string{}, // イベントはProcessEventsで振り分ける
 				})
 			}
 
 			// UpdateTreeIFがあればそちらを呼び出す。なければ再帰的に呼び出す
 			if child.updateTreeIF != nil {
-				if err := child.updateTreeIF.UpdateTree(z+1, ctx); err != nil {
+				if err := child.updateTreeIF.UpdateTree(lib, z+1, self); err != nil {
 					errorList = append(errorList, err...)
 				}
 			} else {
-				if err := child.RecUpdateTree(z+1, ctx); err != nil {
+				if err := child.RecUpdateTree(lib, z+1, self); err != nil {
 					errorList = append(errorList, err...)
 				}
 			}
