@@ -2,6 +2,7 @@ package yamlui
 
 import (
 	"errors"
+	"path"
 	"slices"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -85,21 +86,33 @@ func (self *YAMLUI) Load(data []byte) error {
 	return nil
 }
 
+// 現在のノードを構築
 func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
-	// 現在のノードを構築
-	var ui *UIBase
-	var err error
-
 	// Typeを見て、リマップ関数があればそれで構築
 	type_ := value.Map["Type"].Str
-	if refObj, ok := self.refObj[type_]; ok {
+
+	// path.Matchを使ってtype_を曖昧にマッチさせる
+	matchObj := UIComponent[*UIBase](nil)
+	for pattern, refObj := range self.refObj {
+		matched, err := path.Match(pattern, type_)
+		if err != nil {
+			return errors.New("Invalid pattern in UIBuild: " + pattern + ": " + err.Error())
+		}
+		if matched {
+			matchObj = refObj
+			break
+		}
+	}
+
+	var ui *UIBase
+	if matchObj != nil {
 		// 登録されたUICloneableからUIを複製して構築
-		component := refObj.Clone()
+		component := matchObj.Clone()
 		ui = component.GetUIBase()
 		ui.LoadFromValue(value) // プロパティを流し込む
 
 		// Setup関数でさらに細かい構築を行う
-		if err = component.Setup(type_, value.Map); err != nil {
+		if err := component.Setup(type_, value.Map); err != nil {
 			return err
 		}
 	} else {
