@@ -284,6 +284,7 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 	current := 0
 	for current < len(data) {
 		// キーを見つける
+		// シングルクオートはJSONでは使えないらしいのでダブルクオートのみ
 		// ----------------------------------------
 		keyStart, keyEnd := v.findStartEnd(data, current, '"', '"')
 		if keyStart == -1 || keyEnd == -1 {
