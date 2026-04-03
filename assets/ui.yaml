@@ -19,7 +19,7 @@
               RowsNum: 1
               Events: ["key:up", "key:down", "key:enter"]
               script: >
-                (if (!event 'key:enter')
+                (if (!event "key:enter")
                   (set @Action 
                     (switch @SelectNo "START" "CONTINUE")))
         - Type: "label"
