@@ -115,7 +115,11 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 		// 登録されたUICloneableからUIを複製して構築
 		component := matchObj.Clone()
 		ui = component.GetUIBase()
-		ui.LoadFromValue(value) // プロパティを流し込む
+
+		// ValueからUIBaseに流し込む
+		if err := ui.LoadFromValue(value); err != nil {
+			return err
+		}
 
 		// Setup関数でさらに細かい構築を行う
 		if err := component.Setup(type_, value.Map); err != nil {

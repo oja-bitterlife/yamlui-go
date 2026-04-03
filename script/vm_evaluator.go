@@ -15,11 +15,11 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeNumber, TypeString, TypeBool, TypeLitList:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
-		v = vm.vars.Map[v.Str] // 変数の値を返す
-		if !v.IsLiteral() {
-			return Value{}, errors.New("expected literal value")
+		vv, ok := vm.vars.Map[v.Str] // 変数の値を返す
+		if !ok {
+			return Value{}, errors.New("expected literal value: variable '" + v.Str)
 		}
-		return v, nil
+		return vv, nil
 	case TypeList:
 		// 再帰の深さをチェック
 		// ----------------------------------------

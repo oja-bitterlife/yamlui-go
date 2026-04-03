@@ -121,7 +121,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Update
 	errorList := m.lib.Update(m.frame)
 	for _, err := range errorList {
-		fmt.Printf("Error during update: %v\n", err)
+		panic(fmt.Sprintf("Error during update: %v\n", err))
 	}
 	if len(m.lib.GetEvents()) > 0 {
 		fmt.Printf("Events after update: %v\n", m.lib.GetEvents())
