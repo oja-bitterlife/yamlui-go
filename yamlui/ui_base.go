@@ -39,11 +39,7 @@ type UIBase struct {
 	// インタラクティブなUIに必要なプロパティ
 	SelectNo float64
 	SelGridX float64 // SelectGridで横の折り返し位置
-	Action   string  // UIで発生したイベント名。複数発生させる場合はAddEventを使う
-
-	// 都度リセットされる
-	ScriptAction string       // スクリプト中に@Actionへ発生したイベント名を入れる
-	ScriptResult script.Value // スクリプトの評価結果
+	Action   string  // UI処理で発生したイベントを入れる
 
 	// 子要素が保存させたいもの
 	Prop map[string]script.Value
@@ -138,9 +134,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Color", script.NewString(self.Color))
 	vm.SetVar("@SelectNo", script.NewNumber(float64(self.SelectNo)))
 	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
-
-	// スクリプトからUIに伝えるためのものなので常に空文字を入れておく
-	vm.SetVar("@Action", script.NewString("")) // ScriptActionだと長いので@Actionで
+	vm.SetVar("@Action", script.NewString(self.Action))
 
 	// PropはProp.をプレフィックスにして送る
 	for k, v := range self.Prop {
@@ -160,7 +154,7 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.Color = vm.GetVar("@Color").Str
 	self.SelectNo = vm.GetVar("@SelectNo").Num
 	self.SelGridX = vm.GetVar("@SelGridX").Num
-	self.ScriptAction = vm.GetVar("@Action").Str
+	self.Action = vm.GetVar("@Action").Str
 
 	// PropはProp.をプレフィックスにして受け取る
 	for k, v := range vm.GetVars() {

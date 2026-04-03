@@ -8,8 +8,15 @@ vars:
   UI_DIST_JSON: "ui.json"
 
 tasks:
+  jj-st:
+    desc: "Run jj st"
+    cmds:
+      - jj st
+
   build:
     desc: "Build"
+    deps:
+      - jj-st
     sources:
       - ./script/*.go
       - ./builtin/*.go

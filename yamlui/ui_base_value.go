@@ -18,23 +18,21 @@ func (self *UIBase) ToValue() script.Value {
 	}
 
 	return script.NewLitMap(map[string]script.Value{
-		"ID":           script.NewString(self.ID),
-		"UpdateCount":  script.NewNumber(float64(self.UpdateCount)),
-		"Events":       script.NewLitList(events),
-		"IsEnable":     script.NewBool(self.IsEnable),
-		"X":            script.NewNumber(float64(self.X)),
-		"Y":            script.NewNumber(float64(self.Y)),
-		"W":            script.NewNumber(float64(self.W)),
-		"H":            script.NewNumber(float64(self.H)),
-		"IsVisible":    script.NewBool(self.IsVisible),
-		"Text":         script.NewString(self.Text),
-		"Color":        script.NewString(self.Color),
-		"SelectNo":     script.NewNumber(float64(self.SelectNo)),
-		"SelGridX":     script.NewNumber(float64(self.SelGridX)),
-		"Action":       script.NewString(self.Action),
-		"ScriptAction": script.NewString(self.ScriptAction),
-		"ScriptResult": self.ScriptResult,
-		"Prop":         script.NewLitMap(self.Prop),
+		"ID":          script.NewString(self.ID),
+		"UpdateCount": script.NewNumber(float64(self.UpdateCount)),
+		"Events":      script.NewLitList(events),
+		"IsEnable":    script.NewBool(self.IsEnable),
+		"X":           script.NewNumber(float64(self.X)),
+		"Y":           script.NewNumber(float64(self.Y)),
+		"W":           script.NewNumber(float64(self.W)),
+		"H":           script.NewNumber(float64(self.H)),
+		"IsVisible":   script.NewBool(self.IsVisible),
+		"Text":        script.NewString(self.Text),
+		"Color":       script.NewString(self.Color),
+		"SelectNo":    script.NewNumber(float64(self.SelectNo)),
+		"SelGridX":    script.NewNumber(float64(self.SelGridX)),
+		"Action":      script.NewString(self.Action),
+		"Prop":        script.NewLitMap(self.Prop),
 	})
 }
 
@@ -98,12 +96,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 	if v, ok := m["Action"]; ok {
 		self.Action = v.Str
-	}
-	if v, ok := m["ScriptAction"]; ok {
-		self.ScriptAction = v.Str
-	}
-	if v, ok := m["ScriptResult"]; ok {
-		self.ScriptResult = v
 	}
 
 	if prop, ok := m["Prop"]; ok {

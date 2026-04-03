@@ -5,7 +5,8 @@ import (
 )
 
 type Runtime struct {
-	vm *VM
+	vm     *VM
+	Result Value
 	// コンパイル済みコード
 	// トップは単純なコマンドを並べられる暗黙のBetinなので、Listになっている
 	ast []Value
@@ -52,7 +53,7 @@ func Compile(src string) (*Runtime, error) {
 	}, nil
 }
 
-func (runtime *Runtime) Run() (Value, error) {
+func (runtime *Runtime) Run() error {
 	results := make([]Value, len(runtime.ast))
 
 	// ASTを順番に評価していく
@@ -63,7 +64,7 @@ func (runtime *Runtime) Run() (Value, error) {
 
 		// 評価
 		if result, err := runtime.vm.Eval(v); err != nil {
-			return Value{}, err
+			return err
 		} else {
 			results = append(results, result)
 		}
@@ -71,17 +72,18 @@ func (runtime *Runtime) Run() (Value, error) {
 
 	// 結果
 	// ----------------------------------------
-	// 何も実行されなかった場合は空のValueを返す
+	// 何も実行されなかった
 	if len(results) == 0 {
-		return Value{}, nil
+		return errors.New("no commands were executed")
 	}
 
 	// 結果が1つだけならそのまま返す。複数あるならリストにして返す
 	if len(results) == 1 {
-		return results[0], nil
+		runtime.Result = results[0]
 	} else {
-		return NewLitList(results), nil
+		runtime.Result = NewList(results)
 	}
+	return nil
 }
 
 // **********************************************************************
