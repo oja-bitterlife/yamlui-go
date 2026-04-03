@@ -4,8 +4,10 @@ import "slices"
 
 // **********************************************************************
 // 描画インターフェース
-type DrawIF interface {
-	Draw(x, y float64, ctx DrawContext)
+type DrawContext struct {
+	Lib        *YAMLUI // ライブラリ全体へのアクセス
+	Clip       Area    // 自分が描画できる領域（クリップされている）
+	ParentClip Area    // 親の描画領域（クリップされている）
 }
 
 // 直接DrawIFを呼び出すのではなく、DrawTreeの中でDrawQueueItemにしてキューに入れる
@@ -17,16 +19,14 @@ type DrawQueueItem struct {
 	ctx    DrawContext
 }
 
+// 通常のDraw
+type DrawIF interface {
+	Draw(x, y float64, ctx DrawContext)
+}
+
 // Align操作が必要な時とか、DrawTreeを自前で実装したいときのインターフェース
 type DrawTreeIF interface {
 	DrawTree(z int, x, y float64, ctx DrawContext)
-}
-
-type DrawContext struct {
-	Lib        *YAMLUI // ライブラリ全体へのアクセス
-	Parent     *UIBase // 親のUI
-	ParentClip Area    // 親の描画領域（クリップされている）
-	Clip       Area    // 自分が描画できる領域（クリップされている）
 }
 
 func (self *UIBase) SetDrawIF(drawIF DrawIF) {
@@ -38,10 +38,9 @@ func (self *UIBase) SetDrawTreeIF(drawTreeIF DrawTreeIF) {
 }
 
 // コンテキスト作成
-func NewDrawContext(lib *YAMLUI, self *UIBase, parent *UIBase, parentClip Area) DrawContext {
+func NewDrawContext(lib *YAMLUI, self *UIBase, parentClip Area) DrawContext {
 	return DrawContext{
 		Lib:        lib,
-		Parent:     parent,
 		ParentClip: parentClip,
 		Clip: Area{
 			X: parentClip.X + self.X,
@@ -62,7 +61,7 @@ func (self *YAMLUI) Draw(screen Area) {
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewDrawContext(self, self.root, nil, screen)
+	ctx := NewDrawContext(self, self.root, screen)
 	self.root.RecDrawTree(0, 0, 0, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
@@ -84,7 +83,7 @@ func (self *UIBase) RecDrawTree(z int, x, y float64, ctx DrawContext) {
 	for _, child := range self.children {
 		if child.IsVisible {
 			// 描画座標やクリップ領域等を計算してコンテキストを作る
-			childCtx := NewDrawContext(ctx.Lib, child, self, ctx.Clip)
+			childCtx := NewDrawContext(ctx.Lib, child, ctx.Clip)
 			childX, childY := x+child.X, y+child.Y
 
 			// 描画インターフェースがあれば描画キューに入れる
