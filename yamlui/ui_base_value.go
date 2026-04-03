@@ -51,10 +51,13 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	if v, ok := m["UpdateCount"]; ok {
 		self.UpdateCount = int(v.Num)
 	}
+
+	// EventsはStringのリストであることを確認してから流し込む
 	if v, ok := m["Events"]; ok {
 		if v.Type != script.TypeLitList {
 			return errors.New("Expected Events to be ListType: " + v.Type.String())
 		}
+
 		events := make([]string, len(v.List))
 		for i, eventVal := range v.List {
 			if eventVal.Type != script.TypeString {
@@ -64,6 +67,7 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		}
 		self.Events = events
 	}
+
 	if v, ok := m["IsEnable"]; ok {
 		self.IsEnable = v.Bool
 	}
@@ -98,10 +102,21 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		self.Action = v.Str
 	}
 
+	// PropはMapTypeであればそのまま流し込む。なければ空のまま
 	if prop, ok := m["Prop"]; ok {
 		if prop.Type != script.TypeLitMap {
 			return errors.New("Expected Prop to be MapType: " + prop.Type.String())
 		}
 	}
+
+	// scriptはスクリプトをコンパイルして保存する
+	if v, ok := m["script"]; ok {
+		runtime, err := script.Compile(v.Str)
+		if err != nil {
+			return errors.New("Failed to compile script: " + err.Error())
+		}
+		self.script = runtime
+	}
+
 	return nil
 }
