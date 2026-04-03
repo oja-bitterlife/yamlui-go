@@ -1,8 +1,8 @@
 package yamlui
 
+import "slices"
+
 // **********************************************************************
-// 描画周り
-// ==================================================
 // 描画インターフェース
 type DrawIF interface {
 	Draw(x, y float64, ctx DrawContext)
@@ -37,8 +37,6 @@ func (self *UIBase) SetDrawTreeIF(drawTreeIF DrawTreeIF) {
 	self.drawTreeIF = drawTreeIF
 }
 
-// ==================================================
-// DrawTreeの再帰実行
 // コンテキスト作成
 func NewDrawContext(lib *YAMLUI, self *UIBase, parent *UIBase, parentClip Area) DrawContext {
 	return DrawContext{
@@ -54,6 +52,33 @@ func NewDrawContext(lib *YAMLUI, self *UIBase, parent *UIBase, parentClip Area) 
 	}
 }
 
+// **********************************************************************
+// 呼び出し口
+func (self *YAMLUI) Draw(screen Area) {
+	self.Screen = screen
+
+	// drawQueueをクリア
+	self.drawQueue = []DrawQueueItem{}
+
+	// 描画コンテキストを作成してDrawTreeを呼び出す
+	// ----------------------------------------
+	ctx := NewDrawContext(self, self.root, nil, screen)
+	self.root.RecDrawTree(0, 0, 0, ctx)
+
+	// drawQueueに溜まった描画命令を実行する
+	// ----------------------------------------
+	// Z順でソートする
+	slices.SortStableFunc(self.drawQueue, func(a, b DrawQueueItem) int {
+		return a.z - b.z
+	})
+	// ソートされたqueueを順番に実行する
+	for _, item := range self.drawQueue {
+		item.drawIF.Draw(item.x, item.y, item.ctx)
+	}
+}
+
+// **********************************************************************
+// DrawTreeの再帰実行
 func (self *UIBase) RecDrawTree(z int, x, y float64, ctx DrawContext) {
 	// 子供の描画
 	for _, child := range self.children {

@@ -80,6 +80,12 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
+func nextTick() tea.Cmd {
+	return func() tea.Msg {
+		return struct{}{} // 空のメッセージを返す
+	}
+}
+
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.frame++ // フレームを進める
 
@@ -116,6 +122,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	errorList := m.lib.Update(m.frame)
 	for _, err := range errorList {
 		fmt.Printf("Error during update: %v\n", err)
+	}
+	if len(m.lib.GetEvents()) > 0 {
+		fmt.Printf("Events after update: %v\n", m.lib.GetEvents())
+		return m, nextTick()
 	}
 
 	return m, nil

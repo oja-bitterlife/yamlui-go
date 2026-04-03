@@ -1,8 +1,8 @@
 package yamlui
 
-// ==================================================
-// 更新
-// ----------------------------------------
+import "slices"
+
+// **********************************************************************
 // Updateのインターフェース
 type OnInitIF interface {
 	OnInit(lib *YAMLUI) error
@@ -32,8 +32,84 @@ func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
 	self.updateTreeIF = updateTreeIF
 }
 
-// ==================================================
-// Update実行
+// **********************************************************************
+// 呼び出し口
+func (self *YAMLUI) Update(frame int) []error {
+	errorList := []error{}
+
+	self.SystemFrame = frame
+
+	// updateQueueをクリア
+	self.updateQueue = []UpdateQueueItem{}
+
+	// 更新コンテキストを作成してUpdateTreeを呼び出す
+	// ----------------------------------------
+	if err := self.root.RecUpdateTree(self, 0); err != nil {
+		errorList = append(errorList, err...)
+	}
+
+	// updateQueueに溜まった描画命令を実行する
+	// ----------------------------------------
+	// Z順でソートする
+	slices.SortStableFunc(self.updateQueue, func(a, b UpdateQueueItem) int {
+		return a.z - b.z
+	})
+
+	// UpdateCountが0のときはInitとみなしてOnInitを呼び出す
+	for _, item := range self.updateQueue {
+		uiBase := item.UpdateIF.GetUIBase()
+		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
+			if err := uiBase.onInitIF.OnInit(self); err != nil {
+				errorList = append(errorList, err)
+			}
+		}
+	}
+
+	// イベントをUpdateの前に処理し、Updateにイベントを通知する
+	self.ProcessEvents()
+	self.ClearEvents() // 終わったらイベントキューをクリア
+
+	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
+
+	// ソートされたqueueを順番に実行する
+	for _, item := range self.updateQueue {
+		uiBase := item.UpdateIF.GetUIBase()
+		uiBase.Action = "" // Actionをクリアしておく
+
+		// Updateを呼び出す
+		// ----------------------------------------
+		item.UpdateIF.Update(self, item.Events)
+
+		// Update後スクリプトがあれば走らせる
+		// ----------------------------------------
+		if uiBase.script != nil {
+			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
+			uiBase.storeToVM(uiBase.script.GetVM())
+
+			// スクリプトを実行
+			if err := uiBase.script.Run(); err != nil {
+				errorList = append(errorList, err)
+			}
+
+			// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
+			uiBase.loadFromVM(uiBase.script.GetVM())
+		}
+
+		// Update後処理
+		// ----------------------------------------
+		// Updateの実行後にイベントが発生(Action!="")していればキューに追加
+		if uiBase.Action != "" {
+			self.AddEvent(uiBase.Action)
+		}
+
+		// 実行カウントを進める
+		uiBase.UpdateCount++
+	}
+
+	return errorList
+}
+
+// **********************************************************************
 // 再帰実行
 func (self *UIBase) RecUpdateTree(lib *YAMLUI, z int) []error {
 	errorList := []error{}
