@@ -29,6 +29,10 @@ func NewYAMLUI() *YAMLUI {
 	}
 }
 
+func (self *YAMLUI) FindByID(id string) *UIBase {
+	return self.root.FindChildByID(id)
+}
+
 // **********************************************************************
 // UIのJSONをUnmarshalしたmap[string]ValueのTypeごとにインスタンスを割り当て
 // ==================================================
