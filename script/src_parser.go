@@ -1,26 +1,24 @@
-package convert
+package script
 
 import (
 	"strconv"
 	"strings"
-
-	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
-// 構文解析してscript.ValueのASTを作る
-func Compile(src string) (script.Value, error) {
-	return parse(src)
+// 構文解析してValueのASTを作る
+func Compile(src string) (Value, error) {
+	return parseLisp(src)
 }
 
 // **********************************************************************
 // スクリプトの構文解析
 // ==================================================
-// parse. スクリプト全体を解析して、script.Valueのツリー構造を作る
-func parse(src string) (script.Value, error) {
-	tn := NewTokenizer(src)
+// parseLisp. スクリプト全体を解析して、Valueのツリー構造を作る
+func parseLisp(src string) (Value, error) {
+	tn := NewLispTokenizer(src)
 
-	root := script.Value{Type: script.TypeList, List: []script.Value{}}
+	root := Value{Type: TypeList, List: []Value{}}
 
 	// 明示的な ( がなくても、EOFまでトークンを読み続ける
 	for {
@@ -28,7 +26,7 @@ func parse(src string) (script.Value, error) {
 
 		// エラー
 		if err != nil {
-			return script.Value{}, err
+			return Value{}, err
 		}
 		// 空トークンは終了
 		if token == nil {
@@ -36,9 +34,9 @@ func parse(src string) (script.Value, error) {
 		}
 
 		// トークンを解析して root.List に append していく
-		val, err := parseToken(tn, token)
+		val, err := parseLispToken(tn, token)
 		if err != nil {
-			return script.Value{}, err
+			return Value{}, err
 		}
 		root.List = append(root.List, val)
 	}
@@ -49,58 +47,58 @@ func parse(src string) (script.Value, error) {
 }
 
 // ==================================================
-// parseToken. トークンを解析してscript.Valueに変換する
-func parseToken(tn *Tokenizer, token []byte) (script.Value, error) {
+// parseLispToken. トークンを解析してValueに変換する
+func parseLispToken(tn *LispTokenizer, token []byte) (Value, error) {
 	switch token[0] {
 	case '(':
-		return parseList(tn, ')')
+		return parseLispList(tn, ')')
 	case '{':
-		return parseList(tn, '}')
+		return parseLispList(tn, '}')
 	case ')', '}':
-		return script.Value{}, script.LogErr("unexpected token: %s", string(token))
+		return Value{}, LogErr("unexpected token: %s", string(token))
 	case '"', '\'':
 		// 前後の " を除去して文字列に
 		if len(token) < 2 {
-			return script.Value{}, script.LogErr("invalid string token: %s", string(token))
+			return Value{}, LogErr("invalid string token: %s", string(token))
 		}
-		return script.NewString(string(token[1 : len(token)-1])), nil
+		return NewString(string(token[1 : len(token)-1])), nil
 	case '@', '_':
-		return script.NewProperty(string(token)), nil
+		return NewProperty(string(token)), nil
 	default:
 		// bool, number, or string
 		s := string(token)
 
 		// boolチェック
 		if strings.ToLower(s) == "true" {
-			return script.NewBool(true), nil
+			return NewBool(true), nil
 		}
 		if strings.ToLower(s) == "false" {
-			return script.NewBool(false), nil
+			return NewBool(false), nil
 		}
 
 		// 数値にできる？
 		if f, err := strconv.ParseFloat(s, 64); err == nil {
-			return script.NewNumber(f), nil
+			return NewNumber(f), nil
 		}
 
 		// コマンドかPropety(""で囲まれていない文字列)
-		return script.NewString(s), nil
+		return NewString(s), nil
 	}
 }
 
 // ==================================================
-// parseList. ()で囲まれたリストを解析する
-func parseList(tn *Tokenizer, terminate byte) (script.Value, error) {
-	var list []script.Value
+// parseLispList. ()で囲まれたリストを解析する
+func parseLispList(tn *LispTokenizer, terminate byte) (Value, error) {
+	var list []Value
 	for {
 		token, err := tn.Next()
 
 		// エラーチェック
 		if err != nil {
-			return script.Value{}, err
+			return Value{}, err
 		}
 		if token == nil {
-			return script.Value{}, script.LogErr("unexpected end of input, expected '%c'", terminate)
+			return Value{}, LogErr("unexpected end of input, expected '%c'", terminate)
 		}
 
 		// 終端
@@ -109,18 +107,18 @@ func parseList(tn *Tokenizer, terminate byte) (script.Value, error) {
 		}
 
 		// 内容を再帰的に解析
-		val, err := parseToken(tn, token)
+		val, err := parseLispToken(tn, token)
 		if err != nil {
-			return script.Value{}, err
+			return Value{}, err
 		}
 
 		// リテラルブロックはPropertyやListを含められない
 		if terminate == '}' {
 			switch val.Type {
-			case script.TypeNumber, script.TypeString, script.TypeBool:
+			case TypeNumber, TypeString, TypeBool:
 				// OK
 			default:
-				return script.Value{}, script.LogErr("invalid value in literal block: only number, string, and bool are allowed, got %s", val.Type.String())
+				return Value{}, LogErr("invalid value in literal block: only number, string, and bool are allowed, got %s", val.Type.String())
 			}
 		}
 
@@ -129,8 +127,8 @@ func parseList(tn *Tokenizer, terminate byte) (script.Value, error) {
 
 	// リテラルブロックなら、リスト全体を文字列化してリテラルとして返す
 	if terminate == '}' {
-		return script.NewLitList(list), nil
+		return NewLitList(list), nil
 	} else {
-		return script.NewList(list), nil
+		return NewList(list), nil
 	}
 }

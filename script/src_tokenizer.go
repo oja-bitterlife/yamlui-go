@@ -1,31 +1,31 @@
-package convert
+package script
 
 // 入力文字列をトークンに分割する
-type Tokenizer struct {
+type LispTokenizer struct {
 	src []byte
 	pos int
 }
 
-func NewTokenizer(src string) *Tokenizer {
-	return &Tokenizer{src: []byte(src), pos: 0}
+func NewLispTokenizer(src string) *LispTokenizer {
+	return &LispTokenizer{src: []byte(src), pos: 0}
 }
 
 // **********************************************************************
 // トークン分割
 // ==================================================
 // 特別な文字
-func isSpace(c byte) bool {
+func isLispSpace(c byte) bool {
 	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
 }
-func isDelim(c byte) bool {
+func isLispDelim(c byte) bool {
 	return c == '(' || c == ')' || c == '{' || c == '}' || c == '"' || c == '\''
 }
 
 // ==================================================
 // トークンを一つずつ返す。最後まで行ってたらnilを返す
-func (tn *Tokenizer) Next() ([]byte, error) {
+func (tn *LispTokenizer) Next() ([]byte, error) {
 	// 空白をスキップ
-	for tn.pos < len(tn.src) && isSpace(tn.src[tn.pos]) {
+	for tn.pos < len(tn.src) && isLispSpace(tn.src[tn.pos]) {
 		tn.pos++
 	}
 	if tn.pos >= len(tn.src) {
@@ -74,7 +74,7 @@ func (tn *Tokenizer) Next() ([]byte, error) {
 		return tn.src[start:tn.pos], nil
 
 	default: // 一塊の文字列
-		for tn.pos < len(tn.src) && !isSpace(tn.src[tn.pos]) && !isDelim(tn.src[tn.pos]) {
+		for tn.pos < len(tn.src) && !isLispSpace(tn.src[tn.pos]) && !isLispDelim(tn.src[tn.pos]) {
 			tn.pos++
 		}
 		return tn.src[start:tn.pos], nil

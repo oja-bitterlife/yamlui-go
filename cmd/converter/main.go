@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/goccy/go-yaml"
-	"github.com/oja-bitterlife/yamlui-go/convert"
 	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui_json"
 )
@@ -52,7 +51,7 @@ func CompileScripts(v script.Value) script.Value {
 		for k, child := range v.Map {
 			if k == "script" && child.Type == script.TypeString {
 				// ここで文字列をコンパイル！
-				valueAST, err := convert.Compile(child.Str)
+				valueAST, err := script.Compile(child.Str)
 				if err != nil {
 					panic(fmt.Sprintf("failed to compile script: %v", err))
 				}

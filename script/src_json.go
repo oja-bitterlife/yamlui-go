@@ -6,6 +6,32 @@ import (
 )
 
 // **********************************************************************
+// Unmarshalの実装
+// json.UnmarshalJSONを使ってしまわないよう、関数名を違うものにしておく
+func NewFromValueJSON(data []byte) (Value, error) {
+	data = bytes.TrimSpace(data)
+
+	if len(data) == 0 {
+		return Value{}, LogErr("empty JSON data")
+	}
+
+	// まずはブラケットの整合性をチェック
+	if bytes.HasPrefix(data, []byte("{")) && !bytes.HasSuffix(data, []byte("}")) ||
+		bytes.HasPrefix(data, []byte("[")) && !bytes.HasSuffix(data, []byte("]")) {
+		return Value{}, LogErr("mismatched brackets in JSON data")
+	}
+
+	// JSONの形式に従ってscript.Valueを構築
+	val, err := parseValue(data)
+	if err != nil {
+		return Value{}, err
+	}
+
+	// 構築されたscript.Valueをvにコピー
+	return val, nil
+}
+
+// **********************************************************************
 // Marshalの実装
 // json.MarshalJSONを使ってしまわないよう、関数名を違うものにしておく
 func (v *Value) ToValueJSON() ([]byte, error) {
@@ -106,7 +132,7 @@ func (v *Value) ToValueJSON() ([]byte, error) {
 }
 
 // **********************************************************************
-// ValueのJSON形式からValueへの変換
+// Unmarshalの実装のヘルパー
 // ==================================================
 // parseValue. JSON形式(つまり文字列)のValueをValueに変換する
 func parseValue(data []byte) (Value, error) {
@@ -176,8 +202,6 @@ func parseValue(data []byte) (Value, error) {
 	}
 }
 
-// **********************************************************************
-// ヘルパー
 // ==================================================
 // findStartEnd. dataのstart位置から、openCharで始まりcloseCharで終わる部分の開始位置と終了位置を返す
 func findStartEnd(data []byte, start int, openChar, closeChar byte) (int, int) {
@@ -331,30 +355,4 @@ func parseValueMap(data []byte) (map[string]Value, error) {
 	}
 
 	return m, nil
-}
-
-// **********************************************************************
-// Unmarshalの実装
-// json.UnmarshalJSONを使ってしまわないよう、関数名を違うものにしておく
-func NewFromValueJSON(data []byte) (Value, error) {
-	data = bytes.TrimSpace(data)
-
-	if len(data) == 0 {
-		return Value{}, LogErr("empty JSON data")
-	}
-
-	// まずはブラケットの整合性をチェック
-	if bytes.HasPrefix(data, []byte("{")) && !bytes.HasSuffix(data, []byte("}")) ||
-		bytes.HasPrefix(data, []byte("[")) && !bytes.HasSuffix(data, []byte("]")) {
-		return Value{}, LogErr("mismatched brackets in JSON data")
-	}
-
-	// JSONの形式に従ってscript.Valueを構築
-	val, err := parseValue(data)
-	if err != nil {
-		return Value{}, err
-	}
-
-	// 構築されたscript.Valueをvにコピー
-	return val, nil
 }
