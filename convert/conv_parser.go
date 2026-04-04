@@ -1,7 +1,6 @@
 package convert
 
 import (
-	"errors"
 	"strconv"
 	"strings"
 
@@ -52,11 +51,11 @@ func parseToken(tn *Tokenizer, token []byte) (script.Value, error) {
 	case '{':
 		return parseList(tn, '}')
 	case ')', '}':
-		return script.Value{}, errors.New("unexpected '" + string(token[0]) + "'")
+		return script.Value{}, script.LogErr("unexpected token: %s", string(token))
 	case '"', '\'':
 		// 前後の " を除去して文字列に
 		if len(token) < 2 {
-			return script.Value{}, errors.New("invalid string")
+			return script.Value{}, script.LogErr("invalid string token: %s", string(token))
 		}
 		return script.NewString(string(token[1 : len(token)-1])), nil
 	case '@', '_':
@@ -95,7 +94,7 @@ func parseList(tn *Tokenizer, terminate byte) (script.Value, error) {
 			return script.Value{}, err
 		}
 		if token == nil {
-			return script.Value{}, errors.New("unclosed parenthesis")
+			return script.Value{}, script.LogErr("unexpected end of input, expected '%c'", terminate)
 		}
 
 		// 終端
@@ -115,7 +114,7 @@ func parseList(tn *Tokenizer, terminate byte) (script.Value, error) {
 			case script.TypeNumber, script.TypeString, script.TypeBool:
 				// OK
 			default:
-				return script.Value{}, errors.New("invalid value in literal block: " + val.Type.String())
+				return script.Value{}, script.LogErr("invalid value in literal block: only number, string, and bool are allowed, got %s", val.Type.String())
 			}
 		}
 

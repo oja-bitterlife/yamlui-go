@@ -2,7 +2,6 @@ package convert
 
 import (
 	"bytes"
-	"errors"
 	"strconv"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -22,12 +21,12 @@ func parseValue(data []byte) (script.Value, error) {
 	// キーと値を分割
 	parts := bytes.SplitN(data, []byte(":"), 2)
 	if len(parts) != 2 {
-		return script.Value{}, errors.New("invalid JSON format: expected key-value pair")
+		return script.Value{}, script.LogErr("invalid JSON format: expected key-value pair, got \"%s\"", string(data))
 	}
 
 	key, err := strconv.Unquote(string(bytes.TrimSpace(parts[0])))
 	if err != nil {
-		return script.Value{}, err
+		return script.Value{}, script.LogErr("invalid JSON format: invalid key \"%s\": %v", string(parts[0]), err)
 	}
 	value := bytes.TrimSpace(parts[1])
 
@@ -35,47 +34,47 @@ func parseValue(data []byte) (script.Value, error) {
 	case script.TypeNumberStr:
 		f, err := strconv.ParseFloat(string(value), 64)
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid number \"%s\": %v", string(value), err)
 		}
 		return script.NewNumber(f), nil
 	case script.TypeStringStr:
 		s, err := strconv.Unquote(string(value))
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid string \"%s\": %v", string(value), err)
 		}
 		return script.NewString(s), nil
 	case script.TypePropertyStr:
 		s, err := strconv.Unquote(string(value))
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid property \"%s\": %v", string(value), err)
 		}
 		return script.NewProperty(s), nil
 	case script.TypeBoolStr:
 		b, err := strconv.ParseBool(string(value))
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid bool \"%s\": %v", string(value), err)
 		}
 		return script.NewBool(b), nil
 	case script.TypeListStr:
 		list, err := parseValueList(value)
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid list \"%s\": %v", string(value), err)
 		}
 		return script.NewList(list), nil
 	case script.TypeLitListStr:
 		list, err := parseValueList(value)
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid literal list \"%s\": %v", string(value), err)
 		}
 		return script.NewLitList(list), nil
 	case script.TypeLitMapStr:
 		m, err := parseValueMap(value)
 		if err != nil {
-			return script.Value{}, err
+			return script.Value{}, script.LogErr("invalid JSON format: invalid literal map \"%s\": %v", string(value), err)
 		}
 		return script.NewLitMap(m), nil
 	default:
-		return script.Value{}, errors.New("invalid JSON format: unknown key \"" + string(key) + "\"")
+		return script.Value{}, script.LogErr("invalid JSON format: unknown type \"%s\"", key)
 	}
 }
 
@@ -163,7 +162,7 @@ func parseValueList(data []byte) ([]script.Value, error) {
 		// 最初の{}のペアを見つける
 		start, end := findStartEnd(data, current, '{', '}')
 		if start == -1 || end == -1 {
-			return nil, errors.New("invalid JSON format: unmatched brackets in list")
+			return nil, script.LogErr("invalid JSON format: expected list of objects, got \"%s\"", string(data))
 		}
 
 		// {}の中身を解析
@@ -205,21 +204,21 @@ func parseValueMap(data []byte) (map[string]script.Value, error) {
 
 		key, err := strconv.Unquote(string(data[keyStart:keyEnd]))
 		if err != nil {
-			return nil, err
+			return nil, script.LogErr("invalid JSON format: invalid key at position %d: %v", keyStart, err)
 		}
 
 		// コロンを見つける
 		// ----------------------------------------
 		colonIndex := bytes.IndexByte(data[keyEnd:], ':')
 		if colonIndex == -1 {
-			return nil, errors.New("invalid JSON format: missing colon after key")
+			return nil, script.LogErr("invalid JSON format: expected ':' after key \"%s\"", key)
 		}
 
 		// 値を見つける
 		// ----------------------------------------
 		valueStart, valueEnd := findStartEnd(data, keyEnd+colonIndex, '{', '}')
 		if valueStart == -1 || valueEnd == -1 {
-			return nil, errors.New("invalid JSON format: unmatched brackets in value")
+			return nil, script.LogErr("invalid JSON format: expected value object after key \"%s\"", key)
 		}
 
 		val, err := parseValue(data[valueStart:valueEnd])

@@ -27,7 +27,7 @@ func main() {
 	// JSON からscript.Value に変換
 	val, err := convert.FromJSON(jsonData)
 	if err != nil {
-		script.LogFatal("failed to convert JSON to Value: %v", err)
+		panic(err)
 	}
 
 	// script部分をコンパイル
@@ -36,7 +36,7 @@ func main() {
 	// ValueをValue型JSONに
 	data, err := convert.ToJSON(val)
 	if err != nil {
-		script.LogFatal("failed to convert Value to JSON: %v", err)
+		panic(err)
 	}
 
 	// 成功！

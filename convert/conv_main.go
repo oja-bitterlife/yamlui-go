@@ -2,7 +2,6 @@ package convert
 
 import (
 	"bytes"
-	"errors"
 	"strconv"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -108,7 +107,7 @@ func ToJSON(v script.Value) ([]byte, error) {
 		buf.WriteString(`}}`)
 
 	default:
-		return nil, errors.New("cannot marshal unknown type: " + v.Type.String())
+		return nil, script.LogErr("unsupported Value type: %v", v.Type)
 	}
 
 	return buf.Bytes(), nil
@@ -121,13 +120,13 @@ func FromJSON(data []byte) (script.Value, error) {
 	data = bytes.TrimSpace(data)
 
 	if len(data) == 0 {
-		return script.Value{}, errors.New("invalid JSON format: empty input")
+		return script.Value{}, script.LogErr("empty JSON data")
 	}
 
 	// まずはブラケットの整合性をチェック
 	if bytes.HasPrefix(data, []byte("{")) && !bytes.HasSuffix(data, []byte("}")) ||
 		bytes.HasPrefix(data, []byte("[")) && !bytes.HasSuffix(data, []byte("]")) {
-		return script.Value{}, errors.New("invalid JSON format: mismatched brackets")
+		return script.Value{}, script.LogErr("mismatched brackets in JSON data")
 	}
 
 	// JSONの形式に従ってscript.Valueを構築
