@@ -13,10 +13,15 @@ tasks:
     cmds:
       - jj st
 
+  build_converter:
+    desc: "build converter"
+    cmds:
+      - go build -o {{.BIN_DIR}}/converter --tags debug ./cmd/converter
+
   convert:
     desc: "run convert"
     cmds:
-      - go run ./cmd/converter
+      - "{{.BIN_DIR}}/converter"
 
   build:
     desc: "Build"
@@ -40,15 +45,6 @@ tasks:
       - convert
     cmds:
       - "{{.BIN_DIR}}/main"
-
-  convert:
-    desc: "Convert"
-    sources:
-      - "{{.ASSET_DIR}}/{{.UI_SRC_YAML}}"
-    generates:
-      - "{{.BIN_DIR}}/{{.UI_DIST_JSON}}"
-    cmds:
-      - cat {{.ASSET_DIR}}/{{.UI_SRC_YAML}} | yq -o=json > {{.BIN_DIR}}/{{.UI_DIST_JSON}}
 
   test:
     desc: "Test"

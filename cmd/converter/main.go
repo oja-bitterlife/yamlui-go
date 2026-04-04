@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/oja-bitterlife/yamlui-go/convert"
 	"github.com/oja-bitterlife/yamlui-go/script"
+	"github.com/oja-bitterlife/yamlui-go/yamlui_json"
 )
 
 func main() {
@@ -24,8 +25,14 @@ func main() {
 		script.LogFatal("failed to marshal to JSON: %v", err)
 	}
 
-	// JSON からscript.Value に変換
-	val, err := convert.FromJSON(jsonData)
+	// JSON からValue型JSONに変換
+	jsonValue, err := yamlui_json.AnyJSONToValueJSON(jsonData)
+	if err != nil {
+		panic(err)
+	}
+
+	// Value型JSONをValue型のツリーに変換
+	val, err := convert.FromJSON(jsonValue)
 	if err != nil {
 		panic(err)
 	}

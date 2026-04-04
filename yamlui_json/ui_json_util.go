@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/oja-bitterlife/yamlui-go/convert"
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -22,7 +23,7 @@ func AnyJSONToValueJSON(fileData []byte) ([]byte, error) {
 		if err != nil {
 			return []byte{}, errors.New("Failed to convert JSON to Value: " + err.Error())
 		}
-		return value.MarshalJSON()
+		return convert.ToJSON(value)
 	default:
 		// UI用のデータは基本的にMapかListのはずなので、その他の型はエラーとする
 		return []byte{}, errors.New("Unsupported top-level JSON type: expected object or array, got " + string(fileData))
