@@ -15,5 +15,7 @@ func main() {
 		panic(err)
 	}
 
+	lib.GetRoot().GetScriptRuntime().Run()
+
 	print("UI loaded successfully!")
 }

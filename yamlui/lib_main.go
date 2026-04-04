@@ -35,6 +35,10 @@ func (self *YAMLUI) FindByID(id string) *UIBase {
 	return self.root.FindChildByID(id)
 }
 
+func (self *YAMLUI) GetRoot() *UIBase {
+	return self.root
+}
+
 // デバッグ用。ないとログもままならないので
 func (self *YAMLUI) GetEvents() []string {
 	return self.eventQueue
