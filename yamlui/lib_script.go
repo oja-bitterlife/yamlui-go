@@ -1,7 +1,6 @@
 package yamlui
 
 import (
-	"errors"
 	"path"
 	"strings"
 
@@ -22,8 +21,8 @@ func (self *UIBase) storeScriptEvent(events []string) {
 
 // **********************************************************************
 // scriptコマンドを登録する
-func (self *UIBase) setUIScriptCmds() {
-	self.script.RegisterCmd("event",
+func (self *UIBase) setUIScriptCmds(vm *script.VM) {
+	vm.RegisterCmd("event",
 		func(vm *script.VM, args []script.Value) (script.Value, error) {
 			return self.scriptEvent(vm, args)
 		})
@@ -44,7 +43,7 @@ func (ui *UIBase) scriptEvent(vm *script.VM, args []script.Value) (script.Value,
 
 	// 文字列のはずなのでチェック
 	if value.Type != script.TypeString {
-		return script.Value{}, errors.New("event command expects a string argument, but got " + value.Type.String())
+		return script.Value{}, script.LogErr("event command expects a string argument, but got " + value.Type.String())
 	}
 
 	// vm.varsの中にあるかpath.Matchでチェックする

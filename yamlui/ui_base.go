@@ -168,11 +168,11 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 
 // **********************************************************************
 // UIBaseの関数
-func (self *UIBase) SetScript(newVM *script.VM) {
+func (self *UIBase) SetScriptVM(newVM *script.VM) {
 	self.script = newVM
 }
 
-func (self *UIBase) GetScriptRuntime() (*script.VM, error) {
+func (self *UIBase) GetScriptVM() (*script.VM, error) {
 	if self.script == nil {
 		return nil, script.LogErr("No script runtime set for this UIBase (ID: " + self.ID + ")")
 	}

@@ -7,6 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
 
@@ -108,10 +109,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Update
 	errorList := m.lib.Update(m.frame)
 	for _, err := range errorList {
-		panic(fmt.Sprintf("Error during update: %v\n", err))
+		script.LogFatal(fmt.Sprintf("Error during update: %v\n", err))
 	}
 	if len(m.lib.GetEvents()) > 0 {
-		fmt.Printf("Events after update: %v\n", m.lib.GetEvents())
+		script.Log(fmt.Sprintf("Events: %v\n", m.lib.GetEvents()))
 		return m, nextTick()
 	}
 

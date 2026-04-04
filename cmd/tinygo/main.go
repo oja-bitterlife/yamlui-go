@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	vm, err := lib.GetRoot().GetScriptRuntime()
+	vm, err := lib.GetRoot().GetScriptVM()
 	if err != nil {
 		panic(err)
 	}

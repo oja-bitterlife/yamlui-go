@@ -301,10 +301,10 @@ func (vm *VM) if_(args []Value) (Value, error) {
 		return Value{}, LogErr("if condition must evaluate to a boolean, got: %v", condVal)
 	}
 
-	// 引数が2つの場合は、条件が真のときのケースとみなす。偽のときは nil を返す
+	// 引数が2つの場合は、条件が真のときのケースとみなす。偽のときは[]を返す
 	if len(args) == 2 {
-		// argsのお尻に偽のときのケースとして nil を追加する
-		args = append(args, Value{})
+		// argsのお尻に偽のときのケースとして[] を追加する
+		args = append(args, NewLitList([]Value{}))
 	}
 	return vm.switch_(args)
 }

@@ -1,8 +1,6 @@
 package yamlui
 
 import (
-	"errors"
-
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -40,7 +38,7 @@ func (self *UIBase) ToValue() script.Value {
 // ValueからUIBaseに流し込む関数
 func (self *UIBase) LoadFromValue(value script.Value) error {
 	if value.Type != script.TypeLitMap {
-		return errors.New("Expected Value to be MapType: " + value.Type.String())
+		return script.LogErr("Expected Value to be MapType: " + value.Type.String())
 	}
 	m := value.Map
 
@@ -55,13 +53,13 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	// EventsはStringのリストであることを確認してから流し込む
 	if v, ok := m["Events"]; ok {
 		if v.Type != script.TypeLitList {
-			return errors.New("Expected Events to be ListType: " + v.Type.String())
+			return script.LogErr("Expected Events to be ListType: " + v.Type.String())
 		}
 
 		events := make([]string, len(v.List))
 		for i, eventVal := range v.List {
 			if eventVal.Type != script.TypeString {
-				return errors.New("Expected each Event to be StringType: " + eventVal.Type.String())
+				return script.LogErr("Expected Events to be List of String: " + eventVal.Type.String())
 			}
 			events[i] = eventVal.Str
 		}
@@ -102,10 +100,21 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		self.Action = v.Str
 	}
 
+	// scriptはVMの作成とcmdの登録を行う
+	if v, ok := m["script"]; ok {
+		script, err := script.NewVM(v)
+		if err != nil {
+			return err
+		} else {
+			self.setUIScriptCmds(script)
+			self.script = script
+		}
+	}
+
 	// PropはMapTypeであればそのまま流し込む。なければ空のまま
 	if prop, ok := m["Prop"]; ok {
 		if prop.Type != script.TypeLitMap {
-			return errors.New("Expected Prop to be MapType: " + prop.Type.String())
+			return script.LogErr("Expected Prop to be MapType: " + prop.Type.String())
 		}
 	}
 

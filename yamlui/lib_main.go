@@ -1,7 +1,6 @@
 package yamlui
 
 import (
-	"errors"
 	"path"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -90,7 +89,7 @@ func (self *YAMLUI) Load(valueJson []byte) error {
 			return err
 		}
 	default:
-		return errors.New("Expected top-level Value to be List or Map, got " + value.Type.String())
+		return script.LogErr("Expected top-level Value to be List or Map, got " + value.Type.String())
 	}
 
 	return nil
@@ -106,7 +105,7 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 	for pattern, refObj := range self.refObj {
 		matched, err := path.Match(pattern, type_)
 		if err != nil {
-			return errors.New("Invalid pattern in UIBuild: " + pattern + ": " + err.Error())
+			return script.LogErr("Invalid pattern in UIBuild: " + pattern + ": " + err.Error())
 		}
 		if matched {
 			matchObj = refObj
