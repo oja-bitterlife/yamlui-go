@@ -59,10 +59,10 @@ func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
 // Mapの値を構造体に流し込むためのヘルパー関数
 // **********************************************************************
 // UITreeの構築（再帰的に子要素も構築）
-func (self *YAMLUI) Load(data []byte) error {
+func (self *YAMLUI) Load(valueJson []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
-	var value script.Value
-	if err := value.UnmarshalJSON(data); err != nil {
+	value, err := script.NewFromValueJSON(valueJson)
+	if err != nil {
 		return err
 	}
 

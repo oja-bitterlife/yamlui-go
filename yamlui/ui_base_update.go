@@ -84,7 +84,7 @@ func (self *YAMLUI) Update(frame int) []error {
 		// ----------------------------------------
 		if uiBase.script != nil {
 			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
-			uiBase.storeToVM(uiBase.script.GetVM())
+			uiBase.storeToVM(uiBase.script)
 			uiBase.storeScriptEvent(item.Events) // @UIEventを追加
 
 			// スクリプトを実行
@@ -93,7 +93,7 @@ func (self *YAMLUI) Update(frame int) []error {
 			}
 
 			// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
-			uiBase.loadFromVM(uiBase.script.GetVM())
+			uiBase.loadFromVM(uiBase.script)
 		}
 
 		// Update後処理

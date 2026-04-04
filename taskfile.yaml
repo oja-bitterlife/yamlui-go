@@ -26,8 +26,10 @@ tasks:
     desc: "run convert"
     deps:
       - build_converter
+    generates:
+      - "{{.BIN_DIR}}/ui.json"
     cmds:
-      - "{{.BIN_DIR}}/converter"
+      - "{{.BIN_DIR}}/converter > {{.BIN_DIR}}/ui.json"
 
   build:
     desc: "Build"

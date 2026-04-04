@@ -35,7 +35,7 @@ func main() {
 	val = CompileScripts(val)
 
 	// ValueをValue型JSONに
-	data, err := convert.ToValueJSON(val)
+	data, err := val.ToValueJSON()
 	if err != nil {
 		panic(err)
 	}

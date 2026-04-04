@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/oja-bitterlife/yamlui-go/convert"
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -18,7 +17,7 @@ func AnyJSONToValueJSON(fileData []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return convert.ToValueJSON(val)
+	return val.ToValueJSON()
 }
 
 // Value型で返す。すぐ使うならParseし直さなくていい

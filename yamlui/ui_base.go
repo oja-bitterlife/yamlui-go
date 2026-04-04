@@ -47,7 +47,7 @@ type UIBase struct {
 	// ==================================================
 	// 保存しないもの
 	children []*UIBase
-	script   *script.Runtime
+	script   *script.VM
 
 	// インターフェース(ランタイム用)
 	// ----------------------------------------
@@ -170,18 +170,12 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 
 // **********************************************************************
 // UIBaseの関数
-func (self *UIBase) SetScript(scriptSrc string) error {
-	var err error
-	self.script, err = script.Compile(scriptSrc)
-	return err
+func (self *UIBase) SetScript(newVM *script.VM) {
+	self.script = newVM
 }
 
-func (self *UIBase) GetScriptRuntime() *script.Runtime {
+func (self *UIBase) GetScriptRuntime() *script.VM {
 	return self.script
-}
-
-func (self *UIBase) SetVar(name string, value script.Value) {
-	self.script.GetVM().SetVar(name, value)
 }
 
 // **********************************************************************

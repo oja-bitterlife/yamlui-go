@@ -109,17 +109,5 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		}
 	}
 
-	// scriptはスクリプトをコンパイルして保存する
-	if v, ok := m["script"]; ok {
-		runtime, err := script.Compile(v.Str)
-		if err != nil {
-			return errors.New("Failed to compile script: " + err.Error())
-		}
-		self.script = runtime
-
-		// UI用のCmdをセットする
-		self.setUIScriptCmds()
-	}
-
 	return nil
 }

@@ -8,7 +8,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
-	"github.com/oja-bitterlife/yamlui-go/yamlui_json"
 )
 
 type Cell struct {
@@ -56,22 +55,10 @@ func initialModel() model {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
-	data, err := yamlui_json.AnyJSONToValueJSON(fileData)
 
-	if err := m.lib.Load(data); err != nil {
+	if err := m.lib.Load(fileData); err != nil {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
-
-	// Lispスクリプト: 実行するたびにX座標を増やし、テキストを書き換える
-	// 	scriptSrc := `
-	// (set @X
-	// 	(switch (< @X 3)
-	// 		(+ @X 1)
-	// 		(set @X 0)))
-	// 	   `
-	// 	if err := label.Base.Base.SetScript(scriptSrc); err != nil {
-	// 		panic(fmt.Sprintf("Failed to set script: %v", err))
-	// 	}
 
 	return m
 }

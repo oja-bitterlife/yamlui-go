@@ -34,6 +34,16 @@ func NewVM(valueAST Value) (*VM, error) {
 	return vm, nil
 }
 
+func (vm *VM) Clone() *VM {
+	// vars以外はそのままコピーしても問題ない
+	clone := *vm
+
+	// varsはCloneする
+	clone.vars = clone.vars.Clone()
+
+	return &clone
+}
+
 // **********************************************************************
 // 実行
 func (vm *VM) Run() error {
@@ -83,6 +93,10 @@ func (vm *VM) GetCmds() map[string]VMCmdFunc {
 // vars用
 func (vm *VM) GetVar(name string) Value {
 	return vm.vars.Map[name]
+}
+
+func (vm *VM) GetVars() map[string]Value {
+	return vm.vars.Map
 }
 
 func (vm *VM) SetVar(name string, value Value) {
