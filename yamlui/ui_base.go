@@ -172,8 +172,11 @@ func (self *UIBase) SetScript(newVM *script.VM) {
 	self.script = newVM
 }
 
-func (self *UIBase) GetScriptRuntime() *script.VM {
-	return self.script
+func (self *UIBase) GetScriptRuntime() (*script.VM, error) {
+	if self.script == nil {
+		return nil, script.LogErr("No script runtime set for this UIBase (ID: " + self.ID + ")")
+	}
+	return self.script, nil
 }
 
 // **********************************************************************
