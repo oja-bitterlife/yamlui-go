@@ -13,6 +13,11 @@ tasks:
     cmds:
       - jj st
 
+  convert:
+    desc: "run convert"
+    cmds:
+      - go run ./cmd/converter
+
   build:
     desc: "Build"
     deps:

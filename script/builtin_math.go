@@ -1,9 +1,7 @@
 package script
 
 import (
-	"errors"
 	"math"
-	"strconv"
 	"strings"
 )
 
@@ -118,7 +116,7 @@ func sqrt(vm *VM, args []Value) (Value, error) {
 		if arg0.Type == TypeNumber {
 			// 虚数は無しで
 			if arg0.Num < 0 {
-				return Value{}, errors.New("cannot calculate sqrt of negative number: " + strconv.FormatFloat(arg0.Num, 'f', 4, 64))
+				return Value{}, LogErr("sqrt: cannot take square root of a negative number: %f", arg0.Num)
 			}
 			return NewNumber(math.Sqrt(arg0.Num)), nil
 		}
@@ -176,7 +174,7 @@ func fit(vm *VM, args []Value) (Value, error) {
 	// 一つ目が入力値、二つ目が入力の最小値、三つ目が入力の最大値、四つ目が出力の最小値、五つ目が出力の最大値
 	if values[0].Type != TypeNumber || values[1].Type != TypeNumber || values[2].Type != TypeNumber || values[3].Type != TypeNumber || values[4].Type != TypeNumber {
 
-		return Value{}, errors.New("fit: all arguments must be numbers")
+		return Value{}, LogErr("fit: all arguments must be numbers")
 	}
 	input := values[0].Num
 	inMin := values[1].Num

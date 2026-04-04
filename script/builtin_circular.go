@@ -1,7 +1,6 @@
 package script
 
 import (
-	"errors"
 	"math"
 )
 
@@ -59,7 +58,7 @@ func min(vm *VM, args []Value) (Value, error) {
 	if len(args) == 1 && args[0].Type == TypeLitList {
 		return oneOp(vm, "min", args, func(vm *VM, arg0 Value) (Value, error) {
 			if len(arg0.List) == 0 {
-				return Value{}, errors.New("min expects a non-empty list")
+				return Value{}, LogErr("min expects a non-empty list")
 			}
 			minVal := arg0.List[0]
 			for _, v := range arg0.List[1:] {
@@ -86,7 +85,7 @@ func max(vm *VM, args []Value) (Value, error) {
 	if len(args) == 1 && args[0].Type == TypeLitList {
 		return oneOp(vm, "max", args, func(vm *VM, arg0 Value) (Value, error) {
 			if len(arg0.List) == 0 {
-				return Value{}, errors.New("max expects a non-empty list")
+				return Value{}, LogErr("max expects a non-empty list")
 			}
 			maxVal := arg0.List[0]
 			for _, v := range arg0.List[1:] {

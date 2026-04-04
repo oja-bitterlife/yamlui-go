@@ -1,7 +1,6 @@
 package script
 
 import (
-	"errors"
 	"strconv"
 )
 
@@ -14,7 +13,7 @@ var castCmds = map[string]func(*VM, []Value) (Value, error){
 }
 
 func castError(typeName string, v Value) error {
-	return errors.New("cannot cast " + v.Type.String() + " to " + typeName)
+	return LogErr("cannot cast %s to %s", v.Type.String(), typeName)
 }
 
 // ==================================================

@@ -1,8 +1,6 @@
 package script
 
 import (
-	"errors"
-	"strconv"
 	"strings"
 )
 
@@ -19,7 +17,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeProperty:
 		vv, ok := vm.vars.Map[v.Str] // 変数の値を返す
 		if !ok {
-			return Value{}, errors.New("expected literal value: variable '" + v.Str)
+			return Value{}, LogErr("undefined variable: " + v.Str)
 		}
 		return vv, nil
 	case TypeList:
@@ -32,7 +30,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 			vm.vars.Map["vm_depth"] = depth
 		}()
 		if int(depth.Num) >= vm.maxRecursion {
-			return Value{}, errors.New("maximum recursion depth exceeded")
+			return Value{}, LogErr("maximum recursion depth exceeded: %d", int(depth.Num))
 		}
 		vm.vars.Map["vm_depth"] = depth
 
@@ -50,12 +48,12 @@ func (vm *VM) Eval(v Value) (Value, error) {
 			return Value{}, err
 		}
 		if !list.IsLiteral() {
-			return Value{}, errors.New("expected literal value from list evaluation")
+			return Value{}, LogErr("list did not evaluate to a literal: %v", list)
 		}
 
 		return list, nil
 	default:
-		return Value{}, errors.New("unknown value type")
+		return Value{}, LogErr("unknown value type: %v", v.Type)
 	}
 }
 
@@ -111,30 +109,33 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 	cleanCmd := strings.TrimPrefix(cmd, "$")
 
 	// 組み込みコマンドはここで直接処理する
+	prefixError := func() (Value, error) {
+		return Value{}, LogErr("command '%s' cannot be used with '$' prefix", cleanCmd)
+	}
 	switch cleanCmd {
 	case "set":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("set cannot be used with '$' prefix")
+			return prefixError()
 		}
 		return vm.setVar(args)
 	case "switch":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("switch cannot be used with '$' prefix")
+			return prefixError()
 		}
 		return vm.switch_(args)
 	case "repeat":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("repeat cannot be used with '$' prefix")
+			return prefixError()
 		}
 		return vm.repeat(args)
 	case "do":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("do cannot be used with '$' prefix")
+			return prefixError()
 		}
 		return vm.do(args)
 	case "if":
 		if cmd != cleanCmd {
-			return Value{}, errors.New("if cannot be used with '$' prefix")
+			return prefixError()
 		}
 		return vm.if_(args)
 	}
@@ -142,7 +143,7 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 	// コマンドに応じた処理を実装
 	fn, ok := vm.cmds[cleanCmd]
 	if !ok {
-		return Value{}, errors.New("unknown command: " + cmd)
+		return Value{}, LogErr("unknown command: " + cleanCmd)
 	}
 
 	return fn(vm, args)
@@ -155,13 +156,13 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 // 変数に値をセットする
 func (vm *VM) setVar(args []Value) (Value, error) {
 	if len(args) < 2 {
-		return Value{}, errors.New("set requires variable and value")
+		return Value{}, LogErr("set requires a target and at least one value")
 	}
 
 	// 第一引数は保存先
 	target := args[0].Str
 	if !strings.HasPrefix(target, "@") && !strings.HasPrefix(target, "_") {
-		return Value{}, errors.New("set target must start with '@' or '_': '" + target + "'")
+		return Value{}, LogErr("set target must start with '@' or '_': " + target)
 	}
 
 	// 第二引数以降は、このタイミングで Eval して「値」にする
@@ -187,7 +188,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 // 最初の引数を評価して、その値に応じたケースを実行する
 func (vm *VM) switch_(args []Value) (Value, error) {
 	if len(args) < 2 {
-		return Value{}, errors.New("switch requires an expression and cases")
+		return Value{}, LogErr("switch requires at least an expression and one case")
 	}
 
 	// 最初の引数は評価する式
@@ -208,12 +209,12 @@ func (vm *VM) switch_(args []Value) (Value, error) {
 			caseNo = 2
 		}
 	default:
-		return Value{}, errors.New("switch expression must be a number or bool")
+		return Value{}, LogErr("switch expression must evaluate to a number or boolean, got: %v", exprVal)
 	}
 
 	// caseNoの範囲をチェック
 	if caseNo < 1 || caseNo >= len(args) {
-		return Value{}, errors.New("case number out of range: " + strconv.Itoa(caseNo))
+		return Value{}, LogErr("switch case number out of range: %d (number of cases: %d)", caseNo, len(args)-1)
 	}
 
 	// switch先を評価する
@@ -225,12 +226,12 @@ func (vm *VM) switch_(args []Value) (Value, error) {
 // 繰り返し処理。引数は、カウンタ変数、繰り返し回数、ブロック
 func (vm *VM) repeat(args []Value) (Value, error) {
 	if len(args) < 2 {
-		return Value{}, errors.New("repeat requires count and block")
+		return Value{}, LogErr("repeat requires at least a counter variable and repeat count")
 	}
 
 	// 第１引数は繰り返し用のカウンタ変数（例: @i）
 	if args[0].Type != TypeProperty {
-		return Value{}, errors.New("first argument must be a property (e.g., @i)")
+		return Value{}, LogErr("repeat counter variable must be a property, got: %v", args[0])
 	}
 	counterName := args[0].Str
 
@@ -240,13 +241,13 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 		return Value{}, err
 	}
 	if countVal.Type != TypeNumber {
-		return Value{}, errors.New("repeat count must be a number")
+		return Value{}, LogErr("repeat count must evaluate to a number, got: %v", countVal)
 	}
 	count := int(countVal.Num)
 
 	// 繰り返し回数の上限をチェック
 	if count > vm.maxRepeat {
-		return Value{}, errors.New("repeat count exceeds maximum: " + strconv.Itoa(count))
+		return Value{}, LogErr("repeat count exceeds maximum limit: %d (max: %d)", count, vm.maxRepeat)
 	}
 
 	// 繰り返し回数分ループ
@@ -288,7 +289,7 @@ func (vm *VM) do(args []Value) (Value, error) {
 // 最初の引数を評価して、その値に応じたケースを実行する
 func (vm *VM) if_(args []Value) (Value, error) {
 	if len(args) < 2 || len(args) > 3 {
-		return Value{}, errors.New("if requires condition, true case, and optional false case")
+		return Value{}, LogErr("if requires 2 or 3 arguments: condition, true case, [false case]")
 	}
 
 	// 最初の引数は評価する式
@@ -297,7 +298,7 @@ func (vm *VM) if_(args []Value) (Value, error) {
 		return Value{}, err
 	}
 	if condVal.Type != TypeBool {
-		return Value{}, errors.New("if condition must be a boolean")
+		return Value{}, LogErr("if condition must evaluate to a boolean, got: %v", condVal)
 	}
 
 	// 引数が2つの場合は、条件が真のときのケースとみなす。偽のときは nil を返す

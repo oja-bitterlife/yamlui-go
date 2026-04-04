@@ -1,7 +1,6 @@
 package script
 
 import (
-	"errors"
 	"strconv"
 )
 
@@ -33,7 +32,7 @@ func SetBuiltinCmds(vm *VM) {
 // Validation
 func CheckCmdArgNum(cmdName string, argNum int, args []Value) error {
 	if len(args) != argNum {
-		return errors.New(cmdName + " expects " + strconv.Itoa(argNum) + " arguments, but got " + strconv.Itoa(len(args)))
+		return LogErr("invalid number of arguments for " + cmdName + ": expected " + strconv.Itoa(argNum) + ", got " + strconv.Itoa(len(args)))
 	}
 	return nil
 }
@@ -56,7 +55,7 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 		// どちらもリストなら同じ長でないとエラー
 		// 同じ長でないとエラー
 		if len(values[0].List) != len(values[1].List) {
-			return Value{}, errors.New("different length of lists: " + strconv.Itoa(len(values[0].List)) + " and " + strconv.Itoa(len(values[1].List)))
+			return Value{}, LogErr("invalid argument lists for " + cmdName + ": both lists must have the same length, got " + strconv.Itoa(len(values[0].List)) + " and " + strconv.Itoa(len(values[1].List)))
 		}
 		// 個別に計算
 		result := make([]Value, len(values[0].List))
@@ -96,9 +95,7 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 }
 
 func binOpTypeError(cmd string, arg0 Value, arg1 Value) error {
-	typeArg0 := arg0.Type.String()
-	typeArg1 := arg1.Type.String()
-	return errors.New("invalid types for " + cmd + ": " + string(typeArg0) + " and " + string(typeArg1))
+	return LogErr("invalid types for %s: %s and %s", cmd, arg0.Type.String(), arg1.Type.String())
 }
 
 // ==================================================
@@ -131,5 +128,5 @@ func oneOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value) (Value, err
 }
 
 func oneOpTypeError(cmd string, value Value) error {
-	return errors.New("invalid type for " + cmd + ": " + value.Type.String())
+	return LogErr("invalid type for %s: %s", cmd, value.Type.String())
 }

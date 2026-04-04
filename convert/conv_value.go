@@ -9,110 +9,9 @@ import (
 )
 
 // **********************************************************************
-// Marshalの実装
+// ValueのJSON形式からscript.Valueへの変換
 // ==================================================
-// json.MarshalJSONを使ってしまわないよう、関数名を違うものにしておく
-func ToJSON(v script.Value) ([]byte, error) {
-	var buf bytes.Buffer
-
-	switch v.Type {
-	case script.TypeNumber:
-		buf.WriteString(`{"`)
-		buf.WriteString(script.TypeNumberStr)
-		buf.WriteString(`":`)
-		// 数値を直接書き込み
-		b := buf.AvailableBuffer()
-		b = strconv.AppendFloat(b, v.Num, 'f', 4, 64)
-		buf.Write(b)
-		buf.WriteByte('}')
-
-	case script.TypeString, script.TypeProperty:
-		switch v.Type {
-		case script.TypeString:
-			buf.WriteString(`{"`)
-			buf.WriteString(script.TypeStringStr)
-			buf.WriteString(`":`)
-		case script.TypeProperty:
-			buf.WriteString(`{"`)
-			buf.WriteString(script.TypePropertyStr)
-			buf.WriteString(`":`)
-		}
-		// strconv.AppendQuote を使えば、AvailableBuffer に直接
-		// エスケープ済みの文字列 ("hello" など) を書き込めます！
-		b := buf.AvailableBuffer()
-		b = strconv.AppendQuote(b, v.Str)
-		buf.Write(b)
-		buf.WriteByte('}')
-
-	case script.TypeBool:
-		if v.Bool {
-			buf.WriteString(`{"`)
-			buf.WriteString(script.TypeBoolStr)
-			buf.WriteString(`":true}`)
-		} else {
-			buf.WriteString(`{"`)
-			buf.WriteString(script.TypeBoolStr)
-			buf.WriteString(`":false}`)
-		}
-	case script.TypeList, script.TypeLitList:
-		switch v.Type {
-		case script.TypeList:
-			buf.WriteString(`{"`)
-			buf.WriteString(script.TypeListStr)
-			buf.WriteString(`":`)
-		case script.TypeLitList:
-			buf.WriteString(`{"`)
-			buf.WriteString(script.TypeLitListStr)
-			buf.WriteString(`":`)
-		}
-		buf.WriteByte('[')
-		for i, item := range v.List {
-			if i > 0 {
-				buf.WriteByte(',')
-			}
-			// 再帰的に呼び出される
-			b, err := ToJSON(item)
-			if err != nil {
-				return nil, err
-			}
-			buf.Write(b)
-		}
-		buf.WriteString(`]}`)
-	case script.TypeLitMap:
-		buf.WriteString(`{"`)
-		buf.WriteString(script.TypeLitMapStr)
-		buf.WriteString(`":{`)
-		i := 0
-		for k, v := range v.Map {
-			if i > 0 {
-				buf.WriteByte(',')
-			}
-			// キーは文字列としてエスケープして書き込む
-			b := buf.AvailableBuffer()
-			b = strconv.AppendQuote(b, k)
-			buf.Write(b)
-			buf.WriteByte(':')
-			// 値は再帰的に呼び出される
-			b, err := ToJSON(v)
-			if err != nil {
-				return nil, err
-			}
-			buf.Write(b)
-			i++
-		}
-		buf.WriteString(`}}`)
-
-	default:
-		return nil, errors.New("cannot marshal unknown type: " + v.Type.String())
-	}
-
-	return buf.Bytes(), nil
-}
-
-// **********************************************************************
-// Unmarshalの実装
-// ==================================================
-// 内部関すの実装から
+// parseValue. JSON形式(つまり文字列)のValueをscript.Valueに変換する
 func parseValue(data []byte) (script.Value, error) {
 	data = bytes.TrimSpace(data)
 
@@ -180,6 +79,10 @@ func parseValue(data []byte) (script.Value, error) {
 	}
 }
 
+// **********************************************************************
+// ヘルパー
+// ==================================================
+// findStartEnd. dataのstart位置から、openCharで始まりcloseCharで終わる部分の開始位置と終了位置を返す
 func findStartEnd(data []byte, start int, openChar, closeChar byte) (int, int) {
 	depth := 0
 	inString := false
@@ -242,6 +145,8 @@ func findStartEnd(data []byte, start int, openChar, closeChar byte) (int, int) {
 	return -1, -1
 }
 
+// ==================================================
+// List部分のパース
 func parseValueList(data []byte) ([]script.Value, error) {
 	// 中身はValu型なので、{"Num":1} のような形式で入っているはず
 	data = bytes.TrimSpace(data)
@@ -275,6 +180,8 @@ func parseValueList(data []byte) ([]script.Value, error) {
 	return list, nil
 }
 
+// ==================================================
+// Map部分のパース
 func parseValueMap(data []byte) (map[string]script.Value, error) {
 	// 中身はValu型なので、{"key":{"Num":1}} のような形式で入っているはず
 	data = bytes.TrimSpace(data)
@@ -327,30 +234,4 @@ func parseValueMap(data []byte) (map[string]script.Value, error) {
 	}
 
 	return m, nil
-}
-
-// ==================================================
-// Unmarshalの呼び出し口
-// json.UnmarshalJSONを使ってしまわないよう、関数名を違うものにしておく
-func ValueFromJSON(data []byte) (script.Value, error) {
-	data = bytes.TrimSpace(data)
-
-	if len(data) == 0 {
-		return script.Value{}, errors.New("invalid JSON format: empty input")
-	}
-
-	// まずはブラケットの整合性をチェック
-	if bytes.HasPrefix(data, []byte("{")) && !bytes.HasSuffix(data, []byte("}")) ||
-		bytes.HasPrefix(data, []byte("[")) && !bytes.HasSuffix(data, []byte("]")) {
-		return script.Value{}, errors.New("invalid JSON format: mismatched brackets")
-	}
-
-	// JSONの形式に従ってscript.Valueを構築
-	val, err := parseValue(data)
-	if err != nil {
-		return script.Value{}, err
-	}
-
-	// 構築されたscript.Valueをvにコピー
-	return val, nil
 }
