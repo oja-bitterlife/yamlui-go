@@ -176,8 +176,7 @@ func fit(vm *VM, args []Value) (Value, error) {
 	// 一つ目が入力値、二つ目が入力の最小値、三つ目が入力の最大値、四つ目が出力の最小値、五つ目が出力の最大値
 	if values[0].Type != TypeNumber || values[1].Type != TypeNumber || values[2].Type != TypeNumber || values[3].Type != TypeNumber || values[4].Type != TypeNumber {
 
-		jsonArgs, _ := NewLitList(values).MarshalJSON()
-		return Value{}, errors.New("fit: all arguments must be numbers: " + string(jsonArgs))
+		return Value{}, errors.New("fit: all arguments must be numbers")
 	}
 	input := values[0].Num
 	inMin := values[1].Num

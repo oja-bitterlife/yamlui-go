@@ -1,19 +1,21 @@
-package script
+package convert
 
 import (
 	"errors"
 	"strconv"
 	"strings"
+
+	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
 // スクリプトの構文解析
 // ==================================================
-// parse. スクリプト全体を解析して、Valueのツリー構造を作る
-func parse(src string) (Value, error) {
+// parse. スクリプト全体を解析して、script.Valueのツリー構造を作る
+func parse(src string) (script.Value, error) {
 	tn := NewTokenizer(src)
 
-	root := Value{Type: TypeList, List: []Value{}}
+	root := script.Value{Type: script.TypeList, List: []script.Value{}}
 
 	// 明示的な ( がなくても、EOFまでトークンを読み続ける
 	for {
@@ -21,7 +23,7 @@ func parse(src string) (Value, error) {
 
 		// エラー
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
 		// 空トークンは終了
 		if token == nil {
@@ -31,7 +33,7 @@ func parse(src string) (Value, error) {
 		// トークンを解析して root.List に append していく
 		val, err := parseToken(tn, token)
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
 		root.List = append(root.List, val)
 	}
@@ -42,58 +44,58 @@ func parse(src string) (Value, error) {
 }
 
 // ==================================================
-// parseToken. トークンを解析してValueに変換する
-func parseToken(tn *Tokenizer, token []byte) (Value, error) {
+// parseToken. トークンを解析してscript.Valueに変換する
+func parseToken(tn *Tokenizer, token []byte) (script.Value, error) {
 	switch token[0] {
 	case '(':
 		return parseList(tn, ')')
 	case '{':
 		return parseList(tn, '}')
 	case ')', '}':
-		return Value{}, errors.New("unexpected '" + string(token[0]) + "'")
+		return script.Value{}, errors.New("unexpected '" + string(token[0]) + "'")
 	case '"', '\'':
 		// 前後の " を除去して文字列に
 		if len(token) < 2 {
-			return Value{}, errors.New("invalid string")
+			return script.Value{}, errors.New("invalid string")
 		}
-		return NewString(string(token[1 : len(token)-1])), nil
+		return script.NewString(string(token[1 : len(token)-1])), nil
 	case '@', '_':
-		return NewProperty(string(token)), nil
+		return script.NewProperty(string(token)), nil
 	default:
 		// bool, number, or string
 		s := string(token)
 
 		// boolチェック
 		if strings.ToLower(s) == "true" {
-			return NewBool(true), nil
+			return script.NewBool(true), nil
 		}
 		if strings.ToLower(s) == "false" {
-			return NewBool(false), nil
+			return script.NewBool(false), nil
 		}
 
 		// 数値にできる？
 		if f, err := strconv.ParseFloat(s, 64); err == nil {
-			return NewNumber(f), nil
+			return script.NewNumber(f), nil
 		}
 
 		// コマンドかPropety(""で囲まれていない文字列)
-		return NewString(s), nil
+		return script.NewString(s), nil
 	}
 }
 
 // ==================================================
 // parseList. ()で囲まれたリストを解析する
-func parseList(tn *Tokenizer, terminate byte) (Value, error) {
-	var list []Value
+func parseList(tn *Tokenizer, terminate byte) (script.Value, error) {
+	var list []script.Value
 	for {
 		token, err := tn.Next()
 
 		// エラーチェック
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
 		if token == nil {
-			return Value{}, errors.New("unclosed parenthesis")
+			return script.Value{}, errors.New("unclosed parenthesis")
 		}
 
 		// 終端
@@ -104,17 +106,16 @@ func parseList(tn *Tokenizer, terminate byte) (Value, error) {
 		// 内容を再帰的に解析
 		val, err := parseToken(tn, token)
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
 
 		// リテラルブロックはPropertyやListを含められない
 		if terminate == '}' {
 			switch val.Type {
-			case TypeNumber, TypeString, TypeBool:
+			case script.TypeNumber, script.TypeString, script.TypeBool:
 				// OK
 			default:
-				jsonVal, _ := val.MarshalJSON()
-				return Value{}, errors.New("invalid value in literal block: " + string(jsonVal))
+				return script.Value{}, errors.New("invalid value in literal block: " + val.Type.String())
 			}
 		}
 
@@ -123,8 +124,8 @@ func parseList(tn *Tokenizer, terminate byte) (Value, error) {
 
 	// リテラルブロックなら、リスト全体を文字列化してリテラルとして返す
 	if terminate == '}' {
-		return NewLitList(list), nil
+		return script.NewLitList(list), nil
 	} else {
-		return NewList(list), nil
+		return script.NewList(list), nil
 	}
 }

@@ -1,22 +1,24 @@
-package script
+package convert
 
 import (
 	"bytes"
 	"errors"
 	"strconv"
+
+	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
-// Marshal/Unmarshal
+// Marshalの実装
 // ==================================================
-// json.Marshaler インターフェースの実装
-func (v Value) MarshalJSON() ([]byte, error) {
+// json.MarshalJSONを使ってしまわないよう、関数名を違うものにしておく
+func ToJSON(v script.Value) ([]byte, error) {
 	var buf bytes.Buffer
 
 	switch v.Type {
-	case TypeNumber:
+	case script.TypeNumber:
 		buf.WriteString(`{"`)
-		buf.WriteString(TypeNumberStr)
+		buf.WriteString(script.TypeNumberStr)
 		buf.WriteString(`":`)
 		// 数値を直接書き込み
 		b := buf.AvailableBuffer()
@@ -24,15 +26,15 @@ func (v Value) MarshalJSON() ([]byte, error) {
 		buf.Write(b)
 		buf.WriteByte('}')
 
-	case TypeString, TypeProperty:
+	case script.TypeString, script.TypeProperty:
 		switch v.Type {
-		case TypeString:
+		case script.TypeString:
 			buf.WriteString(`{"`)
-			buf.WriteString(TypeStringStr)
+			buf.WriteString(script.TypeStringStr)
 			buf.WriteString(`":`)
-		case TypeProperty:
+		case script.TypeProperty:
 			buf.WriteString(`{"`)
-			buf.WriteString(TypePropertyStr)
+			buf.WriteString(script.TypePropertyStr)
 			buf.WriteString(`":`)
 		}
 		// strconv.AppendQuote を使えば、AvailableBuffer に直接
@@ -42,25 +44,25 @@ func (v Value) MarshalJSON() ([]byte, error) {
 		buf.Write(b)
 		buf.WriteByte('}')
 
-	case TypeBool:
+	case script.TypeBool:
 		if v.Bool {
 			buf.WriteString(`{"`)
-			buf.WriteString(TypeBoolStr)
+			buf.WriteString(script.TypeBoolStr)
 			buf.WriteString(`":true}`)
 		} else {
 			buf.WriteString(`{"`)
-			buf.WriteString(TypeBoolStr)
+			buf.WriteString(script.TypeBoolStr)
 			buf.WriteString(`":false}`)
 		}
-	case TypeList, TypeLitList:
+	case script.TypeList, script.TypeLitList:
 		switch v.Type {
-		case TypeList:
+		case script.TypeList:
 			buf.WriteString(`{"`)
-			buf.WriteString(TypeListStr)
+			buf.WriteString(script.TypeListStr)
 			buf.WriteString(`":`)
-		case TypeLitList:
+		case script.TypeLitList:
 			buf.WriteString(`{"`)
-			buf.WriteString(TypeLitListStr)
+			buf.WriteString(script.TypeLitListStr)
 			buf.WriteString(`":`)
 		}
 		buf.WriteByte('[')
@@ -69,16 +71,16 @@ func (v Value) MarshalJSON() ([]byte, error) {
 				buf.WriteByte(',')
 			}
 			// 再帰的に呼び出される
-			b, err := item.MarshalJSON()
+			b, err := ToJSON(item)
 			if err != nil {
 				return nil, err
 			}
 			buf.Write(b)
 		}
 		buf.WriteString(`]}`)
-	case TypeLitMap:
+	case script.TypeLitMap:
 		buf.WriteString(`{"`)
-		buf.WriteString(TypeLitMapStr)
+		buf.WriteString(script.TypeLitMapStr)
 		buf.WriteString(`":{`)
 		i := 0
 		for k, v := range v.Map {
@@ -91,7 +93,7 @@ func (v Value) MarshalJSON() ([]byte, error) {
 			buf.Write(b)
 			buf.WriteByte(':')
 			// 値は再帰的に呼び出される
-			b, err := v.MarshalJSON()
+			b, err := ToJSON(v)
 			if err != nil {
 				return nil, err
 			}
@@ -101,15 +103,17 @@ func (v Value) MarshalJSON() ([]byte, error) {
 		buf.WriteString(`}}`)
 
 	default:
-		return nil, errors.New("cannot marshal unknown type: " + strconv.Itoa(int(v.Type)))
+		return nil, errors.New("cannot marshal unknown type: " + v.Type.String())
 	}
 
 	return buf.Bytes(), nil
 }
 
+// **********************************************************************
+// Unmarshalの実装
 // ==================================================
-// json.Unmarshaler インターフェースの実装
-func (v *Value) parseValue(data []byte) (Value, error) {
+// 内部関すの実装から
+func parseValue(data []byte) (script.Value, error) {
 	data = bytes.TrimSpace(data)
 
 	// まずはブラケットを取り除く
@@ -119,64 +123,64 @@ func (v *Value) parseValue(data []byte) (Value, error) {
 	// キーと値を分割
 	parts := bytes.SplitN(data, []byte(":"), 2)
 	if len(parts) != 2 {
-		return Value{}, errors.New("invalid JSON format: expected key-value pair")
+		return script.Value{}, errors.New("invalid JSON format: expected key-value pair")
 	}
 
 	key, err := strconv.Unquote(string(bytes.TrimSpace(parts[0])))
 	if err != nil {
-		return Value{}, err
+		return script.Value{}, err
 	}
 	value := bytes.TrimSpace(parts[1])
 
 	switch string(key) {
-	case TypeNumberStr:
+	case script.TypeNumberStr:
 		f, err := strconv.ParseFloat(string(value), 64)
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewNumber(f), nil
-	case TypeStringStr:
+		return script.NewNumber(f), nil
+	case script.TypeStringStr:
 		s, err := strconv.Unquote(string(value))
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewString(s), nil
-	case TypePropertyStr:
+		return script.NewString(s), nil
+	case script.TypePropertyStr:
 		s, err := strconv.Unquote(string(value))
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewProperty(s), nil
-	case TypeBoolStr:
+		return script.NewProperty(s), nil
+	case script.TypeBoolStr:
 		b, err := strconv.ParseBool(string(value))
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewBool(b), nil
-	case TypeListStr:
-		list, err := v.parseList(value)
+		return script.NewBool(b), nil
+	case script.TypeListStr:
+		list, err := parseValueList(value)
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewList(list), nil
-	case TypeLitListStr:
-		list, err := v.parseList(value)
+		return script.NewList(list), nil
+	case script.TypeLitListStr:
+		list, err := parseValueList(value)
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewLitList(list), nil
-	case TypeLitMapStr:
-		m, err := v.parseMap(value)
+		return script.NewLitList(list), nil
+	case script.TypeLitMapStr:
+		m, err := parseValueMap(value)
 		if err != nil {
-			return Value{}, err
+			return script.Value{}, err
 		}
-		return NewLitMap(m), nil
+		return script.NewLitMap(m), nil
 	default:
-		return Value{}, errors.New("invalid JSON format: unknown key \"" + string(key) + "\"")
+		return script.Value{}, errors.New("invalid JSON format: unknown key \"" + string(key) + "\"")
 	}
 }
 
-func (v *Value) findStartEnd(data []byte, start int, openChar, closeChar byte) (int, int) {
+func findStartEnd(data []byte, start int, openChar, closeChar byte) (int, int) {
 	depth := 0
 	inString := false
 	escaped := false
@@ -238,7 +242,7 @@ func (v *Value) findStartEnd(data []byte, start int, openChar, closeChar byte) (
 	return -1, -1
 }
 
-func (v *Value) parseList(data []byte) ([]Value, error) {
+func parseValueList(data []byte) ([]script.Value, error) {
 	// 中身はValu型なので、{"Num":1} のような形式で入っているはず
 	data = bytes.TrimSpace(data)
 
@@ -246,19 +250,19 @@ func (v *Value) parseList(data []byte) ([]Value, error) {
 	data = bytes.TrimPrefix(data, []byte("["))
 	data = bytes.TrimSuffix(data, []byte("]"))
 
-	var list []Value
+	var list []script.Value
 
 	// Listの各要素は{}のペアなので、{}ごとに処理をしていく
 	current := 0
 	for current < len(data) {
 		// 最初の{}のペアを見つける
-		start, end := v.findStartEnd(data, current, '{', '}')
+		start, end := findStartEnd(data, current, '{', '}')
 		if start == -1 || end == -1 {
 			return nil, errors.New("invalid JSON format: unmatched brackets in list")
 		}
 
 		// {}の中身を解析
-		val, err := v.parseValue(data[start:end])
+		val, err := parseValue(data[start:end])
 		if err != nil {
 			return nil, err
 		}
@@ -270,7 +274,8 @@ func (v *Value) parseList(data []byte) ([]Value, error) {
 
 	return list, nil
 }
-func (v *Value) parseMap(data []byte) (map[string]Value, error) {
+
+func parseValueMap(data []byte) (map[string]script.Value, error) {
 	// 中身はValu型なので、{"key":{"Num":1}} のような形式で入っているはず
 	data = bytes.TrimSpace(data)
 
@@ -278,7 +283,7 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 	data = bytes.TrimPrefix(data, []byte("{"))
 	data = bytes.TrimSuffix(data, []byte("}"))
 
-	m := NewValueMap()
+	m := make(map[string]script.Value)
 
 	// キーと値のペアを処理
 	current := 0
@@ -286,7 +291,7 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 		// キーを見つける
 		// シングルクオートはJSONでは使えないらしいのでダブルクオートのみ
 		// ----------------------------------------
-		keyStart, keyEnd := v.findStartEnd(data, current, '"', '"')
+		keyStart, keyEnd := findStartEnd(data, current, '"', '"')
 		if keyStart == -1 || keyEnd == -1 {
 			break
 		}
@@ -305,12 +310,12 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 
 		// 値を見つける
 		// ----------------------------------------
-		valueStart, valueEnd := v.findStartEnd(data, keyEnd+colonIndex, '{', '}')
+		valueStart, valueEnd := findStartEnd(data, keyEnd+colonIndex, '{', '}')
 		if valueStart == -1 || valueEnd == -1 {
 			return nil, errors.New("invalid JSON format: unmatched brackets in value")
 		}
 
-		val, err := v.parseValue(data[valueStart:valueEnd])
+		val, err := parseValue(data[valueStart:valueEnd])
 		if err != nil {
 			return nil, err
 		}
@@ -324,26 +329,28 @@ func (v *Value) parseMap(data []byte) (map[string]Value, error) {
 	return m, nil
 }
 
-func (v *Value) UnmarshalJSON(data []byte) error {
+// ==================================================
+// Unmarshalの呼び出し口
+// json.UnmarshalJSONを使ってしまわないよう、関数名を違うものにしておく
+func ValueFromJSON(data []byte) (script.Value, error) {
 	data = bytes.TrimSpace(data)
 
 	if len(data) == 0 {
-		return errors.New("empty JSON data")
+		return script.Value{}, errors.New("invalid JSON format: empty input")
 	}
 
 	// まずはブラケットの整合性をチェック
 	if bytes.HasPrefix(data, []byte("{")) && !bytes.HasSuffix(data, []byte("}")) ||
 		bytes.HasPrefix(data, []byte("[")) && !bytes.HasSuffix(data, []byte("]")) {
-		return errors.New("invalid JSON format: mismatched brackets")
+		return script.Value{}, errors.New("invalid JSON format: mismatched brackets")
 	}
 
-	// JSONの形式に従ってValueを構築
-	val, err := v.parseValue(data)
+	// JSONの形式に従ってscript.Valueを構築
+	val, err := parseValue(data)
 	if err != nil {
-		return err
+		return script.Value{}, err
 	}
 
-	// 構築されたValueをvにコピー
-	*v = val
-	return nil
+	// 構築されたscript.Valueをvにコピー
+	return val, nil
 }

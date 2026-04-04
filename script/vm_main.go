@@ -3,49 +3,92 @@ package script
 // **********************************************************************
 // 評価器(VM)の実装
 // ==================================================
+// コマンド実装の関数型
+type VMCmdFunc func(vm *VM, args []Value) (Value, error)
+
 // 外部との連携用データ構造体
 type VM struct {
-	vars         Value
-	cmds         map[string]func(vm *VM, args []Value) (Value, error)
+	ast    []Value              // コンパイル済みコード
+	cmds   map[string]VMCmdFunc // コマンド名と実装のマッピング
+	vars   Value                // VMのメインメモリ的な
+	Result Value                // 最後の評価結果を保存する場所
+
+	// 制御用
 	maxRecursion int // 再帰の最大深さ
 	maxRepeat    int // repeatの最大回数
 }
 
 // VMの初期化
-func NewVM() *VM {
-	return &VM{
-		vars:         NewLitMap(NewValueMap()),
-		cmds:         make(map[string]func(vm *VM, args []Value) (Value, error)),
+func NewVM(valueAST Value) (*VM, error) {
+	// VMの初期化
+	vm := &VM{
+		ast:  valueAST.List,
+		cmds: make(map[string]VMCmdFunc),
+
 		maxRecursion: 64,
 		maxRepeat:    256,
 	}
+	SetBuiltinCmds(vm)
+	vm.ClearVars()
+
+	return vm, nil
 }
 
-// ==================================================
-// コマンドを登録する関数
-func (vm *VM) RegisterCmd(name string, fn func(vm *VM, args []Value) (Value, error)) {
+// **********************************************************************
+// 実行
+func (vm *VM) Run() error {
+	results := make([]Value, len(vm.ast))
+
+	// ASTを順番に評価していく
+	for _, v := range vm.ast {
+		// 深さのリセット
+		vm.SetVar("vm_depth", NewNumber(0))
+		vm.SetVar("vm_depth_max", NewNumber(0))
+
+		// 評価
+		if ret, err := vm.Eval(v); err != nil {
+			return err
+		} else {
+			results = append(results, ret)
+		}
+	}
+
+	// 結果
+	// ----------------------------------------
+	// 結果が1つだけならそのまま返す。複数あるならリストにして返す
+	switch len(results) {
+	case 0:
+		vm.Result = NewNil() // 結果がない場合はnil
+	case 1:
+		vm.Result = results[0] // 結果が1つだけならそのまま返す
+	default:
+		vm.Result = NewList(results) // 結果が複数あるならリストにして返す
+	}
+
+	return nil
+}
+
+// **********************************************************************
+// コマンド用
+func (vm *VM) RegisterCmd(name string, fn VMCmdFunc) {
 	vm.cmds[name] = fn
 }
 
 // デバッグ用cmds取得関数
-func (vm *VM) GetCmds() map[string]func(vm *VM, args []Value) (Value, error) {
+func (vm *VM) GetCmds() map[string]VMCmdFunc {
 	return vm.cmds
 }
 
-// ==================================================
-// vars用の取得・設定する関数
+// **********************************************************************
+// vars用
 func (vm *VM) GetVar(name string) Value {
 	return vm.vars.Map[name]
 }
 
-func (vm *VM) GetVars() map[string]Value {
-	return vm.vars.Map
+func (vm *VM) SetVar(name string, value Value) {
+	vm.vars.Map[name] = value
 }
 
 func (vm *VM) ClearVars() {
-	vm.vars = NewLitMap(NewValueMap())
-}
-
-func (vm *VM) SetVar(name string, value Value) {
-	vm.vars.Map[name] = value
+	vm.vars = NewLitMap(make(map[string]Value))
 }

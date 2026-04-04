@@ -1,4 +1,4 @@
-package script
+package convert
 
 // 入力文字列をトークンに分割する
 type Tokenizer struct {

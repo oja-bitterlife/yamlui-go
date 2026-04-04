@@ -6,14 +6,14 @@ import (
 )
 
 // **********************************************************************
-// 値の型定義
+// ValueのType定義
 // ==================================================
-// 値の種類
 type ValueType int
 
 const (
 	// 評価済み
-	TypeNumber ValueType = iota
+	TypeNil ValueType = iota
+	TypeNumber
 	TypeBool
 	TypeString
 	TypeLitList // 評価済みリスト
@@ -25,6 +25,7 @@ const (
 )
 
 const (
+	TypeNilStr      = "Nil"
 	TypeNumberStr   = "Num"
 	TypeBoolStr     = "Bool"
 	TypeStringStr   = "Str"
@@ -36,6 +37,8 @@ const (
 
 func (t ValueType) String() string {
 	switch t {
+	case TypeNil:
+		return TypeNilStr
 	case TypeNumber:
 		return TypeNumberStr
 	case TypeBool:
@@ -51,11 +54,12 @@ func (t ValueType) String() string {
 	case TypeList:
 		return TypeListStr
 	default:
-		return "Unknown"
+		return "Unknown:" + strconv.Itoa(int(t))
 	}
 }
 
-// ==================================================
+// **********************************************************************
+// Valueの定義
 // Listに格納する型付きの値。リフレクションを避けるため全部入り
 type Value struct {
 	// 型情報
@@ -71,16 +75,38 @@ type Value struct {
 	Map  ValueMap
 }
 
-func (v Value) String() string {
-	jsonBytes, err := v.MarshalJSON()
-	if err != nil {
-		return "Error: " + err.Error()
+// クローンを作成
+func (v Value) Clone() Value {
+	// 参照以外はこれでOk
+	res := v
+
+	// 参照は再起でクローンを作成
+	switch v.Type {
+	case TypeList, TypeLitList:
+		if v.List != nil {
+			newList := make([]Value, len(v.List))
+			for i, item := range v.List {
+				newList[i] = item.Clone() // 再帰
+			}
+			res.List = newList
+		}
+	case TypeLitMap:
+		if v.Map != nil {
+			newMap := make(map[string]Value, len(v.Map))
+			for k, val := range v.Map {
+				newMap[k] = val.Clone() // 再帰
+			}
+			res.Map = newMap
+		}
 	}
-	return string(jsonBytes)
+
+	// 複製された値を返す
+	return res
 }
 
 // ==================================================
 // 値の生成関数
+func NewNil() Value              { return Value{Type: TypeNil} }
 func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
 func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
@@ -114,6 +140,8 @@ func (v Value) IsList() bool {
 // コンバート
 func (v Value) ConvertBool() Value {
 	switch v.Type {
+	case TypeNil:
+		return NewBool(false)
 	case TypeBool:
 		return v
 	case TypeNumber:
@@ -131,6 +159,8 @@ func (v Value) ConvertBool() Value {
 
 func (v Value) ConvertNumber() Value {
 	switch v.Type {
+	case TypeNil:
+		return NewNumber(0)
 	case TypeNumber:
 		return v
 	case TypeBool:

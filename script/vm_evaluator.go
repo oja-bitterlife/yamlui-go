@@ -12,6 +12,8 @@ import (
 // Valueを評価して、最終的な値を返す関数
 func (vm *VM) Eval(v Value) (Value, error) {
 	switch v.Type {
+	case TypeNil:
+		return v, nil // nilはそのまま返す
 	case TypeNumber, TypeString, TypeBool, TypeLitList:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
@@ -147,7 +149,7 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 }
 
 // **********************************************************************
-// Builint-in コマンドの実装
+// 基本構文の実装
 // ==================================================
 // set
 // 変数に値をセットする
@@ -282,6 +284,7 @@ func (vm *VM) do(args []Value) (Value, error) {
 	return lastVal, nil
 }
 
+// ==================================================
 // 最初の引数を評価して、その値に応じたケースを実行する
 func (vm *VM) if_(args []Value) (Value, error) {
 	if len(args) < 2 || len(args) > 3 {

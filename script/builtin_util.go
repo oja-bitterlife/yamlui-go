@@ -96,9 +96,9 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 }
 
 func binOpTypeError(cmd string, arg0 Value, arg1 Value) error {
-	jsonArg0, _ := arg0.MarshalJSON()
-	jsonArg1, _ := arg1.MarshalJSON()
-	return errors.New("invalid types for " + cmd + ": " + string(jsonArg0) + " and " + string(jsonArg1))
+	typeArg0 := arg0.Type.String()
+	typeArg1 := arg1.Type.String()
+	return errors.New("invalid types for " + cmd + ": " + string(typeArg0) + " and " + string(typeArg1))
 }
 
 // ==================================================
@@ -131,6 +131,5 @@ func oneOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value) (Value, err
 }
 
 func oneOpTypeError(cmd string, value Value) error {
-	jsonValue, _ := value.MarshalJSON()
-	return errors.New("invalid type for " + cmd + ": " + string(jsonValue))
+	return errors.New("invalid type for " + cmd + ": " + value.Type.String())
 }

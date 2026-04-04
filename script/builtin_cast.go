@@ -14,8 +14,7 @@ var castCmds = map[string]func(*VM, []Value) (Value, error){
 }
 
 func castError(typeName string, v Value) error {
-	jsonValue, _ := v.MarshalJSON()
-	return errors.New("cannot cast " + string(jsonValue) + " to " + typeName)
+	return errors.New("cannot cast " + v.Type.String() + " to " + typeName)
 }
 
 // ==================================================
