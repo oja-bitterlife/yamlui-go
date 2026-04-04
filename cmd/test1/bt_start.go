@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -68,8 +67,6 @@ func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) error {
 		// 	self.GetUIBase().Action = self.texts[int(self.GetUIBase().SelectNo)]
 		// }
 	}
-	// scriptの確認
-	fmt.Printf("%+v\n", self.GetUIBase())
 	return nil
 }
 

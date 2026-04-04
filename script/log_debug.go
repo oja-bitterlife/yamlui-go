@@ -57,7 +57,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	return nil
 }
 
-// 既存のメソッドは変更なし
+// IFを満たすための実装
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler { return h }
 func (h *PrettyHandler) WithGroup(name string) slog.Handler       { return h }
 
