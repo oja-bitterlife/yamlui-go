@@ -20,19 +20,13 @@ func main() {
 	if err := yaml.Unmarshal(yamlData, &raw); err != nil {
 		script.LogFatal("failed to unmarshal YAML: %v", err)
 	}
-	jsonData, err := json.Marshal(raw)
+	anyJson, err := json.Marshal(raw)
 	if err != nil {
 		script.LogFatal("failed to marshal to JSON: %v", err)
 	}
 
 	// JSON からValue型JSONに変換
-	jsonValue, err := yamlui_json.AnyJSONToValueJSON(jsonData)
-	if err != nil {
-		panic(err)
-	}
-
-	// Value型JSONをValue型のツリーに変換
-	val, err := convert.FromJSON(jsonValue)
+	val, err := yamlui_json.AnyJSONToValue(anyJson)
 	if err != nil {
 		panic(err)
 	}
@@ -41,7 +35,7 @@ func main() {
 	val = CompileScripts(val)
 
 	// ValueをValue型JSONに
-	data, err := convert.ToJSON(val)
+	data, err := convert.ToValueJSON(val)
 	if err != nil {
 		panic(err)
 	}

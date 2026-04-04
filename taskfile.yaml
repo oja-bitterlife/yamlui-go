@@ -15,11 +15,17 @@ tasks:
 
   build_converter:
     desc: "build converter"
+    scources:
+      - ./cmd/converter/*.go
+    generates:
+      - "{{.BIN_DIR}}/converter"
     cmds:
       - go build -o {{.BIN_DIR}}/converter --tags debug ./cmd/converter
 
   convert:
     desc: "run convert"
+    deps:
+      - build_converter
     cmds:
       - "{{.BIN_DIR}}/converter"
 

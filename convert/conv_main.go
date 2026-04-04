@@ -16,7 +16,7 @@ func Compile(src string) (script.Value, error) {
 // **********************************************************************
 // Marshalの実装
 // json.MarshalJSONを使ってしまわないよう、関数名を違うものにしておく
-func ToJSON(v script.Value) ([]byte, error) {
+func ToValueJSON(v script.Value) ([]byte, error) {
 	var buf bytes.Buffer
 
 	switch v.Type {
@@ -75,7 +75,7 @@ func ToJSON(v script.Value) ([]byte, error) {
 				buf.WriteByte(',')
 			}
 			// 再帰的に呼び出される
-			b, err := ToJSON(item)
+			b, err := ToValueJSON(item)
 			if err != nil {
 				return nil, err
 			}
@@ -97,7 +97,7 @@ func ToJSON(v script.Value) ([]byte, error) {
 			buf.Write(b)
 			buf.WriteByte(':')
 			// 値は再帰的に呼び出される
-			b, err := ToJSON(v)
+			b, err := ToValueJSON(v)
 			if err != nil {
 				return nil, err
 			}
@@ -116,7 +116,7 @@ func ToJSON(v script.Value) ([]byte, error) {
 // **********************************************************************
 // Unmarshalの実装
 // json.UnmarshalJSONを使ってしまわないよう、関数名を違うものにしておく
-func FromJSON(data []byte) (script.Value, error) {
+func FromValueJSON(data []byte) (script.Value, error) {
 	data = bytes.TrimSpace(data)
 
 	if len(data) == 0 {
