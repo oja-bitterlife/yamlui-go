@@ -22,8 +22,10 @@ type VM struct {
 func NewVM(valueAST Value) (*VM, error) {
 	// VMの初期化
 	vm := &VM{
-		ast:  valueAST.List,
-		cmds: make(map[string]VMCmdFunc),
+		ast:    valueAST.List,
+		cmds:   make(map[string]VMCmdFunc),
+		vars:   NewLitMap(make(map[string]Value, 128)), // 固定長のMapを用意しておく。足りなければ自動拡張される
+		Result: Value{},
 
 		maxRecursion: 64,
 		maxRepeat:    256,
@@ -104,5 +106,5 @@ func (vm *VM) SetVar(name string, value Value) {
 }
 
 func (vm *VM) ClearVars() {
-	vm.vars = NewLitMap(make(map[string]Value))
+	clear(vm.vars.Map)
 }
