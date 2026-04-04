@@ -31,6 +31,50 @@ tasks:
     cmds:
       - "{{.BIN_DIR}}/converter > {{.BIN_DIR}}/ui.json"
 
+  build_tiny:
+    desc: "Build TinyGo"
+    deps:
+      - jj-st
+    sources:
+      - ./script/*.go
+      - ./builtin/*.go
+      - ./yamlui/*.go
+      - ./cmd/**/*.go
+    generates:
+      - "{{.BIN_DIR}}/tiny"
+    cmds:
+      - mkdir -p {{.BIN_DIR}}
+      - tinygo build -o {{.BIN_DIR}}/tiny -opt=z ./cmd/tinygo
+
+  build:
+    desc: "Build"
+    deps:
+      - jj-st
+    sources:
+      - ./script/*.go
+      - ./builtin/*.go
+      - ./yamlui/*.go
+      - ./cmd/**/*.go
+    generates:
+      - "{{.BIN_DIR}}/main"
+    cmds:
+      - mkdir -p {{.BIN_DIR}}
+      - go build -o {{.BIN_DIR}}/main --tags debug ./cmd/test1
+
+  build:
+    desc: "Build"
+    deps:
+      - jj-st
+    sources:
+      - ./script/*.go
+      - ./builtin/*.go
+      - ./yamlui/*.go
+      - ./cmd/**/*.go
+    generates:
+      - "{{.BIN_DIR}}/main"
+    cmds:
+      - mkdir -p {{.BIN_DIR}}
+      - go build -o {{.BIN_DIR}}/main --tags debug ./cmd/test1
   build:
     desc: "Build"
     deps:
@@ -68,6 +112,7 @@ tasks:
     desc: "Clean"
     cmds:
       - "rm -rf {{.BIN_DIR}}/main"
+      - "rm -rf {{.BIN_DIR}}/tiny"
 
   tag:
     desc: "タグを更新する"

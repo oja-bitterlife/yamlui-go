@@ -1,17 +1,19 @@
 package yamlui
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"maps"
 	"slices"
+	"strconv"
 	"strings"
+	"sync/atomic"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
 // UIの基本構造.これを保有して各UI構造体を作る
+var lastID int32
+
 type UIBase struct {
 	// ==================================================
 	// Scriptで更新させないもの
@@ -59,14 +61,10 @@ type UIBase struct {
 }
 
 func NewUIBase() *UIBase {
-	// 仮のIDを生成
-	b := make([]byte, 16) // 128bit
-	if _, err := rand.Read(b); err != nil {
-		panic(err)
-	}
-
 	ui := &UIBase{}
-	ui.ID = hex.EncodeToString(b)
+	newID := atomic.AddInt32(&lastID, 1)
+	ui.ID = "UIBase_" + strconv.Itoa(int(newID))
+	lastID++
 	ui.IsEnable = true
 	ui.IsVisible = true
 	ui.Color = "system"
