@@ -4,7 +4,8 @@ import "strings"
 
 // **********************************************************************
 // strconv的な機能の自前実装
-
+// ==================================================
+// Int
 func Itoa(num int) string {
 	if num == 0 {
 		return "0"
@@ -58,14 +59,9 @@ func Atoi(s string) (int, error) {
 	return sign * num, nil
 }
 
-func ToFix16(num int) int {
-	return num * 65536
-}
-
-func UnFix16(num int) int {
-	return num / 65536
-}
-
+// ==================================================
+// string
+// Quoteは、文字列をエスケープしてダブルクオートで囲む関数
 func Quote(s string) string {
 	var sb strings.Builder
 	sb.WriteByte('"')
@@ -89,6 +85,7 @@ func Quote(s string) string {
 	return sb.String()
 }
 
+// Unquoteは、Quoteでエスケープされた文字列を元に戻す関数
 func Unquote(s string) (string, error) {
 	if len(s) < 2 || s[0] != '"' || s[len(s)-1] != '"' {
 		return "", LogErr("invalid quoted string: %s", s)
@@ -125,6 +122,8 @@ func Unquote(s string) (string, error) {
 	return sb.String(), nil
 }
 
+// ==================================================
+// bool
 func AtoBool(s string) (bool, error) {
 	s = strings.ToLower(strings.TrimSpace(s))
 	switch s {
