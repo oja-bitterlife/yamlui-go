@@ -109,10 +109,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// Update
 	errorList := m.lib.Update(m.frame)
 	for _, err := range errorList {
-		script.LogFatal(fmt.Sprintf("Error during update: %v\n", err))
+		script.LogFatal("Error during update: %v", err)
 	}
 	if len(m.lib.GetEvents()) > 0 {
-		script.Log(fmt.Sprintf("Events: %v\n", m.lib.GetEvents()))
+		script.Log("Events: %v", m.lib.GetEvents())
 		return m, nextTick()
 	}
 
@@ -148,6 +148,13 @@ func (m model) View() string {
 }
 
 func main() {
+	file, err := os.Create("bin/yamlui.log")
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close() // 最後に確実に閉じる
+	script.SetLogWriter(file)
+
 	// p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {

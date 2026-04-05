@@ -13,6 +13,16 @@ import (
 	"time"
 )
 
+type PrettyHandler struct {
+	out io.Writer
+}
+
+func SetLogWriter(w io.Writer) {
+	logger = slog.New(&PrettyHandler{out: w})
+}
+
+// **********************************************************************
+// ログのフォーマット
 // ANSI カラーコード
 const (
 	bgInfo     = "\033[96;1m"
@@ -21,10 +31,6 @@ const (
 	colorGray  = "\033[97;2m"
 	colorReset = "\033[0m"
 )
-
-type PrettyHandler struct {
-	out io.Writer
-}
 
 func (h *PrettyHandler) Enabled(_ context.Context, _ slog.Level) bool { return true }
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
@@ -56,26 +62,32 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler { return h }
 func (h *PrettyHandler) WithGroup(name string) slog.Handler       { return h }
 
-var logger = slog.New(&PrettyHandler{out: os.Stderr})
+var logger = slog.New(&PrettyHandler{out: os.Stdout})
 
-func Log(msg string, args ...any) {
-	pc, _, _, _ := runtime.Caller(1)
-	r := slog.NewRecord(time.Now(), slog.LevelInfo, fmt.Sprintf(msg, args...), pc)
+// **********************************************************************
+// ログ出力
+// ==================================================
+// 共通出力関数
+func logPrint(level slog.Level, msg string, args ...any) string {
+	fmtMsg := fmt.Sprintf(msg, args...)
+	pc, _, _, _ := runtime.Caller(2) // 2階層上の呼び出し元を取得
+	r := slog.NewRecord(time.Now(), level, fmtMsg, pc)
 	_ = logger.Handler().Handle(context.Background(), r)
+	return fmtMsg
+}
+
+// ==================================================
+// 各ログレベルの出力
+func Log(msg string, args ...any) {
+	logPrint(slog.LevelInfo, msg, args...)
 }
 
 func LogErr(msg string, args ...any) error {
-	fmtMsg := fmt.Sprintf(msg, args...)
-	pc, _, _, _ := runtime.Caller(1)
-	r := slog.NewRecord(time.Now(), slog.LevelError, fmtMsg, pc)
-	_ = logger.Handler().Handle(context.Background(), r)
+	fmtMsg := logPrint(slog.LevelError, msg, args...)
 	return fmt.Errorf(fmtMsg)
 }
 
 func LogFatal(msg string, args ...any) {
-	fmtMsg := fmt.Sprintf(msg, args...)
-	pc, _, _, _ := runtime.Caller(1)
-	r := slog.NewRecord(time.Now(), slog.LevelError, fmtMsg, pc)
-	_ = logger.Handler().Handle(context.Background(), r)
+	fmtMsg := logPrint(slog.LevelError, msg, args...)
 	panic(fmtMsg)
 }
