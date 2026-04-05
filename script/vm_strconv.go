@@ -5,6 +5,29 @@ import "strings"
 // **********************************************************************
 // strconv的な機能の自前実装
 // ==================================================
+// 文字列の前後のスペースを削除する
+func isSpace(c byte) bool {
+	return c == ' ' || c == '\t' || c == '\n' || c == '\r'
+}
+
+func TrimSpace(s string) string {
+	start := 0
+	for start < len(s) && isSpace(s[start]) {
+		start++
+	}
+
+	end := len(s) - 1
+	for end >= 0 && isSpace(s[end]) {
+		end--
+	}
+
+	if start > end {
+		return ""
+	}
+	return s[start : end+1]
+}
+
+// ==================================================
 // Int
 func Itoa(num int) string {
 	if num == 0 {
@@ -33,7 +56,7 @@ func Itoa(num int) string {
 }
 
 func Atoi(s string) (int, error) {
-	s = strings.TrimSpace(s)
+	s = TrimSpace(s)
 	if s == "" {
 		return 0, LogErr("imput string is empty")
 	}
@@ -122,10 +145,22 @@ func Unquote(s string) (string, error) {
 	return sb.String(), nil
 }
 
+func ToLower(s string) string {
+	var sb strings.Builder
+	for _, c := range s {
+		if 'A' <= c && c <= 'Z' {
+			sb.WriteRune(c + ('a' - 'A'))
+		} else {
+			sb.WriteRune(c)
+		}
+	}
+	return sb.String()
+}
+
 // ==================================================
 // bool
 func AtoBool(s string) (bool, error) {
-	s = strings.ToLower(strings.TrimSpace(s))
+	s = ToLower(TrimSpace(s))
 	switch s {
 	case "true":
 		return true, nil

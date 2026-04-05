@@ -1,9 +1,5 @@
 package script
 
-import (
-	"strings"
-)
-
 // **********************************************************************
 // 構文解析してValueのASTを作る
 func Compile(src string) (Value, error) {
@@ -68,10 +64,10 @@ func parseLispToken(tn *LispTokenizer, token []byte) (Value, error) {
 		s := string(token)
 
 		// boolチェック
-		if strings.ToLower(s) == "true" {
+		if ToLower(s) == "true" {
 			return NewBool(true), nil
 		}
-		if strings.ToLower(s) == "false" {
+		if ToLower(s) == "false" {
 			return NewBool(false), nil
 		}
 

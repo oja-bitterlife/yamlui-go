@@ -1,9 +1,5 @@
 package script
 
-import (
-	"strings"
-)
-
 // **********************************************************************
 // ValueのType定義
 // ==================================================
@@ -146,7 +142,7 @@ func (v Value) ConvertBool() Value {
 	case TypeNumber:
 		return NewBool(v.Num != 0)
 	case TypeString:
-		return NewBool(strings.ToLower(v.Str) == "true")
+		return NewBool(ToLower(v.Str) == "true")
 	case TypeLitList, TypeList:
 		return NewBool(len(v.List) > 0)
 	case TypeLitMap:
