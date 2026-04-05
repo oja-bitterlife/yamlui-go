@@ -52,8 +52,8 @@ tasks:
     deps:
       - build_tiny
     cmds:
-      - ls -lh {{.BIN_DIR}}/tiny
-      - ls -lh {{.BIN_DIR}}/tiny.wasm
+      - ls -lhn {{.BIN_DIR}}/tiny
+      - ls -lhn {{.BIN_DIR}}/tiny.wasm
       - nm -S --size-sort -r bin/tiny | head -n 8
 
   build:
