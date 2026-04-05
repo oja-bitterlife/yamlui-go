@@ -1,7 +1,6 @@
 package script
 
 import (
-	"strconv"
 	"strings"
 )
 
@@ -54,7 +53,7 @@ func (t ValueType) String() string {
 	case TypeList:
 		return TypeListStr
 	default:
-		return "Unknown:" + strconv.Itoa(int(t))
+		return "Unknown:" + Itoa(int(t))
 	}
 }
 
