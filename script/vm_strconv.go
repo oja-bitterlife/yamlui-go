@@ -55,6 +55,26 @@ func Itoa(num int) string {
 	return sb.String()
 }
 
+func IsNumeric(s string) bool {
+	s = TrimSpace(s)
+	if s == "" {
+		return false
+	}
+
+	if s[0] == '-' || s[0] == '+' {
+		s = s[1:]
+	}
+
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+
+	return true
+}
+
 func Atoi(s string) (int, error) {
 	s = TrimSpace(s)
 	if s == "" {

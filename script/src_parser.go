@@ -72,8 +72,12 @@ func parseLispToken(tn *LispTokenizer, token []byte) (Value, error) {
 		}
 
 		// 数値にできる？
-		if f, err := Atoi(s); err == nil {
-			return NewNumber(f), nil
+		if IsNumeric(s) {
+			if f, err := Atoi(s); err != nil {
+				return Value{}, err
+			} else {
+				return NewNumber(f), nil
+			}
 		}
 
 		// コマンドかPropety(""で囲まれていない文字列)
