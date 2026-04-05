@@ -254,7 +254,7 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 	results := make([]Value, count)
 	for i := range count {
 		// カウンタ変数を現在の値で更新
-		vm.vars.Map[counterName] = Value{Type: TypeNumber, Num: float64(i)}
+		vm.vars.Map[counterName] = Value{Type: TypeNumber, Num: i}
 
 		// 第3引数：ブロックを評価
 		result, err := vm.Eval(args[2])

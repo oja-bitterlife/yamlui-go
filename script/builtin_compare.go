@@ -12,8 +12,6 @@ var compareCmds = map[string]func(*VM, []Value) (Value, error){
 	"not": not,
 	"and": and,
 	"or":  or,
-	"min": min,
-	"max": max,
 }
 
 // ==================================================

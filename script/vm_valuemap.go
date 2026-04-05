@@ -14,20 +14,12 @@ func (data ValueMap) GetStr(key string, def string) string {
 	return value.Str
 }
 
-func (data ValueMap) GetNum(key string, def float64) float64 {
+func (data ValueMap) GetNum(key string, def int) int {
 	value, ok := data[key]
 	if !ok || value.Type != TypeNumber {
 		return def
 	}
 	return value.Num
-}
-
-func (data ValueMap) GetInt(key string, def int) int {
-	value, ok := data[key]
-	if !ok || value.Type != TypeNumber {
-		return def
-	}
-	return int(value.Num)
 }
 
 func (data ValueMap) GetBool(key string, def bool) bool {

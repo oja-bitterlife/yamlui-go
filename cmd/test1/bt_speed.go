@@ -67,8 +67,8 @@ func (self *BTSpeed) Update(lib *yamlui.YAMLUI, events []string) error {
 	return nil
 }
 
-func (self *BTSpeed) Draw(x, y float64, ctx yamlui.DrawContext) {
-	clipW, clipH := ctx.Clip.IWH()
+func (self *BTSpeed) Draw(x, y int, ctx yamlui.DrawContext) {
+	clipW, clipH := ctx.Clip.WH()
 
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
@@ -77,8 +77,8 @@ func (self *BTSpeed) Draw(x, y float64, ctx yamlui.DrawContext) {
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		drawX := x + float64(i%self.SelBase.RowsNum)*15 // 1行あたり16文字分の幅を確保
-		drawY := y + float64(i/self.SelBase.RowsNum)
+		drawX := x + (i%self.SelBase.RowsNum)*15 // 1行あたり16文字分の幅を確保
+		drawY := y + i/self.SelBase.RowsNum
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "

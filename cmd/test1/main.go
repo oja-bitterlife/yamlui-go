@@ -126,7 +126,7 @@ func (m model) View() string {
 		}
 	}
 
-	m.lib.Draw(yamlui.NewAreaI(0, 0, m.width, m.height))
+	m.lib.Draw(m.width, m.height)
 
 	// 色の設定
 	bgStyle := lipgloss.NewStyle().

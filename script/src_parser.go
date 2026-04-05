@@ -1,7 +1,6 @@
 package script
 
 import (
-	"strconv"
 	"strings"
 )
 
@@ -77,7 +76,7 @@ func parseLispToken(tn *LispTokenizer, token []byte) (Value, error) {
 		}
 
 		// 数値にできる？
-		if f, err := strconv.ParseFloat(s, 64); err == nil {
+		if f, err := Atoi(s); err == nil {
 			return NewNumber(f), nil
 		}
 

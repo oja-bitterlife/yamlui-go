@@ -2,7 +2,6 @@ package script
 
 import (
 	"bytes"
-	"strconv"
 )
 
 // **********************************************************************
@@ -42,10 +41,7 @@ func (v Value) ToValueJSON() ([]byte, error) {
 		buf.WriteString(`{"`)
 		buf.WriteString(TypeNumberStr)
 		buf.WriteString(`":`)
-		// 数値を直接書き込み
-		b := buf.AvailableBuffer()
-		b = strconv.AppendFloat(b, v.Num, 'f', 4, 64)
-		buf.Write(b)
+		buf.WriteString(Itoa(v.Num))
 		buf.WriteByte('}')
 
 	case TypeString, TypeProperty:
@@ -59,11 +55,7 @@ func (v Value) ToValueJSON() ([]byte, error) {
 			buf.WriteString(TypePropertyStr)
 			buf.WriteString(`":`)
 		}
-		// strconv.AppendQuote を使えば、AvailableBuffer に直接
-		// エスケープ済みの文字列 ("hello" など) を書き込めます！
-		b := buf.AvailableBuffer()
-		b = strconv.AppendQuote(b, v.Str)
-		buf.Write(b)
+		buf.WriteString(Quote(v.Str))
 		buf.WriteByte('}')
 
 	case TypeBool:
@@ -110,9 +102,7 @@ func (v Value) ToValueJSON() ([]byte, error) {
 				buf.WriteByte(',')
 			}
 			// キーは文字列としてエスケープして書き込む
-			b := buf.AvailableBuffer()
-			b = strconv.AppendQuote(b, k)
-			buf.Write(b)
+			buf.WriteString(Quote(k))
 			buf.WriteByte(':')
 			// 値は再帰的に呼び出される
 			b, err := v.ToValueJSON()
@@ -148,7 +138,7 @@ func parseValue(data []byte) (Value, error) {
 		return Value{}, LogErr("invalid JSON format: expected key-value pair, got \"%s\"", string(data))
 	}
 
-	key, err := strconv.Unquote(string(bytes.TrimSpace(parts[0])))
+	key, err := Unquote(string(bytes.TrimSpace(parts[0])))
 	if err != nil {
 		return Value{}, LogErr("invalid JSON format: invalid key \"%s\": %v", string(parts[0]), err)
 	}
@@ -156,25 +146,25 @@ func parseValue(data []byte) (Value, error) {
 
 	switch string(key) {
 	case TypeNumberStr:
-		f, err := strconv.ParseFloat(string(value), 64)
+		f, err := Atoi(string(value))
 		if err != nil {
 			return Value{}, LogErr("invalid JSON format: invalid number \"%s\": %v", string(value), err)
 		}
 		return NewNumber(f), nil
 	case TypeStringStr:
-		s, err := strconv.Unquote(string(value))
+		s, err := Unquote(string(value))
 		if err != nil {
 			return Value{}, LogErr("invalid JSON format: invalid string \"%s\": %v", string(value), err)
 		}
 		return NewString(s), nil
 	case TypePropertyStr:
-		s, err := strconv.Unquote(string(value))
+		s, err := Unquote(string(value))
 		if err != nil {
 			return Value{}, LogErr("invalid JSON format: invalid property \"%s\": %v", string(value), err)
 		}
 		return NewProperty(s), nil
 	case TypeBoolStr:
-		b, err := strconv.ParseBool(string(value))
+		b, err := AtoBool(string(value))
 		if err != nil {
 			return Value{}, LogErr("invalid JSON format: invalid bool \"%s\": %v", string(value), err)
 		}
@@ -324,7 +314,7 @@ func parseValueMap(data []byte) (map[string]Value, error) {
 			break
 		}
 
-		key, err := strconv.Unquote(string(data[keyStart:keyEnd]))
+		key, err := Unquote(string(data[keyStart:keyEnd]))
 		if err != nil {
 			return nil, LogErr("invalid JSON format: invalid key at position %d: %v", keyStart, err)
 		}

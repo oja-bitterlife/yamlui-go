@@ -54,13 +54,13 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 	self.UIBase.SetDrawTreeIF(self)
 
 	// デフォルトはMargin=0
-	self.Margin = data.GetInt("Margin", 0)
-	self.MarginTop = data.GetInt("MarginTop", 0)
-	self.MarginBottom = data.GetInt("MarginBottom", 0)
-	self.MarginLeft = data.GetInt("MarginLeft", 0)
-	self.MarginRight = data.GetInt("MarginRight", 0)
-	self.MarginX = data.GetInt("MarginX", 0)
-	self.MarginY = data.GetInt("MarginY", 0)
+	self.Margin = data.GetNum("Margin", 0)
+	self.MarginTop = data.GetNum("MarginTop", 0)
+	self.MarginBottom = data.GetNum("MarginBottom", 0)
+	self.MarginLeft = data.GetNum("MarginLeft", 0)
+	self.MarginRight = data.GetNum("MarginRight", 0)
+	self.MarginX = data.GetNum("MarginX", 0)
+	self.MarginY = data.GetNum("MarginY", 0)
 
 	// Align系のプロパティはデフォルトはfalse
 	self.AlignCenter = data.GetBool("AlignCenter", false)
@@ -77,7 +77,7 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // DrawTreeのOverride
-func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
+func (self *UILayout) DrawTree(z int, x, y int, ctx DrawContext) {
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
 	selfW, selfH := self.GetUIBase().Area().WH()
@@ -89,8 +89,8 @@ func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 	}
 
 	// Align系のプロパティを考慮して、子の描画領域を計算する
-	offsetX := 0.0
-	offsetY := 0.0
+	offsetX := 0
+	offsetY := 0
 	if self.AlignRight {
 		offsetX = parentW - selfW
 	}
@@ -108,10 +108,10 @@ func (self *UILayout) DrawTree(z int, x, y float64, ctx DrawContext) {
 	alignY := y + offsetY
 
 	// マージンを考慮して、子の描画領域を計算する
-	left := float64(self.MarginLeft + self.MarginX + self.Margin)
-	top := float64(self.MarginTop + self.MarginY + self.Margin)
-	right := float64(self.MarginRight + self.MarginX + self.Margin)
-	bottom := float64(self.MarginBottom + self.MarginY + self.Margin)
+	left := self.MarginLeft + self.MarginX + self.Margin
+	top := self.MarginTop + self.MarginY + self.Margin
+	right := self.MarginRight + self.MarginX + self.Margin
+	bottom := self.MarginBottom + self.MarginY + self.Margin
 
 	// Right/Bottomマージン分親のエリアから引いておく
 	parentArea := ctx.ParentClip

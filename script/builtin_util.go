@@ -1,9 +1,5 @@
 package script
 
-import (
-	"strconv"
-)
-
 // ==================================================
 // 組み込みコマンドの登録
 // mapを渡して複数のコマンドを登録する
@@ -18,9 +14,6 @@ func SetBuiltinCmds(vm *VM) {
 	// 数学関数を追加
 	registerCmdList(vm, mathCmds)
 
-	// 円関数を追加
-	registerCmdList(vm, circularCmds)
-
 	// 比較系関数を追加
 	registerCmdList(vm, compareCmds)
 
@@ -32,7 +25,7 @@ func SetBuiltinCmds(vm *VM) {
 // Validation
 func CheckCmdArgNum(cmdName string, argNum int, args []Value) error {
 	if len(args) != argNum {
-		return LogErr("invalid number of arguments for " + cmdName + ": expected " + strconv.Itoa(argNum) + ", got " + strconv.Itoa(len(args)))
+		return LogErr("invalid number of arguments for " + cmdName + ": expected " + Itoa(argNum) + ", got " + Itoa(len(args)))
 	}
 	return nil
 }
@@ -55,7 +48,7 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 		// どちらもリストなら同じ長でないとエラー
 		// 同じ長でないとエラー
 		if len(values[0].List) != len(values[1].List) {
-			return Value{}, LogErr("invalid argument lists for " + cmdName + ": both lists must have the same length, got " + strconv.Itoa(len(values[0].List)) + " and " + strconv.Itoa(len(values[1].List)))
+			return Value{}, LogErr("invalid argument lists for " + cmdName + ": both lists must have the same length, got " + Itoa(len(values[0].List)) + " and " + Itoa(len(values[1].List)))
 		}
 		// 個別に計算
 		result := make([]Value, len(values[0].List))

@@ -40,7 +40,7 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
+func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
 	drawArea := ctx.Clip
 	myArea := yamlui.Area{
 		X: x,
@@ -54,10 +54,10 @@ func (self *BTWindow) Draw(x, y float64, ctx yamlui.DrawContext) {
 		for dx := int(drawArea.Left()); dx < int(drawArea.Right()); dx++ {
 
 			// 現在の (x, y) が「本来の自分の領域(myArea)」のどこに当たるかで文字を決める
-			isLeft := (dx == myArea.ILeft())
-			isRight := (dx == myArea.IRight()-1)
-			isTop := (dy == myArea.ITop())
-			isBottom := (dy == myArea.IBottom()-1)
+			isLeft := (dx == myArea.Left())
+			isRight := (dx == myArea.Right()-1)
+			isTop := (dy == myArea.Top())
+			isBottom := (dy == myArea.Bottom()-1)
 
 			var r rune
 			if isLeft && isTop {

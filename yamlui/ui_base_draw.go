@@ -13,20 +13,20 @@ type DrawContext struct {
 // 直接DrawIFを呼び出すのではなく、DrawTreeの中でDrawQueueItemにしてキューに入れる
 type DrawQueueItem struct {
 	drawIF DrawIF
-	x      float64
-	y      float64
+	x      int
+	y      int
 	z      int
 	ctx    DrawContext
 }
 
 // 通常のDraw
 type DrawIF interface {
-	Draw(x, y float64, ctx DrawContext)
+	Draw(x, y int, ctx DrawContext)
 }
 
 // Align操作が必要な時とか、DrawTreeを自前で実装したいときのインターフェース
 type DrawTreeIF interface {
-	DrawTree(z int, x, y float64, ctx DrawContext)
+	DrawTree(z int, x, y int, ctx DrawContext)
 }
 
 func (self *UIBase) SetDrawIF(drawIF DrawIF) {
@@ -53,15 +53,16 @@ func NewDrawContext(lib *YAMLUI, self *UIBase, parentClip Area) DrawContext {
 
 // **********************************************************************
 // 呼び出し口
-func (self *YAMLUI) Draw(screen Area) {
-	self.Screen = screen
+func (self *YAMLUI) Draw(sw, sh int) {
+	// 描画領域をセット
+	self.Screen = NewArea(0, 0, sw, sh)
 
 	// drawQueueをクリア
 	self.drawQueue = []DrawQueueItem{}
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewDrawContext(self, self.root, screen)
+	ctx := NewDrawContext(self, self.root, self.Screen)
 	self.root.RecDrawTree(0, 0, 0, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
@@ -78,7 +79,7 @@ func (self *YAMLUI) Draw(screen Area) {
 
 // **********************************************************************
 // DrawTreeの再帰実行
-func (self *UIBase) RecDrawTree(z int, x, y float64, ctx DrawContext) {
+func (self *UIBase) RecDrawTree(z int, x, y int, ctx DrawContext) {
 	// 子供の描画
 	for _, child := range self.children {
 		if child.IsVisible {

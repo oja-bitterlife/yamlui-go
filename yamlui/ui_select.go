@@ -23,7 +23,7 @@ func (self *UISelect) GetSelectNo() int {
 }
 
 func (self *UISelect) SetSelectNo(selectNo int) {
-	self.UIBase.SelectNo = float64(selectNo)
+	self.UIBase.SelectNo = selectNo
 }
 
 // **********************************************************************

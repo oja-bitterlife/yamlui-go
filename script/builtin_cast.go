@@ -1,9 +1,5 @@
 package script
 
-import (
-	"strconv"
-)
-
 // **********************************************************************
 // キャスト系のbuiltin
 var castCmds = map[string]func(*VM, []Value) (Value, error){
@@ -42,7 +38,7 @@ func castStr(vm *VM, args []Value) (Value, error) {
 			}
 			return NewString("false"), nil
 		case TypeNumber:
-			return NewString(strconv.FormatFloat(value.Num, 'f', -1, 64)), nil
+			return NewString(Itoa(value.Num)), nil
 		case TypeString:
 			return value, nil
 		default:
@@ -62,7 +58,7 @@ func castNum(vm *VM, args []Value) (Value, error) {
 		case TypeNumber:
 			return value, nil
 		case TypeString:
-			num, err := strconv.ParseFloat(value.Str, 64)
+			num, err := Atoi(value.Str)
 			if err != nil {
 				return Value{}, castError("num", value)
 			}

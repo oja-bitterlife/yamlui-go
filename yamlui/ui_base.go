@@ -3,7 +3,6 @@ package yamlui
 import (
 	"maps"
 	"slices"
-	"strconv"
 	"strings"
 	"sync/atomic"
 
@@ -28,10 +27,10 @@ type UIBase struct {
 	IsEnable bool
 
 	// 座標
-	X float64
-	Y float64
-	W float64
-	H float64
+	X int
+	Y int
+	W int
+	H int
 
 	// 表示
 	IsVisible bool
@@ -39,9 +38,9 @@ type UIBase struct {
 	Color     string // 使用するカラーの名称。system/msg/frameなどを想定
 
 	// インタラクティブなUIに必要なプロパティ
-	SelectNo float64
-	SelGridX float64 // SelectGridで横の折り返し位置
-	Action   string  // UI処理で発生したイベントを入れる
+	SelectNo int
+	SelGridX int    // SelectGridで横の折り返し位置
+	Action   string // UI処理で発生したイベントを入れる
 
 	// 子要素が保存させたいもの
 	Prop map[string]script.Value // PropはValueMap型と意味が違うのでmapそのままで
@@ -63,7 +62,7 @@ type UIBase struct {
 func NewUIBase() *UIBase {
 	ui := &UIBase{}
 	newID := atomic.AddInt32(&lastID, 1)
-	ui.ID = "UIBase_" + strconv.Itoa(int(newID))
+	ui.ID = "UIBase_" + script.Itoa(int(newID))
 	lastID++
 	ui.IsEnable = true
 	ui.IsVisible = true
@@ -122,19 +121,19 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.ClearVars()
 
 	// スクリプトで使うFrameはUpdateCountを入れる
-	vm.SetVar("@Frame", script.NewNumber(float64(self.UpdateCount)))
+	vm.SetVar("@Frame", script.NewNumber(self.UpdateCount))
 
 	// プロパティの送信
 	vm.SetVar("@IsEnable", script.NewBool(self.IsEnable))
-	vm.SetVar("@X", script.NewNumber(float64(self.X)))
-	vm.SetVar("@Y", script.NewNumber(float64(self.Y)))
-	vm.SetVar("@Width", script.NewNumber(float64(self.W)))
-	vm.SetVar("@Height", script.NewNumber(float64(self.H)))
+	vm.SetVar("@X", script.NewNumber(self.X))
+	vm.SetVar("@Y", script.NewNumber(self.Y))
+	vm.SetVar("@Width", script.NewNumber(self.W))
+	vm.SetVar("@Height", script.NewNumber(self.H))
 	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
 	vm.SetVar("@Text", script.NewString(self.Text))
 	vm.SetVar("@Color", script.NewString(self.Color))
-	vm.SetVar("@SelectNo", script.NewNumber(float64(self.SelectNo)))
-	vm.SetVar("@SelGridX", script.NewNumber(float64(self.SelGridX)))
+	vm.SetVar("@SelectNo", script.NewNumber(self.SelectNo))
+	vm.SetVar("@SelGridX", script.NewNumber(self.SelGridX))
 	vm.SetVar("@Action", script.NewString(self.Action))
 
 	// PropはProp.をプレフィックスにして送る

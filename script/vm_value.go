@@ -66,7 +66,7 @@ type Value struct {
 	Type ValueType
 
 	// 基本データ
-	Num  float64
+	Num  int
 	Bool bool
 	Str  string
 
@@ -107,7 +107,7 @@ func (v Value) Clone() Value {
 // ==================================================
 // 値の生成関数
 func NewNil() Value              { return Value{Type: TypeNil} }
-func NewNumber(f float64) Value  { return Value{Type: TypeNumber, Num: f} }
+func NewNumber(i int) Value      { return Value{Type: TypeNumber, Num: i} }
 func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
 func NewLitList(v []Value) Value { return Value{Type: TypeLitList, List: v} }
@@ -170,15 +170,15 @@ func (v Value) ConvertNumber() Value {
 			return NewNumber(0)
 		}
 	case TypeString:
-		f, err := strconv.ParseFloat(v.Str, 64)
+		i, err := Atoi(v.Str)
 		if err != nil {
 			return NewNumber(0)
 		}
-		return NewNumber(f)
+		return NewNumber(i)
 	case TypeLitList, TypeList:
-		return NewNumber(float64(len(v.List)))
+		return NewNumber(len(v.List))
 	case TypeLitMap:
-		return NewNumber(float64(len(v.Map)))
+		return NewNumber(len(v.Map))
 	default:
 		return NewNumber(0)
 	}

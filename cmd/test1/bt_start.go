@@ -71,7 +71,7 @@ func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) error {
 }
 
 // Draw
-func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
+func (self *BTStart) Draw(x, y int, ctx yamlui.DrawContext) {
 
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
@@ -80,8 +80,8 @@ func (self *BTStart) Draw(x, y float64, ctx yamlui.DrawContext) {
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := ctx.Clip.IY() + i/self.SelBase.RowsNum
-		x := ctx.Clip.IX() + (i % self.SelBase.RowsNum)
+		y := ctx.Clip.Y + i/self.SelBase.RowsNum
+		x := ctx.Clip.X + (i % self.SelBase.RowsNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "
