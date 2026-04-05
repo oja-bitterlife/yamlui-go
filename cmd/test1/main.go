@@ -57,7 +57,7 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
 
-	if err := m.lib.Load(fileData); err != nil {
+	if err = m.lib.Load(fileData); err != nil {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
 

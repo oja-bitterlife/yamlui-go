@@ -34,7 +34,7 @@ func NewFromValueJSON(data []byte) (Value, error) {
 // **********************************************************************
 // Marshalの実装
 // json.MarshalJSONを使ってしまわないよう、関数名を違うものにしておく
-func (v *Value) ToValueJSON() ([]byte, error) {
+func (v Value) ToValueJSON() ([]byte, error) {
 	var buf bytes.Buffer
 
 	switch v.Type {

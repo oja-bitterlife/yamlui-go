@@ -57,9 +57,6 @@ func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
 	self.refObj[type_] = refObj
 }
 
-// ==================================================
-// map解析
-// Mapの値を構造体に流し込むためのヘルパー関数
 // **********************************************************************
 // UITreeの構築（再帰的に子要素も構築）
 func (self *YAMLUI) Load(valueJson []byte) error {
