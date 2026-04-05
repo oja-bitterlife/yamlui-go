@@ -115,7 +115,7 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 }
 
 // **********************************************************************
-// VMとのやりとり
+// ScriptVMとの連携
 func (self *UIBase) storeToVM(vm *script.VM) {
 	// 既存の変数をクリア
 	vm.ClearVars()
@@ -165,8 +165,8 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 	}
 }
 
-// **********************************************************************
-// UIBaseの関数
+// ==================================================
+// getter/setter
 func (self *UIBase) SetScriptVM(newVM *script.VM) {
 	self.script = newVM
 }

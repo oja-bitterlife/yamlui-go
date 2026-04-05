@@ -120,3 +120,33 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 
 	return nil
 }
+
+// **********************************************************************
+// Propのgetter/setter
+func (self *UIBase) SetPropStr(key string, str string) {
+	self.Prop[key] = script.NewString(str)
+}
+
+func (self *UIBase) AddPropNum(key string, num int) {
+	self.Prop[key] = script.NewNumber(self.PropNum(key) + num)
+}
+
+func (self *UIBase) SetPropNum(key string, num int) {
+	self.Prop[key] = script.NewNumber(num)
+}
+
+func (self *UIBase) SetPropBool(key string, b bool) {
+	self.Prop[key] = script.NewBool(b)
+}
+
+func (self *UIBase) PropStr(key string) string {
+	return self.Prop[key].Str
+}
+
+func (self *UIBase) PropNum(key string) int {
+	return self.Prop[key].Num
+}
+
+func (self *UIBase) PropBool(key string) bool {
+	return self.Prop[key].Bool
+}
