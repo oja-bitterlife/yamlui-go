@@ -5,9 +5,7 @@ package script
 import "errors"
 
 // 完全に消えることを期待
-func Log(msg string, args ...any)      {}
-func LogDebug(msg string, args ...any) {}
-func LogWarn(msg string, args ...any)  {}
+func Log(msg string, args ...any) {}
 func LogErr(msg string, args ...any) error {
 	return errors.New(msg)
 }

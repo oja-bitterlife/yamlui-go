@@ -15,11 +15,10 @@ import (
 
 // ANSI カラーコード
 const (
-	bgInfo     = "\033[42;97m" // 緑背景・黒文字
-	bgDebug    = "\033[46;97m" // シアン背景・黒文字
-	bgWarn     = "\033[43;97m" // 黄背景・黒文字
-	bgError    = "\033[41;97m" // 赤背景・白文字
-	colorGray  = "\033[90m"    // 灰色（日時用）
+	bgInfo     = "\033[96;1m"
+	bgError    = "\033[91;1m"
+	bgFunc     = "\033[32m"
+	colorGray  = "\033[97;2m"
 	colorReset = "\033[0m"
 )
 
@@ -32,14 +31,10 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	// レベルごとの色決定
 	var levelStr, levelColor string
 	switch r.Level {
-	case slog.LevelDebug:
-		levelStr, levelColor = "DEBUG", bgDebug
-	case slog.LevelWarn:
-		levelStr, levelColor = "WARN ", bgWarn
 	case slog.LevelError:
-		levelStr, levelColor = "ERROR", bgError
+		levelStr, levelColor = "ERRO", bgError
 	default:
-		levelStr, levelColor = "INFO ", bgInfo
+		levelStr, levelColor = "INFO", bgInfo
 	}
 
 	// ソース情報の取得
@@ -49,10 +44,10 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 
 	// フォーマット: [日時] [レベル] [ソース] | [メッセージ]
 	// ※画像に合わせてセパレータやスペースを調整
-	fmt.Fprintf(h.out, "%s%s%s %s%s%s %-20s | %s\n",
+	fmt.Fprintf(h.out, "%s%s%s %s%s%s %s%-20s %s| %s\n",
 		colorGray, r.Time.Format("2006-01-02 15:04:05"), colorReset,
 		levelColor, levelStr, colorReset,
-		source, r.Message,
+		bgFunc, source, colorReset, r.Message,
 	)
 	return nil
 }
@@ -75,18 +70,6 @@ func LogErr(msg string, args ...any) error {
 	r := slog.NewRecord(time.Now(), slog.LevelError, fmtMsg, pc)
 	_ = logger.Handler().Handle(context.Background(), r)
 	return fmt.Errorf(fmtMsg)
-}
-
-func LogWarn(msg string, args ...any) {
-	pc, _, _, _ := runtime.Caller(1)
-	r := slog.NewRecord(time.Now(), slog.LevelWarn, fmt.Sprintf(msg, args...), pc)
-	_ = logger.Handler().Handle(context.Background(), r)
-}
-
-func LogDebug(msg string, args ...any) {
-	pc, _, _, _ := runtime.Caller(1)
-	r := slog.NewRecord(time.Now(), slog.LevelDebug, fmt.Sprintf(msg, args...), pc)
-	_ = logger.Handler().Handle(context.Background(), r)
 }
 
 func LogFatal(msg string, args ...any) {
