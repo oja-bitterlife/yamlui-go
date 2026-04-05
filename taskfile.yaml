@@ -93,6 +93,7 @@ tasks:
     cmds:
       - "rm -rf {{.BIN_DIR}}/main"
       - "rm -rf {{.BIN_DIR}}/tiny"
+      - "rm -rf {{.BIN_DIR}}/tiny.wasm"
 
   tag:
     desc: "タグを更新する"

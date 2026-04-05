@@ -20,6 +20,7 @@ func (self *UIBase) ToValue() script.Value {
 		"UpdateCount": script.NewNumber(self.UpdateCount),
 		"Events":      script.NewLitList(events),
 		"IsEnable":    script.NewBool(self.IsEnable),
+		"Remove":      script.NewBool(self.Remove),
 		"X":           script.NewNumber(self.X),
 		"Y":           script.NewNumber(self.Y),
 		"W":           script.NewNumber(self.W),
@@ -68,6 +69,10 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 
 	if v, ok := m["IsEnable"]; ok {
 		self.IsEnable = v.Bool
+
+	}
+	if v, ok := m["Remove"]; ok {
+		self.Remove = v.Bool
 	}
 	if v, ok := m["X"]; ok {
 		self.X = v.Num

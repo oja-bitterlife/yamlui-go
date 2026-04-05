@@ -25,6 +25,7 @@ type UIBase struct {
 	// ==================================================
 	// スクリプトで更新できるプロパティ
 	IsEnable bool
+	Remove   bool // UIツリーから削除するかどうか。UPDATEの最後にまとめて削除するためのフラグ
 
 	// 座標
 	X int
@@ -125,6 +126,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 
 	// プロパティの送信
 	vm.SetVar("@IsEnable", script.NewBool(self.IsEnable))
+	vm.SetVar("@Remove", script.NewBool(self.Remove))
 	vm.SetVar("@X", script.NewNumber(self.X))
 	vm.SetVar("@Y", script.NewNumber(self.Y))
 	vm.SetVar("@Width", script.NewNumber(self.W))
@@ -145,6 +147,7 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 func (self *UIBase) loadFromVM(vm *script.VM) {
 	// プロパティの受信
 	self.IsEnable = vm.GetVar("@IsEnable").Bool
+	self.Remove = vm.GetVar("@Remove").Bool
 	self.X = vm.GetVar("@X").Num
 	self.Y = vm.GetVar("@Y").Num
 	self.W = vm.GetVar("@Width").Num

@@ -6,6 +6,7 @@ import "slices"
 // Updateのインターフェース
 type OnInitIF interface {
 	OnInit(lib *YAMLUI) error
+	GetUIBase() *UIBase
 }
 
 type UpdateIF interface {
@@ -22,6 +23,10 @@ type UpdateQueueItem struct {
 	UpdateIF UpdateIF
 	z        int
 	Events   []string
+}
+
+func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
+	self.onInitIF = onInitIF
 }
 
 func (self *UIBase) SetUpdateIF(updateIF UpdateIF) {
@@ -44,7 +49,7 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
-	if err := self.root.RecUpdateTree(self, 0); err != nil {
+	if err := self.root.recUpdateTree(self, 0); err != nil {
 		errorList = append(errorList, err...)
 	}
 
@@ -107,12 +112,17 @@ func (self *YAMLUI) Update(frame int) []error {
 		uiBase.UpdateCount++
 	}
 
+	// Update後にRemoveを処理する。Removeがtrueの要素は子供もろとも削除する
+	self.root.recRemove()
+
 	return errorList
 }
 
 // **********************************************************************
 // 再帰実行
-func (self *UIBase) RecUpdateTree(lib *YAMLUI, z int) []error {
+// ==================================================
+// UpdateTreeの再帰
+func (self *UIBase) recUpdateTree(lib *YAMLUI, z int) []error {
 	errorList := []error{}
 
 	// 子供の更新
@@ -133,7 +143,7 @@ func (self *UIBase) RecUpdateTree(lib *YAMLUI, z int) []error {
 					errorList = append(errorList, err...)
 				}
 			} else {
-				if err := child.RecUpdateTree(lib, z+1); err != nil {
+				if err := child.recUpdateTree(lib, z+1); err != nil {
 					errorList = append(errorList, err...)
 				}
 			}
@@ -141,4 +151,18 @@ func (self *UIBase) RecUpdateTree(lib *YAMLUI, z int) []error {
 	}
 
 	return errorList
+}
+
+// ==================================================
+// Removeの再帰
+func (self *UIBase) recRemove() {
+	for _, child := range self.children {
+		if child.Remove {
+			// Removeがtrueの要素は子供もろとも削除する
+			self.RemoveChild(child)
+		} else {
+			// 再帰的に呼び出す
+			child.recRemove()
+		}
+	}
 }
