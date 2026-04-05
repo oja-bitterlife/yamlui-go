@@ -8,8 +8,8 @@ type Timer struct {
 	duration int
 }
 
-func NewTimer(start, duration int) *Timer {
-	return &Timer{start: start, duration: duration}
+func NewTimer(start, duration int) Timer {
+	return Timer{start: start, duration: duration}
 }
 
 func (t *Timer) Reset(restart int) {

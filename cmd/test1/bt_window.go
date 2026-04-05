@@ -6,37 +6,37 @@ import (
 )
 
 type BTWindow struct {
-	WinBase *yamlui.UIWindow
-	model   *model
+	UIBase *yamlui.UIBase
+	model  *model
 }
 
 func NewBTWindow(m *model) *BTWindow {
 	return &BTWindow{
-		WinBase: yamlui.NewUIWindow(),
-		model:   m,
+		UIBase: yamlui.NewUIBase(),
+		model:  m,
 	}
 }
 
 // **********************************************************************
 // UIComponentIFの実装
 func (self *BTWindow) GetUIBase() *yamlui.UIBase {
-	return self.WinBase.UIBase
+	return self.UIBase
 }
 
 func (self *BTWindow) Clone() yamlui.UIComponent[*yamlui.UIBase] {
 	// modelは共有でOK
 	return &BTWindow{
-		WinBase: self.WinBase.Clone().(*yamlui.UIWindow),
-		model:   self.model,
+		UIBase: self.GetUIBase().Clone(),
+		model:  self.model,
 	}
 }
 
 func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
-	if err := self.WinBase.Setup(type_, data); err != nil { // super call
+	if err := self.GetUIBase().Setup(type_, data); err != nil { // super call
 		return err
 	}
 
-	self.WinBase.UIBase.SetDrawIF(self)
+	self.GetUIBase().SetDrawIF(self)
 	return nil
 }
 
