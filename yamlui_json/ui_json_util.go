@@ -2,8 +2,6 @@ package yamlui_json
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -25,7 +23,7 @@ func AnyJSONToValue(fileData []byte) (script.Value, error) {
 	// まずは普通にjsonのUnmarshal
 	var data any
 	if err := json.Unmarshal(fileData, &data); err != nil {
-		return script.Value{}, errors.New("Failed to parse JSON: " + err.Error())
+		return script.Value{}, script.LogErr("Failed to unmarshal JSON: %v", err)
 	}
 
 	// anyなのでValueに変換
@@ -34,7 +32,7 @@ func AnyJSONToValue(fileData []byte) (script.Value, error) {
 		return anyJSONToValue(data)
 	default:
 		// UI用のデータは基本的にMapかListのはずなので、その他の型はエラーとする
-		return script.Value{}, errors.New("Unsupported top-level JSON type: expected object or array, got " + string(fileData))
+		return script.Value{}, script.LogErr("Unsupported top-level JSON type: %T", data)
 	}
 }
 
@@ -47,7 +45,7 @@ func anyJSONToValue(data any) (script.Value, error) {
 		for k, val := range data {
 			v, err := anyJSONToValue(val)
 			if err != nil {
-				return script.Value{}, errors.New("Failed to convert map value for key '" + k + "': " + err.Error())
+				return script.Value{}, err
 			}
 			res[k] = v
 		}
@@ -57,7 +55,7 @@ func anyJSONToValue(data any) (script.Value, error) {
 		for i, val := range data {
 			v, err := anyJSONToValue(val)
 			if err != nil {
-				return script.Value{}, errors.New("Failed to convert list item at index " + fmt.Sprint(i) + ": " + err.Error())
+				return script.Value{}, err
 			}
 			list[i] = v
 		}
@@ -65,10 +63,10 @@ func anyJSONToValue(data any) (script.Value, error) {
 	case string:
 		return script.NewString(data), nil
 	case float64:
-		return script.NewNumber(data), nil
+		return script.NewNumber(int(data)), nil
 	case bool:
 		return script.NewBool(data), nil
 	default:
-		return script.Value{}, errors.New("Unsupported JSON value type: " + fmt.Sprintf("%T", data))
+		return script.Value{}, script.LogErr("Unsupported JSON value type: %T", data)
 	}
 }

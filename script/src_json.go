@@ -138,13 +138,13 @@ func parseValue(data []byte) (Value, error) {
 		return Value{}, LogErr("invalid JSON format: expected key-value pair, got \"%s\"", string(data))
 	}
 
-	key, err := Unquote(string(bytes.TrimSpace(parts[0])))
+	key, err := Unquote(TrimSpace(string(parts[0])))
 	if err != nil {
 		return Value{}, LogErr("invalid JSON format: invalid key \"%s\": %v", string(parts[0]), err)
 	}
 	value := bytes.TrimSpace(parts[1])
 
-	switch string(key) {
+	switch key {
 	case TypeNumberStr:
 		f, err := Atoi(string(value))
 		if err != nil {

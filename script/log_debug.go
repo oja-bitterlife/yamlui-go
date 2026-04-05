@@ -62,7 +62,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 func (h *PrettyHandler) WithAttrs(attrs []slog.Attr) slog.Handler { return h }
 func (h *PrettyHandler) WithGroup(name string) slog.Handler       { return h }
 
-var logger = slog.New(&PrettyHandler{out: os.Stdout})
+var logger = slog.New(&PrettyHandler{out: os.Stderr})
 
 // **********************************************************************
 // ログ出力
