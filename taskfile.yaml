@@ -45,7 +45,14 @@ tasks:
     cmds:
       - mkdir -p {{.BIN_DIR}}
       - tinygo build -o {{.BIN_DIR}}/tiny -opt=z ./cmd/tinygo
-        # nm -S --size-sort -r bin/tiny | head -n 20
+
+  check_tiny:
+    desc: "Check TinyGo"
+    deps:
+      - build_tiny
+    cmds:
+      - ls -lh {{.BIN_DIR}}/tiny
+      - nm -S --size-sort -r bin/tiny | head -n 8
 
   build:
     desc: "Build"
