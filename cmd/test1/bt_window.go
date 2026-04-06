@@ -8,6 +8,7 @@ import (
 type BTWindow struct {
 	UIBase *yamlui.UIBase
 	model  *model
+	orgH   int
 }
 
 func NewBTWindow(m *model) *BTWindow {
@@ -36,28 +37,33 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 		return err
 	}
 
+	// クローズのアニメーションのために元の高さを保存
+	self.orgH = self.GetUIBase().H
+
+	self.GetUIBase().SetUpdateIF(self)
 	self.GetUIBase().SetDrawIF(self)
+	return nil
+}
+
+func (self *BTWindow) Update(lib *yamlui.YAMLUI, events []string) error {
+	// close_ratioに応じて上から閉じていくようにY座標を計算
+	self.GetUIBase().H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
+
 	return nil
 }
 
 func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
 	drawArea := ctx.Clip
-	myArea := yamlui.Area{
-		X: x,
-		Y: y,
-		W: ctx.Clip.W,
-		H: ctx.Clip.H,
-	}
 
 	// 3. 描画ループ
 	for dy := int(drawArea.Top()); dy < int(drawArea.Bottom()); dy++ {
 		for dx := int(drawArea.Left()); dx < int(drawArea.Right()); dx++ {
 
-			// 現在の (x, y) が「本来の自分の領域(myArea)」のどこに当たるかで文字を決める
-			isLeft := (dx == myArea.Left())
-			isRight := (dx == myArea.Right()-1)
-			isTop := (dy == myArea.Top())
-			isBottom := (dy == myArea.Bottom()-1)
+			// dx, dy が本来の自分の領域のどこに当たるかで文字を決める
+			isLeft := (dx == x)
+			isRight := (dx == x+self.GetUIBase().W-1)
+			isTop := (dy == y)
+			isBottom := (dy == y+self.orgH-1)
 
 			var r rune
 			if isLeft && isTop {
@@ -84,7 +90,9 @@ func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
 
 			// キャンバスの物理境界チェックをして書き込み
 			if dy >= 0 && dy < len(self.model.canvas) && dx >= 0 && dx < len(self.model.canvas[dy]) {
-				self.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
+				if drawArea.Contains(dx, dy) {
+					self.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
+				}
 			}
 		}
 	}
