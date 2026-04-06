@@ -48,9 +48,12 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	}
 
 	// ソース情報の取得
-	fs := runtime.CallersFrames([]uintptr{r.PC})
-	f, _ := fs.Next()
-	source := fmt.Sprintf("%s:%d", filepath.Base(f.File), f.Line)
+	source := ""
+	if r.PC != 0 {
+		fs := runtime.CallersFrames([]uintptr{r.PC})
+		f, _ := fs.Next()
+		source = fmt.Sprintf("%s:%d", filepath.Base(f.File), f.Line)
+	}
 
 	// フォーマット: [日時] [レベル] [ソース] | [メッセージ]
 	// ※画像に合わせてセパレータやスペースを調整
@@ -72,9 +75,19 @@ var logger = slog.New(&PrettyHandler{out: os.Stderr})
 // ログ出力
 // ==================================================
 // 共通出力関数
+// 共通出力関数
 func logPrint(level slog.Level, msg string, args ...any) string {
 	fmtMsg := fmt.Sprintf(msg, args...)
-	pc, _, _, _ := runtime.Caller(2) // 2階層上の呼び出し元を取得
+
+	// 1. 呼び出し元のPCを取得
+	// [呼び出し元] -> [Log/LogWarn] -> [logPrint]
+	// なので、3階層上を指定する必要があります
+	var pc uintptr
+	var pcs [1]uintptr
+	// runtime.Callers を使うのが一般的です (skip=3: logPrint, Log, 呼び出し元)
+	runtime.Callers(3, pcs[:])
+	pc = pcs[0]
+
 	r := slog.NewRecord(time.Now(), level, fmtMsg, pc)
 	_ = logger.Handler().Handle(context.Background(), r)
 	return fmtMsg
