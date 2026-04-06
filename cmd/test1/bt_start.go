@@ -63,10 +63,8 @@ func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) error {
 		if event == "key:down" {
 			self.SelBase.NextGridY(1, true)
 		}
-		// if event == "key:enter" {
-		// 	self.GetUIBase().Action = self.texts[int(self.GetUIBase().SelectNo)]
-		// }
 	}
+
 	return nil
 }
 

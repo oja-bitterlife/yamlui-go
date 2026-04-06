@@ -47,12 +47,20 @@ func (t *Timer) Remaining(current int) int {
 func (t *Timer) Progress(current int, resolution int) int {
 	elapsed := t.Elapsed(current)
 	// 0除算注意
-	if elapsed >= t.duration || t.duration == 0 {
+	if t.duration == 0 {
+		return 0
+	}
+
+	if elapsed >= t.duration {
 		return resolution
 	}
 	return elapsed * resolution / t.duration
 }
 
 func (t *Timer) IsFinish(current int) bool {
+	// まだ開始していない
+	if t.duration == 0 {
+		return false
+	}
 	return current >= t.start+t.duration
 }

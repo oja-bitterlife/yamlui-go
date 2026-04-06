@@ -23,6 +23,23 @@ func (self *YAMLUI) ClearEvents() {
 	self.eventQueue = []string{}
 }
 
+// ワイルドカードでイベントチェックする便利関数
+func (self *YAMLUI) HasEvent(matchStr string, events []string) bool {
+	for _, event := range events {
+		if match := self.MatchEvent(matchStr, event); match {
+			return true
+		}
+	}
+	return false
+}
+
+func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
+	if match, _ := path.Match(matchStr, event); match {
+		return true
+	}
+	return false
+}
+
 // **********************************************************************
 // イベント処理
 // UpdateQueueのEventsにイベントを振り分ける

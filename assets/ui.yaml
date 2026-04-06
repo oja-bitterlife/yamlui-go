@@ -1,4 +1,5 @@
 - Type: "window"
+  ID: "win:title"
   W: 68
   H: 26
   children:
@@ -21,10 +22,11 @@
         script: >
           (if ($event "key:enter")
             (set @Action 
-              (switch @SelectNo "START" "CONTINUE")))
+              (switch @SelectNo "next:START" "next:CONTINUE")))
         children:
-        - Type: "title_close"
-          IsEnable: false
+        - Type: "close_win"
+          ID: "close_win"
+          Events: ["next:START", "next:CONTINUE"]
     - Type: "label"
       Text: "-MESSAGE SPEAD-"
       X: 16

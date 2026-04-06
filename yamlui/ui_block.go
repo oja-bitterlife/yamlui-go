@@ -5,10 +5,8 @@ import (
 )
 
 type UIBlock struct {
-	UIBase     *UIBase
-	timer      Timer
-	timerEvent string
-	actionFunc func(lib *YAMLUI, event string) error
+	UIBase *UIBase
+	Timer  Timer
 }
 
 func NewUIBlock() *UIBlock {
@@ -18,14 +16,23 @@ func NewUIBlock() *UIBlock {
 }
 
 // ==================================================
-// setter
-func (self *UIBlock) SetActionFunc(actionFunc func(lib *YAMLUI, event string) error) {
-	self.actionFunc = actionFunc
+// setter/getter
+// イベントを指定してブロックする。引数なしならすべてのイベントをブロックする
+func (self *UIBlock) SetBlock(args ...string) {
+	if len(args) == 0 {
+		args = []string{"*"}
+	}
+	self.GetUIBase().Events = args
 }
 
-func (self *UIBlock) SetTimer(event string, duration int) {
-	self.timer = NewTimer(0, duration)
-	self.timerEvent = event
+// タイマーをセットしてブロックを開始する。durationはフレーム数。TimerEventはタイマーが終了したときのイベント名
+func (self *UIBlock) StartBlockTimer(duration int, args ...string) {
+	self.Timer = NewTimer(self.GetUIBase().UpdateCount, duration)
+	self.SetBlock(args...)
+}
+
+func (self *UIBlock) IsTimerFinish() bool {
+	return self.Timer.IsFinish(self.GetUIBase().UpdateCount)
 }
 
 // **********************************************************************
@@ -44,31 +51,5 @@ func (self *UIBlock) Setup(type_ string, data script.ValueMap) error {
 	if err := self.GetUIBase().Setup(type_, data); err != nil { // super call
 		return err
 	}
-
-	// すべてのイベントをこのUIBlockで吸収する
-	self.GetUIBase().Events = []string{"*"}
-
-	// イベントチェック用Update
-	self.GetUIBase().SetUpdateIF(self)
-	return nil
-}
-
-// **********************************************************************
-// Updateでイベントを吸収する
-func (self *UIBlock) Update(lib *YAMLUI, events []string) error {
-	// タイマーイベントチェック
-	if self.timer.Duration() > 0 && self.timerEvent != "" {
-		if self.timer.IsFinish(self.GetUIBase().UpdateCount) {
-			if self.actionFunc != nil {
-				self.actionFunc(lib, self.timerEvent)
-			}
-		}
-	}
-
-	// それ以外のイベントも全部回す.PressAnyKey的な使い方を想定
-	for _, event := range events {
-		self.actionFunc(lib, event)
-	}
-
 	return nil
 }

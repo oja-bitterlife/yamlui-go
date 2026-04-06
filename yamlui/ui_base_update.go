@@ -1,6 +1,8 @@
 package yamlui
 
-import "slices"
+import (
+	"slices"
+)
 
 // **********************************************************************
 // Updateのインターフェース
@@ -63,10 +65,21 @@ func (self *YAMLUI) Update(frame int) []error {
 	// UpdateCountが0のときはInitとみなしてOnInitを呼び出す
 	for _, item := range self.updateQueue {
 		uiBase := item.UpdateIF.GetUIBase()
+		uiBase.Action = "" // Actionをクリアしておく
+
+		// OnInitを呼び出す
+		// ----------------------------------------
 		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
 			if err := uiBase.onInitIF.OnInit(self); err != nil {
 				errorList = append(errorList, err)
 			}
+		}
+
+		// OnInit後処理
+		// ----------------------------------------
+		// OnIniteの実行後にイベントが発生(Action!="")していればキューに追加
+		if uiBase.Action != "" {
+			self.AddEvent(uiBase.Action)
 		}
 	}
 

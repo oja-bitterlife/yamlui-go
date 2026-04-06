@@ -11,6 +11,10 @@ import (
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
 
+const (
+	TEA_UPDATE_EVENT = "tea:update"
+)
+
 type Cell struct {
 	Rune  rune
 	Color string
@@ -50,6 +54,7 @@ func initialModel() model {
 	m.lib.UIBuild("start", NewBTStart(&m))
 	m.lib.UIBuild("label", NewBTLabel(&m))
 	m.lib.UIBuild("speed", NewBTSpeed(&m))
+	m.lib.UIBuild("close_win", NewBTCloseWin(&m))
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")
@@ -112,7 +117,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		script.LogFatal("Error during update: %v", err)
 	}
 	if len(m.lib.GetEvents()) > 0 {
-		script.Log("Events: %v", m.lib.GetEvents())
 		return m, nextTick()
 	}
 
