@@ -43,12 +43,11 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 		return Value{}, err
 	}
 
-	// リストなら個別に
+	// リスト同士なら個別に
 	if values[0].Type == TypeLitList && values[1].Type == TypeLitList {
-		// どちらもリストなら同じ長でないとエラー
 		// 同じ長でないとエラー
 		if len(values[0].List) != len(values[1].List) {
-			return Value{}, LogErr("invalid argument lists for " + cmdName + ": both lists must have the same length, got " + Itoa(len(values[0].List)) + " and " + Itoa(len(values[1].List)))
+			return Value{}, LogErr("invalid arg lists for " + cmdName + ": lists length " + Itoa(len(values[0].List)) + " and " + Itoa(len(values[1].List)))
 		}
 		// 個別に計算
 		result := make([]Value, len(values[0].List))
@@ -60,22 +59,22 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 		}
 		return NewLitList(result), nil
 	}
-	if values[0].Type == TypeLitList && values[1].Type != TypeLitList {
-		// 第二引数をリストに適用
-		result := make([]Value, len(values[0].List))
-		for i := 0; i < len(values[0].List); i++ {
-			result[i], err = fn(vm, values[0].List[i], values[1])
-			if err != nil {
-				return Value{}, err
-			}
+
+	// リストと単一の値の計算
+	if (values[0].Type == TypeLitList && values[1].Type != TypeLitList) ||
+		(values[0].Type != TypeLitList && values[1].Type == TypeLitList) {
+
+		var listArg, valueArg Value
+		if values[0].Type == TypeLitList {
+			listArg, valueArg = values[0], values[1]
+		} else {
+			listArg, valueArg = values[1], values[0]
 		}
-		return NewLitList(result), nil
-	}
-	if values[0].Type != TypeLitList && values[1].Type == TypeLitList {
-		// 第一引数をリストに適用
-		result := make([]Value, len(values[1].List))
-		for i := 0; i < len(values[1].List); i++ {
-			result[i], err = fn(vm, values[0], values[1].List[i])
+
+		// 第二引数をリストに適用
+		result := make([]Value, len(listArg.List))
+		for i := 0; i < len(listArg.List); i++ {
+			result[i], err = fn(vm, listArg.List[i], valueArg)
 			if err != nil {
 				return Value{}, err
 			}
@@ -83,7 +82,7 @@ func binOp(vm *VM, cmdName string, args []Value, fn func(*VM, Value, Value) (Val
 		return NewLitList(result), nil
 	}
 
-	// 個別に計算
+	// 単一同士で計算
 	return fn(vm, values[0], values[1])
 }
 
