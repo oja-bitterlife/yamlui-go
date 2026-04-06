@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -73,12 +74,6 @@ func (m model) Init() tea.Cmd {
 	return nil
 }
 
-func nextTick() tea.Cmd {
-	return func() tea.Msg {
-		return struct{}{} // 空のメッセージを返す
-	}
-}
-
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.frame++ // フレームを進める
 
@@ -117,9 +112,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		script.LogFatal("Error during update: %v", err)
 	}
 	if len(m.lib.GetEvents()) > 0 {
-		return m, nextTick()
+		duration := time.Duration(33 * time.Millisecond)
+		return m, tea.Tick(duration, func(t time.Time) tea.Msg {
+			return struct{}{} // 空のメッセージを返す
+		})
 	}
-
 	return m, nil
 }
 

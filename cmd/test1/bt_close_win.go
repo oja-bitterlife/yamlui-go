@@ -45,6 +45,7 @@ func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, events []string) error {
 
 	// タイマーが終わるまでイベントを繋いでおく
 	if lib.HasEvent(TEA_UPDATE_EVENT, events) {
+		script.Log("CountDown: %d", self.uiBlock.Timer.Remain(self.GetUIBase().UpdateCount))
 		self.GetUIBase().Action = TEA_UPDATE_EVENT
 	}
 

@@ -36,7 +36,7 @@ func (t *Timer) Elapsed(current int) int {
 	return current - t.start
 }
 
-func (t *Timer) Remaining(current int) int {
+func (t *Timer) Remain(current int) int {
 	elapsed := t.Elapsed(current)
 	if elapsed >= t.duration {
 		return 0
