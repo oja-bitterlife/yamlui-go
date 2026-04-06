@@ -17,7 +17,8 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeProperty:
 		vv, ok := vm.vars.Map[v.Str] // 変数の値を返す
 		if !ok {
-			return Value{}, LogErr("undefined variable: " + v.Str)
+			LogWarn("undefined variable: " + v.Str)
+			return NewNumber(0), nil // 定義されていない変数は0を返す
 		}
 		return vv, nil
 	case TypeList:
