@@ -46,8 +46,11 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 }
 
 func (self *BTWindow) Update(lib *yamlui.YAMLUI, events []string) (string, error) {
-	// close_ratioに応じて上から閉じていくようにY座標を計算
-	self.GetUIBase().H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
+	// closing中
+	if self.GetUIBase().HasProp("close_ratio") {
+		// close_ratioに応じて上から閉じていくようにY座標を計算
+		self.GetUIBase().H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
+	}
 
 	return "", nil
 }

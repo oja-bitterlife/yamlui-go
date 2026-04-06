@@ -135,8 +135,6 @@ func (v Value) IsList() bool {
 // コンバート
 func (v Value) ConvertBool() Value {
 	switch v.Type {
-	case TypeNil:
-		return NewBool(false)
 	case TypeBool:
 		return v
 	case TypeNumber:
@@ -154,8 +152,6 @@ func (v Value) ConvertBool() Value {
 
 func (v Value) ConvertNumber() Value {
 	switch v.Type {
-	case TypeNil:
-		return NewNumber(0)
 	case TypeNumber:
 		return v
 	case TypeBool:
@@ -176,5 +172,22 @@ func (v Value) ConvertNumber() Value {
 		return NewNumber(len(v.Map))
 	default:
 		return NewNumber(0)
+	}
+}
+
+func (v Value) ConvertString() Value {
+	switch v.Type {
+	case TypeNumber:
+		return NewString(Itoa(v.Num))
+	case TypeBool:
+		if v.Bool {
+			return NewString("true")
+		} else {
+			return NewString("false")
+		}
+	case TypeString:
+		return v
+	default:
+		return NewString("")
 	}
 }

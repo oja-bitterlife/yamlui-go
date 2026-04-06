@@ -112,6 +112,7 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 
 // **********************************************************************
 // Propのgetter/setter
+// ==================================================
 // 設定
 func (self *UIBase) SetPropStr(key string, str string) {
 	self.Prop[key] = script.NewString(str)
@@ -129,34 +130,55 @@ func (self *UIBase) SetPropBool(key string, b bool) {
 	self.Prop[key] = script.NewBool(b)
 }
 
+// ==================================================
 // 取り出すだけ
 func (self *UIBase) PropStr(key string) string {
+	if self.Prop[key].Type != script.TypeString {
+		script.LogWarn("Prop %s is not a string, but %s. Converting to string.", key, self.Prop[key].Type.String())
+		return self.Prop[key].ConvertString().Str
+	}
 	return self.Prop[key].Str
 }
 
 func (self *UIBase) PropNum(key string) int {
+	if self.Prop[key].Type != script.TypeNumber {
+		script.LogWarn("Prop %s is not a number, but %s. Converting to number.", key, self.Prop[key].Type.String())
+		return self.Prop[key].ConvertNumber().Num
+	}
 	return self.Prop[key].Num
 }
 
 func (self *UIBase) PropBool(key string) bool {
+	if self.Prop[key].Type != script.TypeBool {
+		script.LogWarn("Prop %s is not a bool, but %s. Converting to bool.", key, self.Prop[key].Type.String())
+		return self.Prop[key].ConvertBool().Bool
+	}
 	return self.Prop[key].Bool
 }
 
+// ==================================================
 // 取り出してクリアする
 func (self *UIBase) TakePropStr(key string) string {
-	str := self.Prop[key].Str
+	str := self.PropStr(key)
 	delete(self.Prop, key)
 	return str
 }
 
 func (self *UIBase) TakePropNum(key string) int {
-	num := self.Prop[key].Num
+	num := self.PropNum(key)
 	delete(self.Prop, key)
 	return num
 }
 
 func (self *UIBase) TakePropBool(key string) bool {
-	b := self.Prop[key].Bool
+	b := self.PropBool(key)
 	delete(self.Prop, key)
 	return b
+}
+
+// ==================================================
+// Propの存在チェック
+func (self *UIBase) HasProp(key string) bool {
+	_, ok := self.Prop[key]
+	return ok
 }
