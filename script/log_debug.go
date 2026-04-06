@@ -26,6 +26,7 @@ func SetLogWriter(w io.Writer) {
 // ANSI カラーコード
 const (
 	bgInfo     = "\033[96;1m"
+	bgWarn     = "\033[93;1m"
 	bgError    = "\033[91;1m"
 	bgFunc     = "\033[32m"
 	colorGray  = "\033[97;2m"
@@ -39,6 +40,8 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	switch r.Level {
 	case slog.LevelError:
 		levelStr, levelColor = "ERRO", bgError
+	case slog.LevelWarn:
+		levelStr, levelColor = "WARN", bgWarn
 	default:
 		levelStr, levelColor = "INFO", bgInfo
 	}
@@ -80,6 +83,10 @@ func logPrint(level slog.Level, msg string, args ...any) string {
 // 各ログレベルの出力
 func Log(msg string, args ...any) {
 	logPrint(slog.LevelInfo, msg, args...)
+}
+
+func LogWarn(msg string, args ...any) {
+	logPrint(slog.LevelWarn, msg, args...)
 }
 
 func LogErr(msg string, args ...any) error {

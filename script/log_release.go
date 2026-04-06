@@ -12,7 +12,8 @@ import (
 func SetLogWriter(w io.Writer) {}
 
 // ----------------------------------------
-func Log(msg string, args ...any) {}
+func Log(msg string, args ...any)     {}
+func LogWarn(msg string, args ...any) {}
 func LogErr(msg string, args ...any) error {
 	return errors.New(msg)
 }

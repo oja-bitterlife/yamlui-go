@@ -127,6 +127,7 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 		}
 	} else {
 		// 登録されたUICloneableがない場合は、基本的なUIを構築
+		script.LogWarn("Unregister Type: " + type_)
 		ui = NewUIBase()
 		ui.LoadFromValue(value) // プロパティを流し込む
 	}

@@ -22,6 +22,9 @@
           (if ($event "key:enter")
             (set @Action 
               (switch @SelectNo "START" "CONTINUE")))
+        children:
+        - Type: "title_close"
+          IsEnable: false
     - Type: "label"
       Text: "-MESSAGE SPEAD-"
       X: 16
