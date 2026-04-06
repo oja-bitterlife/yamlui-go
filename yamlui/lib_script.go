@@ -9,13 +9,15 @@ import (
 
 // **********************************************************************
 const (
-	UIEventPrefix = "@UIEvent." // UIイベントのプロパティ名のプレフィックス
+	// UIイベントのプロパティ名のプレフィックス
+	UIEventPrefix   = "UIEvent."
+	UIEventAtPrefix = "@" + UIEventPrefix
 )
 
 // vmのPropにUIのイベントをセットする
 func (self *UIBase) storeScriptEvent(events []string) {
 	for _, event := range events {
-		self.script.SetVar(UIEventPrefix+event, script.NewBool(true))
+		self.script.SetVar(UIEventAtPrefix+event, script.NewBool(true))
 	}
 }
 
@@ -48,14 +50,13 @@ func (ui *UIBase) scriptEvent(vm *script.VM, args []script.Value) (script.Value,
 
 	// vm.varsの中にあるかpath.Matchでチェックする
 	for k := range vm.GetVars() {
-		event, ok := strings.CutPrefix(k, UIEventPrefix)
+		event, ok := strings.CutPrefix(k, UIEventAtPrefix)
 		if !ok {
 			continue // プレフィックスが違うものはスキップ
 		}
 
 		// path.Matchでイベント名をマッチさせる
 		if match, err := path.Match(value.Str, event); err == nil && match {
-			vm.SetVar("@Action", value)      // @Actionにイベントをセットしておく
 			return script.NewBool(true), nil // マッチしたらtrueを返す
 		}
 	}

@@ -38,18 +38,18 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, events []string) error {
+func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, events []string) (string, error) {
 	// "next:*"イベントがあったら30フレーム後にウィンドウを閉じるタイマーをセットする
 	if lib.HasEvent("next:*", events) {
 		self.uiBlock.StartBlockTimer(10)
-		self.GetUIBase().Action = TITLE_CLOSING_EVENT
+		return TITLE_CLOSING_EVENT, nil
 	}
 
 	// タイマーが終わるまでイベントを繋いでおく
 	if lib.HasEvent(TITLE_CLOSING_EVENT, events) {
 		win := lib.FindByID("win:title")
 		if win == nil {
-			return script.LogErr("BTCloseWin: win:title not found")
+			return "", script.LogErr("BTCloseWin: win:title not found")
 		}
 
 		// タイマーが終了したらウィンドウを閉じる
@@ -59,8 +59,8 @@ func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, events []string) error {
 			win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(self.GetUIBase().UpdateCount, 100))
 		}
 
-		self.GetUIBase().Action = TITLE_CLOSING_EVENT
+		return TITLE_CLOSING_EVENT, nil
 	}
 
-	return nil
+	return "", nil
 }

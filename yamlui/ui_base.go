@@ -39,8 +39,7 @@ type UIBase struct {
 
 	// インタラクティブなUIに必要なプロパティ
 	SelectNo int
-	SelGridX int    // SelectGridで横の折り返し位置
-	Action   string // UI処理で発生したイベントを入れる
+	SelGridX int // SelectGridで横の折り返し位置
 
 	// 子要素が保存させたいもの
 	Prop map[string]script.Value // PropはValueMap型と意味が違うのでmapそのままで
@@ -133,33 +132,57 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Text", script.NewString(self.Text))
 	vm.SetVar("@SelectNo", script.NewNumber(self.SelectNo))
 	vm.SetVar("@SelGridX", script.NewNumber(self.SelGridX))
-	vm.SetVar("@Action", script.NewString(self.Action))
 
-	// PropはProp.をプレフィックスにして送る
+	// Propを送る
 	for k, v := range self.Prop {
-		vm.SetVar("@Prop."+k, v)
+		vm.SetVar("@"+k, v)
 	}
 }
 
 func (self *UIBase) loadFromVM(vm *script.VM) {
-	// プロパティの受信
-	self.IsEnable = vm.GetVar("@IsEnable").Bool
-	self.Remove = vm.GetVar("@Remove").Bool
-	self.X = vm.GetVar("@X").Num
-	self.Y = vm.GetVar("@Y").Num
-	self.W = vm.GetVar("@Width").Num
-	self.H = vm.GetVar("@Height").Num
-	self.IsVisible = vm.GetVar("@IsVisivle").Bool
-	self.Text = vm.GetVar("@Text").Str
-	self.SelectNo = vm.GetVar("@SelectNo").Num
-	self.SelGridX = vm.GetVar("@SelGridX").Num
-	self.Action = vm.GetVar("@Action").Str
+	// 既存のプロパティをクリアしてから受け取る
+	self.Prop = make(map[string]script.Value)
 
-	// PropはProp.をプレフィックスにして受け取る
+	// プロパティの受信
 	for k, v := range vm.GetVars() {
-		if after, ok := strings.CutPrefix(k, "@Prop."); ok {
-			propKey := after
-			self.Prop[propKey] = v
+		// @で始まる変数はUIBaseのプロパティとして受け取る
+		if propName, ok := strings.CutPrefix(k, "@"); ok {
+			switch propName {
+
+			// FrameはUpdateCountから入れたのでUpdateCountに戻す
+			case "Frame":
+				self.UpdateCount = int(v.Num)
+
+			// UIBaseのプロパティの受信
+			case "IsEnable":
+				self.IsEnable = v.Bool
+			case "Remove":
+				self.Remove = v.Bool
+			case "X":
+				self.X = v.Num
+			case "Y":
+				self.Y = v.Num
+			case "Width":
+				self.W = v.Num
+			case "Height":
+				self.H = v.Num
+			case "IsVisivle":
+				self.IsVisible = v.Bool
+			case "Text":
+				self.Text = v.Str
+			case "SelectNo":
+				self.SelectNo = v.Num
+			case "SelGridX":
+				self.SelGridX = v.Num
+
+			// その他はProp
+			default:
+				// "UIEvent."で始まるプロパティはイベントなのでPropには入れない
+				if !strings.HasPrefix(propName, UIEventPrefix) {
+					// 一般的なProperty
+					self.Prop[propName] = v
+				}
+			}
 		}
 	}
 }

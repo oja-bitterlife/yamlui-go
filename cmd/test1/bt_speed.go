@@ -55,7 +55,7 @@ func (self *BTSpeed) Setup(type_ string, data script.ValueMap) error {
 }
 
 // Update
-func (self *BTSpeed) Update(lib *yamlui.YAMLUI, events []string) error {
+func (self *BTSpeed) Update(lib *yamlui.YAMLUI, events []string) (string, error) {
 	for _, event := range events {
 		if event == "key:left" {
 			self.SelBase.NextGridX(-1, true)
@@ -64,7 +64,7 @@ func (self *BTSpeed) Update(lib *yamlui.YAMLUI, events []string) error {
 			self.SelBase.NextGridX(1, true)
 		}
 	}
-	return nil
+	return "", nil
 }
 
 func (self *BTSpeed) Draw(x, y int, ctx yamlui.DrawContext) {

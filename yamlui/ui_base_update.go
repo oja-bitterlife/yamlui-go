@@ -7,12 +7,12 @@ import (
 // **********************************************************************
 // Updateのインターフェース
 type OnInitIF interface {
-	OnInit(lib *YAMLUI) error
+	OnInit(lib *YAMLUI) (string, error)
 	GetUIBase() *UIBase
 }
 
 type UpdateIF interface {
-	Update(lib *YAMLUI, events []string) error
+	Update(lib *YAMLUI, events []string) (string, error)
 	GetUIBase() *UIBase
 }
 
@@ -55,7 +55,7 @@ func (self *YAMLUI) Update(frame int) []error {
 		errorList = append(errorList, err...)
 	}
 
-	// updateQueueに溜まった描画命令を実行する
+	// updateQueueに溜まったUpdateを実行する
 	// ----------------------------------------
 	// Z順でソートする
 	slices.SortStableFunc(self.updateQueue, func(a, b UpdateQueueItem) int {
@@ -65,21 +65,19 @@ func (self *YAMLUI) Update(frame int) []error {
 	// UpdateCountが0のときはInitとみなしてOnInitを呼び出す
 	for _, item := range self.updateQueue {
 		uiBase := item.UpdateIF.GetUIBase()
-		uiBase.Action = "" // Actionをクリアしておく
 
 		// OnInitを呼び出す
 		// ----------------------------------------
 		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
-			if err := uiBase.onInitIF.OnInit(self); err != nil {
+			event, err := uiBase.onInitIF.OnInit(self)
+			if err != nil {
 				errorList = append(errorList, err)
 			}
-		}
 
-		// OnInit後処理
-		// ----------------------------------------
-		// OnIniteの実行後にイベントが発生(Action!="")していればキューに追加
-		if uiBase.Action != "" {
-			self.AddEvent(uiBase.Action)
+			// OnIniteの実行後にイベントが発生(event!="")していればキューに追加
+			if event != "" {
+				self.AddEvent(event)
+			}
 		}
 	}
 
@@ -92,7 +90,6 @@ func (self *YAMLUI) Update(frame int) []error {
 	// ソートされたqueueを順番に実行する
 	for _, item := range self.updateQueue {
 		uiBase := item.UpdateIF.GetUIBase()
-		uiBase.Action = "" // Actionをクリアしておく
 
 		// スクリプトがあれば走らせる
 		// ----------------------------------------
@@ -112,16 +109,22 @@ func (self *YAMLUI) Update(frame int) []error {
 
 		// Updateを呼び出す
 		// ----------------------------------------
-		item.UpdateIF.Update(self, item.Events)
-
-		// Update後処理
-		// ----------------------------------------
-		// Updateの実行後にイベントが発生(Action!="")していればキューに追加
-		if uiBase.Action != "" {
-			self.AddEvent(uiBase.Action)
+		event, err := item.UpdateIF.Update(self, item.Events)
+		if err != nil {
+			errorList = append(errorList, err)
 		}
 
-		// 実行カウントを進める
+		// Updateの実行後にイベントが発生(event!="")していればキューに追加
+		if event != "" {
+			self.AddEvent(event)
+		}
+
+	}
+
+	// 実行カウントを進める
+	// ----------------------------------------
+	for _, item := range self.updateQueue {
+		uiBase := item.UpdateIF.GetUIBase()
 		uiBase.UpdateCount++
 	}
 

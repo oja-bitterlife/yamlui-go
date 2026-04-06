@@ -55,7 +55,7 @@ func (self *BTStart) Setup(type_ string, data script.ValueMap) error {
 }
 
 // Update
-func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) error {
+func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) (string, error) {
 	for _, event := range events {
 		if event == "key:up" {
 			self.SelBase.NextGridY(-1, true)
@@ -65,7 +65,10 @@ func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) error {
 		}
 	}
 
-	return nil
+	if self.GetUIBase().PropStr("Action") != "" {
+		return self.GetUIBase().TakePropStr("Action"), nil
+	}
+	return "", nil
 }
 
 // Draw

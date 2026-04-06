@@ -29,7 +29,6 @@ func (self *UIBase) ToValue() script.Value {
 		"Text":        script.NewString(self.Text),
 		"SelectNo":    script.NewNumber(self.SelectNo),
 		"SelGridX":    script.NewNumber(self.SelGridX),
-		"Action":      script.NewString(self.Action),
 		"Prop":        script.NewLitMap(self.Prop),
 	})
 }
@@ -97,9 +96,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	if v, ok := m["SelGridX"]; ok {
 		self.SelGridX = v.Num
 	}
-	if v, ok := m["Action"]; ok {
-		self.Action = v.Str
-	}
 
 	// scriptはVMの作成とcmdの登録を行う
 	if v, ok := m["script"]; ok {
@@ -124,6 +120,7 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 
 // **********************************************************************
 // Propのgetter/setter
+// 設定
 func (self *UIBase) SetPropStr(key string, str string) {
 	self.Prop[key] = script.NewString(str)
 }
@@ -140,6 +137,7 @@ func (self *UIBase) SetPropBool(key string, b bool) {
 	self.Prop[key] = script.NewBool(b)
 }
 
+// 取り出すだけ
 func (self *UIBase) PropStr(key string) string {
 	return self.Prop[key].Str
 }
@@ -150,4 +148,23 @@ func (self *UIBase) PropNum(key string) int {
 
 func (self *UIBase) PropBool(key string) bool {
 	return self.Prop[key].Bool
+}
+
+// 取り出してクリアする
+func (self *UIBase) TakePropStr(key string) string {
+	str := self.Prop[key].Str
+	delete(self.Prop, key)
+	return str
+}
+
+func (self *UIBase) TakePropNum(key string) int {
+	num := self.Prop[key].Num
+	delete(self.Prop, key)
+	return num
+}
+
+func (self *UIBase) TakePropBool(key string) bool {
+	b := self.Prop[key].Bool
+	delete(self.Prop, key)
+	return b
 }

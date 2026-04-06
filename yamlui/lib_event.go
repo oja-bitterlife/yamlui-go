@@ -44,14 +44,18 @@ func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
 // イベント処理
 // UpdateQueueのEventsにイベントを振り分ける
 func (self *YAMLUI) ProcessEvents() {
-	// Updateの後ろからイベント処理が可能かを確認する
+	// Updateの後ろからイベント処理
 	checkEvents := self.eventQueue[:]
 	for i := len(self.updateQueue) - 1; i >= 0; i-- {
+
+		// イベントを1つずつ確認する
 		remainEvents := []string{} // マッチしなかったイベントをためておくリスト
 		for _, event := range checkEvents {
+
 			// 受信設定と一致したイベントがあるか確認する
 			matchedAny := false
 			for _, wildStr := range self.updateQueue[i].UpdateIF.GetUIBase().Events {
+
 				// ワイルドカード(path.Match)でマッチング
 				if match, _ := path.Match(wildStr, event); match {
 					matchedAny = true
@@ -67,7 +71,11 @@ func (self *YAMLUI) ProcessEvents() {
 				remainEvents = append(remainEvents, event)
 			}
 		}
-		checkEvents = remainEvents // 次のUIではマッチしなかったイベントだけを確認する
+
+		// 次のUIはマッチしなかったイベントだけを確認する
+		checkEvents = remainEvents
 	}
-	self.eventQueue = checkEvents // 最後までマッチしなかったイベントは残しておく
+
+	// 最後までマッチしなかったイベントは残しておく
+	self.eventQueue = checkEvents
 }

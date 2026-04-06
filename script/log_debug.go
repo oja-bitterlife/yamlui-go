@@ -4,6 +4,7 @@ package script
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -91,7 +92,7 @@ func LogWarn(msg string, args ...any) {
 
 func LogErr(msg string, args ...any) error {
 	fmtMsg := logPrint(slog.LevelError, msg, args...)
-	return fmt.Errorf(fmtMsg)
+	return errors.New(fmtMsg)
 }
 
 func LogFatal(msg string, args ...any) {
