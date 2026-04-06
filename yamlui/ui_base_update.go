@@ -94,11 +94,7 @@ func (self *YAMLUI) Update(frame int) []error {
 		uiBase := item.UpdateIF.GetUIBase()
 		uiBase.Action = "" // Actionをクリアしておく
 
-		// Updateを呼び出す
-		// ----------------------------------------
-		item.UpdateIF.Update(self, item.Events)
-
-		// Update後スクリプトがあれば走らせる
+		// スクリプトがあれば走らせる
 		// ----------------------------------------
 		if uiBase.script != nil {
 			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
@@ -113,6 +109,10 @@ func (self *YAMLUI) Update(frame int) []error {
 			// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
 			uiBase.loadFromVM(uiBase.script)
 		}
+
+		// Updateを呼び出す
+		// ----------------------------------------
+		item.UpdateIF.Update(self, item.Events)
 
 		// Update後処理
 		// ----------------------------------------

@@ -36,7 +36,6 @@ type UIBase struct {
 	// 表示
 	IsVisible bool
 	Text      string
-	Color     string // 使用するカラーの名称。system/msg/frameなどを想定
 
 	// インタラクティブなUIに必要なプロパティ
 	SelectNo int
@@ -67,7 +66,6 @@ func NewUIBase() *UIBase {
 	lastID++
 	ui.IsEnable = true
 	ui.IsVisible = true
-	ui.Color = "system"
 	// とりあえず大きな値を入れておく
 	ui.W = 65536
 	ui.H = 65536
@@ -133,7 +131,6 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Height", script.NewNumber(self.H))
 	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
 	vm.SetVar("@Text", script.NewString(self.Text))
-	vm.SetVar("@Color", script.NewString(self.Color))
 	vm.SetVar("@SelectNo", script.NewNumber(self.SelectNo))
 	vm.SetVar("@SelGridX", script.NewNumber(self.SelGridX))
 	vm.SetVar("@Action", script.NewString(self.Action))
@@ -154,7 +151,6 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 	self.H = vm.GetVar("@Height").Num
 	self.IsVisible = vm.GetVar("@IsVisivle").Bool
 	self.Text = vm.GetVar("@Text").Str
-	self.Color = vm.GetVar("@Color").Str
 	self.SelectNo = vm.GetVar("@SelectNo").Num
 	self.SelGridX = vm.GetVar("@SelGridX").Num
 	self.Action = vm.GetVar("@Action").Str
