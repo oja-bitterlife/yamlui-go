@@ -34,7 +34,7 @@ func (self *UIBlock) GetUIBase() *UIBase {
 	return self.UIBase
 }
 
-func (self *UIBlock) Clone() UIComponent[*UIBase] {
+func (self *UIBlock) Clone() UICloned {
 	return &UIBlock{
 		UIBase: self.GetUIBase().Clone(),
 	}

@@ -23,7 +23,7 @@ func (self *BTWindow) GetUIBase() *yamlui.UIBase {
 	return self.UIBase
 }
 
-func (self *BTWindow) Clone() yamlui.UIComponent[*yamlui.UIBase] {
+func (self *BTWindow) Clone() yamlui.UICloned {
 	// modelは共有でOK
 	return &BTWindow{
 		UIBase: self.GetUIBase().Clone(),

@@ -39,7 +39,7 @@ func (self *UILayout) GetUIBase() *UIBase {
 	return self.UIBase
 }
 
-func (self *UILayout) Clone() UIComponent[*UIBase] {
+func (self *UILayout) Clone() UICloned {
 	newLayout := *self
 	newLayout.UIBase = self.UIBase.Clone()
 	return &newLayout

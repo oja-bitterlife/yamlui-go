@@ -32,7 +32,7 @@ func (self *UISelect) GetUIBase() *UIBase {
 	return self.UIBase
 }
 
-func (self *UISelect) Clone() UIComponent[*UIBase] {
+func (self *UISelect) Clone() UICloned {
 	return &UISelect{
 		UIBase:  self.UIBase.Clone(),
 		ItemNum: self.ItemNum,

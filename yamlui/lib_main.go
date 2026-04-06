@@ -48,9 +48,12 @@ func (self *YAMLUI) GetEvents() []string {
 // ==================================================
 type UIComponent[T any] interface {
 	GetUIBase() *UIBase
-	Clone() UIComponent[*UIBase]
+	Clone() UICloned
 	Setup(type_ string, data script.ValueMap) error
 }
+
+// 簡易アクセス用
+type UICloned UIComponent[*UIBase]
 
 // LoadのときにTypeを見て登録されたUICloneableからUIBaseを複製して構築するインターフェース
 func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
