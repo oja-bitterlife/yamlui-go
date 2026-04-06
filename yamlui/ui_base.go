@@ -134,11 +134,18 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 }
 
 func (self *UIBase) loadFromVM(vm *script.VM) {
+	// 既存のプロパティをクリアしてから受け取る
+	self.Prop = make(map[string]script.Value)
+
 	// プロパティの受信
 	for k, v := range vm.GetVars() {
 		// @で始まる変数はUIBaseのプロパティとして受け取る
 		if propName, ok := strings.CutPrefix(k, "@"); ok {
 			switch propName {
+
+			// FrameはUpdateCountから入れたのでUpdateCountに戻す
+			case "Frame":
+				self.UpdateCount = int(v.Num)
 
 			// UIBaseのプロパティの受信
 			case "IsEnable":
