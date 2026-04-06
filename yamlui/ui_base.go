@@ -37,10 +37,6 @@ type UIBase struct {
 	IsVisible bool
 	Text      string
 
-	// インタラクティブなUIに必要なプロパティ
-	SelectNo int
-	SelGridX int // SelectGridで横の折り返し位置
-
 	// 子要素が保存させたいもの
 	Prop map[string]script.Value // PropはValueMap型と意味が違うのでmapそのままで
 
@@ -130,8 +126,6 @@ func (self *UIBase) storeToVM(vm *script.VM) {
 	vm.SetVar("@Height", script.NewNumber(self.H))
 	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
 	vm.SetVar("@Text", script.NewString(self.Text))
-	vm.SetVar("@SelectNo", script.NewNumber(self.SelectNo))
-	vm.SetVar("@SelGridX", script.NewNumber(self.SelGridX))
 
 	// Propを送る
 	for k, v := range self.Prop {
@@ -170,10 +164,6 @@ func (self *UIBase) loadFromVM(vm *script.VM) {
 				self.IsVisible = v.Bool
 			case "Text":
 				self.Text = v.Str
-			case "SelectNo":
-				self.SelectNo = v.Num
-			case "SelGridX":
-				self.SelGridX = v.Num
 
 			// その他はProp
 			default:

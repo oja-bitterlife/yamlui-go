@@ -82,7 +82,7 @@ func (self *BTSpeed) Draw(x, y int, ctx yamlui.DrawContext) {
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		prefix := "   "
-		if i == int(self.GetUIBase().SelectNo) {
+		if i == int(self.SelBase.SelectNo()) {
 			prefix = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}

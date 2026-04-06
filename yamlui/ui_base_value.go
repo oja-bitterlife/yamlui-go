@@ -27,8 +27,6 @@ func (self *UIBase) ToValue() script.Value {
 		"H":           script.NewNumber(self.H),
 		"IsVisible":   script.NewBool(self.IsVisible),
 		"Text":        script.NewString(self.Text),
-		"SelectNo":    script.NewNumber(self.SelectNo),
-		"SelGridX":    script.NewNumber(self.SelGridX),
 		"Prop":        script.NewLitMap(self.Prop),
 	})
 }
@@ -89,12 +87,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 	if v, ok := m["Text"]; ok {
 		self.Text = v.Str
-	}
-	if v, ok := m["SelectNo"]; ok {
-		self.SelectNo = v.Num
-	}
-	if v, ok := m["SelGridX"]; ok {
-		self.SelGridX = v.Num
 	}
 
 	// scriptはVMの作成とcmdの登録を行う

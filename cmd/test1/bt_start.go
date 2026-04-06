@@ -66,6 +66,7 @@ func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) (string, error)
 	}
 
 	if self.GetUIBase().PropStr("Action") != "" {
+		script.Log("Action: " + self.GetUIBase().PropStr("Action"))
 		return self.GetUIBase().TakePropStr("Action"), nil
 	}
 	return "", nil
@@ -86,7 +87,7 @@ func (self *BTStart) Draw(x, y int, ctx yamlui.DrawContext) {
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "
-		if i == int(self.GetUIBase().SelectNo) {
+		if i == int(self.SelBase.SelectNo()) {
 			line = "▶"
 			// TODO: ここで Canvas 側に反転色や色の指定を渡せるとリッチになります
 		}

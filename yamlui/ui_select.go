@@ -2,6 +2,11 @@ package yamlui
 
 import "github.com/oja-bitterlife/yamlui-go/script"
 
+const (
+	// 選択のProp名
+	PROP_SELECT_NO = "SelectNo"
+)
+
 // **********************************************************************
 // 選択UI
 type UISelect struct {
@@ -18,12 +23,12 @@ func NewUISelect(itemNum, rowsNum int) *UISelect {
 	}
 }
 
-func (self *UISelect) GetSelectNo() int {
-	return int(self.UIBase.SelectNo)
+func (self *UISelect) SelectNo() int {
+	return self.GetUIBase().PropNum(PROP_SELECT_NO)
 }
 
 func (self *UISelect) SetSelectNo(selectNo int) {
-	self.UIBase.SelectNo = selectNo
+	self.GetUIBase().SetPropNum(PROP_SELECT_NO, selectNo)
 }
 
 // **********************************************************************
@@ -54,7 +59,7 @@ func (self *UISelect) Next(step int, toggle bool) {
 		return
 	}
 
-	selectNo := self.GetSelectNo() + step
+	selectNo := self.SelectNo() + step
 
 	if toggle {
 		selectNo = (self.ItemNum + selectNo) % self.ItemNum
@@ -71,8 +76,8 @@ func (self *UISelect) NextGridX(step int, toggle bool) {
 		return
 	}
 
-	gridX := self.GetSelectNo() % self.RowsNum
-	gridY := self.GetSelectNo() / self.RowsNum
+	gridX := self.SelectNo() % self.RowsNum
+	gridY := self.SelectNo() / self.RowsNum
 	gridX += step
 
 	if toggle {
@@ -96,8 +101,8 @@ func (self *UISelect) NextGridY(step int, toggle bool) {
 		return
 	}
 
-	gridX := self.GetSelectNo() % self.RowsNum
-	gridY := self.GetSelectNo() / self.RowsNum
+	gridX := self.SelectNo() % self.RowsNum
+	gridY := self.SelectNo() / self.RowsNum
 	lineNum := (self.ItemNum + self.RowsNum - 1) / self.RowsNum
 	gridY += step
 
