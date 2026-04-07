@@ -64,7 +64,6 @@ func NewUIBase() *UIBase {
 
 	// ScriptVM
 	ui.script = script.NewVM(script.Value{})
-	ui.script.AddCmdDispatcher(ui.UIScriptCmds)
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
@@ -149,8 +148,8 @@ func (self *UIBase) loadFromVM() {
 
 // ==================================================
 // getter/setter
-func (self *UIBase) GetVM() script.VM {
-	return self.script
+func (self *UIBase) HasScript() bool {
+	return len(self.script.AST.List) > 0
 }
 
 // **********************************************************************

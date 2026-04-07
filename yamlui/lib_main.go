@@ -27,7 +27,7 @@ type YAMLUI struct {
 }
 
 func NewYAMLUI() *YAMLUI {
-	return &YAMLUI{
+	lib := &YAMLUI{
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
@@ -36,21 +36,26 @@ func NewYAMLUI() *YAMLUI {
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
 	}
+
+	// ここでYAMLUIのscriptコマンドを登録する
+	lib.SetUIScriptCmds()
+
+	return lib
 }
 
 // ==================================================
 // Getter/Setter
-func (self *YAMLUI) FindByID(id string) *UIBase {
-	return self.root.FindChildByID(id)
+func (lib *YAMLUI) FindByID(id string) *UIBase {
+	return lib.root.FindChildByID(id)
 }
 
-func (self *YAMLUI) GetRoot() *UIBase {
-	return self.root
+func (lib *YAMLUI) GetRoot() *UIBase {
+	return lib.root
 }
 
 // デバッグ用。ないとログもままならないので
-func (self *YAMLUI) GetEvents() []EventQueueItem {
-	return self.eventQueue
+func (lib *YAMLUI) GetEvents() []EventQueueItem {
+	return lib.eventQueue
 }
 
 // **********************************************************************
@@ -66,13 +71,13 @@ type UIComponent[T any] interface {
 type UICloned UIComponent[*UIBase]
 
 // LoadのときにTypeを見て登録されたUICloneableからUIBaseを複製して構築するインターフェース
-func (self *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
-	self.refObj[type_] = refObj
+func (lib *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
+	lib.refObj[type_] = refObj
 }
 
 // **********************************************************************
 // UITreeの構築（再帰的に子要素も構築）
-func (self *YAMLUI) Load(valueJson []byte) error {
+func (lib *YAMLUI) Load(valueJson []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
 	value, err := script.NewFromValueJSON(valueJson)
 	if err != nil {
@@ -80,13 +85,13 @@ func (self *YAMLUI) Load(valueJson []byte) error {
 	}
 
 	// Loadで再帰的にUIを構築する
-	self.root.children = []*UIBase{} // 既存の子要素をクリア
+	lib.root.children = []*UIBase{} // 既存の子要素をクリア
 
 	switch value.Type {
 	case script.TypeLitList:
 		// 最初が配列なら最初ですべてを子要素として追加する
 		for _, item := range value.List {
-			err := self.load(self.root, item)
+			err := lib.load(lib.root, item)
 			if err != nil {
 				return err
 			}
@@ -94,7 +99,7 @@ func (self *YAMLUI) Load(valueJson []byte) error {
 		return nil
 	case script.TypeLitMap:
 		// 最初がMapなら普通に登録していく
-		err := self.load(self.root, value)
+		err := lib.load(lib.root, value)
 		if err != nil {
 			return err
 		}
@@ -106,13 +111,13 @@ func (self *YAMLUI) Load(valueJson []byte) error {
 }
 
 // 現在のノードを構築
-func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
+func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 	// Typeを見て、リマップ関数があればそれで構築
 	type_ := value.Map["Type"].Str
 
 	// path.Matchを使ってtype_を曖昧にマッチさせる
 	matchObj := UIComponent[*UIBase](nil)
-	for pattern, refObj := range self.refObj {
+	for pattern, refObj := range lib.refObj {
 		matched, err := path.Match(pattern, type_)
 		if err != nil {
 			return script.LogErr("Invalid pattern in UIBuild: " + pattern + ": " + err.Error())
@@ -157,7 +162,7 @@ func (self *YAMLUI) load(parent *UIBase, value script.Value) error {
 	}
 	for _, childValue := range children.List {
 		// 再帰的に子ノードを構築
-		err := self.load(ui, childValue)
+		err := lib.load(ui, childValue)
 		if err != nil {
 			return err
 		}

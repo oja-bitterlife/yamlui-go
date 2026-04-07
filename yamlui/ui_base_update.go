@@ -93,7 +93,7 @@ func (self *YAMLUI) Update(frame int) []error {
 
 		// スクリプトがあれば走らせる
 		// ----------------------------------------
-		if uiBase.script.HasScript() {
+		if uiBase.HasScript() {
 			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
 			uiBase.storeToVM()
 

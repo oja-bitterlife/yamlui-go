@@ -1,19 +1,14 @@
 package script
 
+import "maps"
+
 // ==================================================
 // 組み込みコマンドの実行
 
-func BuiltinCmds(cmdName string) (VMCmdFunc, bool) {
-	if mathCmd, ok := mathCmds[cmdName]; ok {
-		return mathCmd, true
-	}
-	if compareCmd, ok := compareCmds[cmdName]; ok {
-		return compareCmd, true
-	}
-	if castCmd, ok := castCmds[cmdName]; ok {
-		return castCmd, true
-	}
-	return nil, false
+func SetBuiltinCmds(cmds map[string]VMCmdFunc) {
+	maps.Copy(cmds, mathCmds)
+	maps.Copy(cmds, compareCmds)
+	maps.Copy(cmds, castCmds)
 }
 
 // ==================================================

@@ -1,12 +1,10 @@
 package script
 
+import "sync"
+
 // **********************************************************************
 // 評価器(VM)の実装
 // ==================================================
-// コマンド実装の関数型
-type VMCmdFunc func(vm *VM, args []Value) (Value, error)
-type VMCmdDispatcher func(cmdName string) (VMCmdFunc, bool)
-
 const (
 	VM_VAR_CAPACITY  = 32 // varsの初期容量
 	VM_RECURSION_MAX = 16 // 再帰の最大深さ
@@ -15,10 +13,9 @@ const (
 
 // 外部との連携用データ構造体
 type VM struct {
-	AST    Value             // コンパイル済みコード
-	cmds   []VMCmdDispatcher // コマンド名と実装のマッピング
-	Vars   ValueMap          // VMのメインメモリ的な
-	Result Value             // 最後の評価結果を保存する場所
+	AST    Value    // コンパイル済みコード
+	Vars   ValueMap // VMのメインメモリ的な
+	Result Value    // 最後の評価結果を保存する場所
 }
 
 // VMの初期化
@@ -26,11 +23,13 @@ func NewVM(valueAST Value) VM {
 	// VMの初期化
 	vm := VM{
 		AST:    valueAST,
-		cmds:   make([]VMCmdDispatcher, 0, 4), // 組み込みコマンドを最初に登録
 		Vars:   make(map[string]Value, VM_VAR_CAPACITY),
 		Result: Value{},
 	}
-	vm.AddCmdDispatcher(BuiltinCmds) // 組み込みコマンドを登録
+
+	// Builtinコマンドの登録
+	RegisterVMCmd("", nil)
+
 	return vm
 }
 
@@ -44,6 +43,41 @@ func (vm *VM) Clone() VM {
 	}
 
 	return clone
+}
+
+// **********************************************************************
+// コマンド管理
+type VMCmdFunc func(vm *VM, args []Value) (Value, error)
+
+var (
+	systemCmds map[string]VMCmdFunc
+	userCmds   map[string]VMCmdFunc
+	userMu     sync.RWMutex
+	initOnce   sync.Once
+)
+
+func RegisterVMCmd(cmdName string, fn VMCmdFunc) {
+	// 最初の1回だけsystemCmds とuserCmds を生成
+	initOnce.Do(func() {
+		systemCmds = make(map[string]VMCmdFunc)
+		SetBuiltinCmds(systemCmds) // Builtinの登録
+		userCmds = make(map[string]VMCmdFunc)
+	})
+
+	// 何もしない
+	if cmdName == "" || fn == nil {
+		return
+	}
+
+	// ユーザー定義の登録
+	// ----------------------------------------
+	userMu.Lock()
+	defer userMu.Unlock()
+
+	if _, exists := userCmds[cmdName]; exists {
+		LogWarn("command %s is already defined", cmdName)
+	}
+	userCmds[cmdName] = fn
 }
 
 // **********************************************************************
@@ -76,14 +110,4 @@ func (vm *VM) Run() error {
 	}
 
 	return nil
-}
-
-// **********************************************************************
-// getter/setter
-func (vm *VM) AddCmdDispatcher(cmdDispatcher VMCmdDispatcher) {
-	vm.cmds = append(vm.cmds, cmdDispatcher)
-}
-
-func (vm *VM) HasScript() bool {
-	return len(vm.AST.List) > 0
 }

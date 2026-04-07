@@ -142,11 +142,13 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 	}
 
 	// 登録されたコマンドを探して実行
-	for _, cmdFunc := range vm.cmds {
-		fn, ok := cmdFunc(cleanCmd)
-		if ok {
-			return fn(vm, args)
-		}
+	fn, ok := systemCmds[cleanCmd]
+	if ok {
+		return fn(vm, args)
+	}
+	fn, ok = userCmds[cleanCmd]
+	if ok {
+		return fn(vm, args)
 	}
 
 	return Value{}, LogErr("unknown command: " + cleanCmd)
