@@ -64,7 +64,7 @@ func NewUIBase() *UIBase {
 
 	// ScriptVM
 	ui.script = script.NewVM(script.Value{})
-	ui.script.AddCmdIF(ui.UIScriptCmds)
+	ui.script.AddCmdDispatcher(ui.UIScriptCmds)
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}

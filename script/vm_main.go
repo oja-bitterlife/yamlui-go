@@ -26,10 +26,11 @@ func NewVM(valueAST Value) VM {
 	// VMの初期化
 	vm := VM{
 		AST:    valueAST,
-		cmds:   []VMCmdDispatcher{BuiltinCmds},
+		cmds:   make([]VMCmdDispatcher, 0, 4), // 組み込みコマンドを最初に登録
 		Vars:   make(map[string]Value, VM_VAR_CAPACITY),
 		Result: Value{},
 	}
+	vm.AddCmdDispatcher(BuiltinCmds) // 組み込みコマンドを登録
 	return vm
 }
 
@@ -79,7 +80,7 @@ func (vm *VM) Run() error {
 
 // **********************************************************************
 // getter/setter
-func (vm *VM) AddCmdIF(cmdDispatcher VMCmdDispatcher) {
+func (vm *VM) AddCmdDispatcher(cmdDispatcher VMCmdDispatcher) {
 	vm.cmds = append(vm.cmds, cmdDispatcher)
 	for _, cmdsFunc := range vm.cmds {
 		Log("cmds: %v", cmdsFunc)
