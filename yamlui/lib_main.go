@@ -6,6 +6,11 @@ import (
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
+const (
+	EVENT_USING_MAX = 8  // 同時に発生するイベントの最大数
+	UI_USING_MAX    = 64 // 同時に使用するUIの最大数
+)
+
 type YAMLUI struct {
 	// UIツリー構築用
 	root   *UIBase
@@ -25,6 +30,11 @@ func NewYAMLUI() *YAMLUI {
 	return &YAMLUI{
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
+
+		eventQueue:  make([]string, 0, EVENT_USING_MAX),
+		updateQueue: make([]UpdateQueueItem, 0, UI_USING_MAX),
+
+		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
 	}
 }
 

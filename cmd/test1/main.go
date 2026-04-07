@@ -109,6 +109,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		TraceMemory() // メモリ使用状況をログに出力
 	}
+	return m, nil
 
 	// Update
 	errorList := m.lib.Update(m.frame)
@@ -132,6 +133,7 @@ func (m model) View() string {
 	}
 
 	m.lib.Draw(m.width, m.height)
+	return ""
 
 	// 色の設定
 	bgStyle := lipgloss.NewStyle().

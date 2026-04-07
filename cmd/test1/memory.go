@@ -2,6 +2,8 @@ package main
 
 import (
 	"runtime"
+
+	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 func PrintMemStats() {
@@ -24,10 +26,11 @@ func TraceMemory() {
 	lastMallocs = m.Mallocs
 
 	if diff > 0 {
-		println("Memory Stats",
-			"Alloc_KB", m.HeapAlloc/1024,
-			"New_Mallocs", diff,
-			"Total_Mallocs", m.Mallocs,
-		)
+		// println("Memory Stats",
+		// 	"Alloc_KB", m.HeapAlloc/1024,
+		// 	"New_Mallocs", diff,
+		// 	"Total_Mallocs", m.Mallocs,
+		// )
+		script.Log("Alloc_KB %d, New_Mallocs %d, Total_Mallocs %d", m.HeapAlloc/1024, diff, m.Mallocs)
 	}
 }

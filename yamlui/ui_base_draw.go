@@ -58,7 +58,7 @@ func (self *YAMLUI) Draw(sw, sh int) {
 	self.Screen = NewArea(0, 0, sw, sh)
 
 	// drawQueueをクリア
-	self.drawQueue = []DrawQueueItem{}
+	self.drawQueue = self.drawQueue[:0]
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
