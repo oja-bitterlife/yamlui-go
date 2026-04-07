@@ -82,9 +82,6 @@ func (vm *VM) Run() error {
 // getter/setter
 func (vm *VM) AddCmdDispatcher(cmdDispatcher VMCmdDispatcher) {
 	vm.cmds = append(vm.cmds, cmdDispatcher)
-	for _, cmdsFunc := range vm.cmds {
-		Log("cmds: %v", cmdsFunc)
-	}
 }
 
 func (vm *VM) HasScript() bool {
