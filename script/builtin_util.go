@@ -3,22 +3,22 @@ package script
 // ==================================================
 // 組み込みコマンドの登録
 // mapを渡して複数のコマンドを登録する
-func registerCmdList(vm *VM, cmds map[string]func(vm *VM, args []Value) (Value, error)) {
+func (vm *VM) registerCmdList(cmds map[string]func(vm *VM, args []Value) (Value, error)) {
 	for name, fn := range cmds {
 		vm.RegisterCmd(name, fn)
 	}
 }
 
 // 組み込みコマンドをまとめて登録
-func SetBuiltinCmds(vm *VM) {
+func (vm *VM) SetBuiltinCmds() {
 	// 数学関数を追加
-	registerCmdList(vm, mathCmds)
+	vm.registerCmdList(mathCmds)
 
 	// 比較系関数を追加
-	registerCmdList(vm, compareCmds)
+	vm.registerCmdList(compareCmds)
 
 	// キャスト系関数を追加
-	registerCmdList(vm, castCmds)
+	vm.registerCmdList(castCmds)
 }
 
 // ==================================================

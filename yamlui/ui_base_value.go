@@ -15,6 +15,8 @@ func (self *UIBase) ToValue() script.Value {
 		events[i] = script.NewString(event)
 	}
 
+	scriptValue := self.script.ToValue()
+
 	return script.NewLitMap(script.ValueMap{
 		"ID":          script.NewString(self.ID),
 		"UpdateCount": script.NewNumber(self.UpdateCount),
@@ -27,7 +29,7 @@ func (self *UIBase) ToValue() script.Value {
 		"H":           script.NewNumber(self.H),
 		"IsVisible":   script.NewBool(self.IsVisible),
 		"Text":        script.NewString(self.Text),
-		"Prop":        script.NewLitMap(self.Prop),
+		"script":      scriptValue,
 	})
 }
 
@@ -91,13 +93,9 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 
 	// scriptはVMの作成とcmdの登録を行う
 	if v, ok := m["script"]; ok {
-		script, err := script.NewVM(v)
-		if err != nil {
-			return err
-		} else {
-			self.setUIScriptCmds(script)
-			self.script = script
-		}
+		script := script.NewVM(v)
+		self.setUIScriptCmds(&script)
+		self.script = script
 	}
 
 	// PropはMapTypeであればそのまま流し込む。なければ空のまま
@@ -115,70 +113,73 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 // ==================================================
 // 設定
 func (self *UIBase) SetPropStr(key string, str string) {
-	self.Prop[key] = script.NewString(str)
+	self.script.SetVar(key, script.NewString(str))
 }
 
 func (self *UIBase) AddPropNum(key string, num int) {
-	self.Prop[key] = script.NewNumber(self.PropNum(key) + num)
+	self.script.SetVar(key, script.NewNumber(self.PropNum(key)+num))
 }
 
 func (self *UIBase) SetPropNum(key string, num int) {
-	self.Prop[key] = script.NewNumber(num)
+	self.script.SetVar(key, script.NewNumber(num))
 }
 
 func (self *UIBase) SetPropBool(key string, b bool) {
-	self.Prop[key] = script.NewBool(b)
+	self.script.SetVar(key, script.NewBool(b))
 }
 
 // ==================================================
 // 取り出すだけ
 func (self *UIBase) PropStr(key string) string {
-	if self.Prop[key].Type != script.TypeString {
-		script.LogWarn("Prop %s is not a string, but %s. Converting to string.", key, self.Prop[key].Type.String())
-		return self.Prop[key].ConvertString().Str
+	v := self.script.GetVar(key)
+	if v.Type != script.TypeString {
+		script.LogWarn("Prop %s is not a string, but %s. Converting to string.", v.Type.String())
+		return v.ConvertString().Str
 	}
-	return self.Prop[key].Str
+	return v.Str
 }
 
 func (self *UIBase) PropNum(key string) int {
-	if self.Prop[key].Type != script.TypeNumber {
-		script.LogWarn("Prop %s is not a number, but %s. Converting to number.", key, self.Prop[key].Type.String())
-		return self.Prop[key].ConvertNumber().Num
+	v := self.script.GetVar(key)
+	if v.Type != script.TypeNumber {
+		script.LogWarn("Prop %s is not a number, but %s. Converting to number.", key, v.Type.String())
+		return v.ConvertNumber().Num
 	}
-	return self.Prop[key].Num
+	return v.Num
 }
 
 func (self *UIBase) PropBool(key string) bool {
-	if self.Prop[key].Type != script.TypeBool {
-		script.LogWarn("Prop %s is not a bool, but %s. Converting to bool.", key, self.Prop[key].Type.String())
-		return self.Prop[key].ConvertBool().Bool
+	v := self.script.GetVar(key)
+	if v.Type != script.TypeBool {
+		script.LogWarn("Prop %s is not a bool, but %s. Converting to bool.", key, v.Type.String())
+		return v.ConvertBool().Bool
 	}
-	return self.Prop[key].Bool
+	return v.Bool
 }
 
 // ==================================================
 // 取り出してクリアする
 func (self *UIBase) TakePropStr(key string) string {
 	str := self.PropStr(key)
-	delete(self.Prop, key)
+	self.script.DeleteVar(key)
 	return str
 }
 
 func (self *UIBase) TakePropNum(key string) int {
 	num := self.PropNum(key)
-	delete(self.Prop, key)
+	self.script.DeleteVar(key)
 	return num
 }
 
 func (self *UIBase) TakePropBool(key string) bool {
 	b := self.PropBool(key)
-	delete(self.Prop, key)
+	self.script.DeleteVar(key)
 	return b
 }
 
 // ==================================================
 // Propの存在チェック
 func (self *UIBase) HasProp(key string) bool {
-	_, ok := self.Prop[key]
+	_, ok := self.script.GetVars()[key]
 	return ok
 }

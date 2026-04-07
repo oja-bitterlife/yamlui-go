@@ -1,9 +1,7 @@
 package yamlui
 
 import (
-	"maps"
 	"slices"
-	"strings"
 	"sync/atomic"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
@@ -37,13 +35,12 @@ type UIBase struct {
 	IsVisible bool
 	Text      string
 
-	// 子要素が保存させたいもの
-	Prop map[string]script.Value // PropはValueMap型と意味が違うのでmapそのままで
+	// ScriptVM. VarsはUIBaseのプロパティと共有
+	script script.VM
 
 	// ==================================================
 	// 保存しないもの
 	children []*UIBase
-	script   *script.VM
 
 	// インターフェース(ランタイム用)
 	// ----------------------------------------
@@ -65,9 +62,11 @@ func NewUIBase() *UIBase {
 	ui.W = 65536
 	ui.H = 65536
 
+	// ScriptVM
+	ui.script = script.NewVM(script.Value{})
+
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
-	ui.Prop = make(map[string]script.Value) // ValueMapにはしない
 	ui.children = []*UIBase{}
 
 	return ui
@@ -83,7 +82,6 @@ func (self *UIBase) Clone() *UIBase {
 	clone := *self
 
 	// PropとEventsは標準ライブラリのCloneでOK
-	clone.Prop = maps.Clone(self.Prop)
 	clone.Events = slices.Clone(self.Events)
 
 	// UIBaseのポインタは再帰的にUICloneする
@@ -95,10 +93,8 @@ func (self *UIBase) Clone() *UIBase {
 		}
 	}
 
-	// scriptはRuntimeがCloneを持っている
-	if self.script != nil {
-		clone.script = self.script.Clone()
-	}
+	// scriptはVMがCloneを持っている
+	clone.script = self.script.Clone()
 
 	return &clone
 }
@@ -110,77 +106,50 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // ScriptVMとの連携
-func (self *UIBase) storeToVM(vm *script.VM) {
-	// 既存の変数をクリア
-	vm.ClearVars()
-
+func (self *UIBase) storeToVM() {
 	// スクリプトで使うFrameはUpdateCountを入れる
-	vm.SetVar("@Frame", script.NewNumber(self.UpdateCount))
+	self.script.SetVar("@Frame", script.NewNumber(self.UpdateCount))
 
 	// プロパティの送信
-	vm.SetVar("@IsEnable", script.NewBool(self.IsEnable))
-	vm.SetVar("@Remove", script.NewBool(self.Remove))
-	vm.SetVar("@X", script.NewNumber(self.X))
-	vm.SetVar("@Y", script.NewNumber(self.Y))
-	vm.SetVar("@Width", script.NewNumber(self.W))
-	vm.SetVar("@Height", script.NewNumber(self.H))
-	vm.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
-	vm.SetVar("@Text", script.NewString(self.Text))
-
-	// Propを送る
-	for k, v := range self.Prop {
-		vm.SetVar("@"+k, v)
-	}
+	self.script.SetVar("@IsEnable", script.NewBool(self.IsEnable))
+	self.script.SetVar("@Remove", script.NewBool(self.Remove))
+	self.script.SetVar("@X", script.NewNumber(self.X))
+	self.script.SetVar("@Y", script.NewNumber(self.Y))
+	self.script.SetVar("@Width", script.NewNumber(self.W))
+	self.script.SetVar("@Height", script.NewNumber(self.H))
+	self.script.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
+	self.script.SetVar("@Text", script.NewString(self.Text))
 }
 
-func (self *UIBase) loadFromVM(vm *script.VM) {
-	// プロパティの受信
-	for k, v := range vm.GetVars() {
-		// @で始まる変数はUIBaseのプロパティとして受け取る
-		if propName, ok := strings.CutPrefix(k, "@"); ok {
-			switch propName {
+func (self *UIBase) loadFromVM() {
+	// UIBaseのプロパティの受信
+	for k, v := range self.script.GetVars() {
+		switch k {
 
-			// UIBaseのプロパティの受信
-			case "IsEnable":
-				self.IsEnable = v.Bool
-			case "Remove":
-				self.Remove = v.Bool
-			case "X":
-				self.X = v.Num
-			case "Y":
-				self.Y = v.Num
-			case "Width":
-				self.W = v.Num
-			case "Height":
-				self.H = v.Num
-			case "IsVisivle":
-				self.IsVisible = v.Bool
-			case "Text":
-				self.Text = v.Str
-
-			// その他はProp
-			default:
-				// "UIEvent."で始まるプロパティはイベントなのでPropには入れない
-				if !strings.HasPrefix(propName, UIEventPrefix) {
-					// 一般的なProperty
-					self.Prop[propName] = v
-				}
-			}
+		case "@IsEnable":
+			self.IsEnable = v.Bool
+		case "@Remove":
+			self.Remove = v.Bool
+		case "@X":
+			self.X = v.Num
+		case "@Y":
+			self.Y = v.Num
+		case "@Width":
+			self.W = v.Num
+		case "@Height":
+			self.H = v.Num
+		case "@IsVisivle":
+			self.IsVisible = v.Bool
+		case "@Text":
+			self.Text = v.Str
 		}
 	}
 }
 
 // ==================================================
 // getter/setter
-func (self *UIBase) SetScriptVM(newVM *script.VM) {
-	self.script = newVM
-}
-
-func (self *UIBase) GetScriptVM() (*script.VM, error) {
-	if self.script == nil {
-		return nil, script.LogErr("No script runtime set for this UIBase (ID: " + self.ID + ")")
-	}
-	return self.script, nil
+func (self *UIBase) GetScriptVM() script.VM {
+	return self.script
 }
 
 // **********************************************************************
