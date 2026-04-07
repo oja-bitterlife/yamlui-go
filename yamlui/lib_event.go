@@ -13,17 +13,17 @@ type EventQueueItem struct {
 	updateQueueNo int // 初期値は-1。ProcessEventsでUpdateQueueのどれに対応するかセットされる
 }
 
-func (self *YAMLUI) AddEvent(event string) {
-	self.eventQueue = append(self.eventQueue, EventQueueItem{
+func (lib *YAMLUI) AddEvent(event string) {
+	lib.eventQueue = append(lib.eventQueue, EventQueueItem{
 		event:         event,
 		updateQueueNo: -1, // UpdateQueueNoはProcessEventsでセットされる
 	})
 }
 
-func (self *YAMLUI) RemoveEvent(event string) {
-	for i, e := range self.eventQueue {
+func (lib *YAMLUI) RemoveEvent(event string) {
+	for i, e := range lib.eventQueue {
 		if e.event == event {
-			self.eventQueue = append(self.eventQueue[:i], self.eventQueue[i+1:]...)
+			lib.eventQueue = append(lib.eventQueue[:i], lib.eventQueue[i+1:]...)
 			return
 		}
 	}
@@ -32,9 +32,9 @@ func (self *YAMLUI) RemoveEvent(event string) {
 // ==================================================
 // イベントチェック.ワイルドカードでイベントチェックする
 // 発生したイベントの中に、matchStrにマッチするものがあるか
-func (self *YAMLUI) HasEvent(matchStr string, events []string) bool {
+func (lib *YAMLUI) HasEvent(matchStr string, events []string) bool {
 	for _, event := range events {
-		if match := self.MatchEvent(matchStr, event); match {
+		if match := lib.MatchEvent(matchStr, event); match {
 			return true
 		}
 	}
@@ -42,7 +42,7 @@ func (self *YAMLUI) HasEvent(matchStr string, events []string) bool {
 }
 
 // そのイベントがワイルドカードにマッチするか
-func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
+func (lib *YAMLUI) MatchEvent(matchStr string, event string) bool {
 	if match, _ := path.Match(matchStr, event); match {
 		return true
 	}
@@ -52,16 +52,16 @@ func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
 // **********************************************************************
 // イベント処理
 // UpdateQueueのEventsにイベントを振り分ける
-func (self *YAMLUI) ProcessEvents() {
+func (lib *YAMLUI) ProcessEvents() {
 	// イベントを順番にUpdateQueueの後ろから振り分ける
-	for ei, e := range self.eventQueue {
+	for ei, e := range lib.eventQueue {
 
 		// Updateの後ろからイベント処理
-		for i := len(self.updateQueue) - 1; i >= 0; i-- {
+		for i := len(lib.updateQueue) - 1; i >= 0; i-- {
 
 			// 受信設定と一致したイベントがあるか確認する
 			matchedAny := false
-			for _, wildStr := range self.updateQueue[i].UpdateIF.GetUIBase().Events {
+			for _, wildStr := range lib.updateQueue[i].UpdateIF.GetUIBase().Events {
 
 				// ワイルドカード(path.Match)でマッチング
 				if match, _ := path.Match(wildStr, e.event); match {
@@ -72,7 +72,7 @@ func (self *YAMLUI) ProcessEvents() {
 
 			// マッチしたイベントはUpdateQueueのどれに対応するかセットする
 			if matchedAny {
-				self.eventQueue[ei].updateQueueNo = i
+				lib.eventQueue[ei].updateQueueNo = i
 			}
 		}
 	}

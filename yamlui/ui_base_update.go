@@ -6,11 +6,26 @@ import (
 
 // **********************************************************************
 // Updateのインターフェース
+// ==================================================
+// 直接DrawIFを呼び出すのではなく、UpdateTreeの中でUpdateQueueItemにしてキューに入れる
+type UpdateQueueItem struct {
+	UpdateIF UpdateIF
+	z        int
+}
+
+// ==================================================
+// OnInit
 type OnInitIF interface {
 	OnInit(lib *YAMLUI) (string, error)
 	GetUIBase() *UIBase
 }
 
+func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
+	self.onInitIF = onInitIF
+}
+
+// ==================================================
+// Update
 type UpdateIF interface {
 	Update(lib *YAMLUI, events []string) (string, error)
 	GetUIBase() *UIBase
@@ -18,16 +33,6 @@ type UpdateIF interface {
 
 type UpdateTreeIF interface {
 	UpdateTree(lib *YAMLUI, z int) []error
-}
-
-// 直接DrawIFを呼び出すのではなく、UpdateTreeの中でUpdateQueueItemにしてキューに入れる
-type UpdateQueueItem struct {
-	UpdateIF UpdateIF
-	z        int
-}
-
-func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
-	self.onInitIF = onInitIF
 }
 
 func (self *UIBase) SetUpdateIF(updateIF UpdateIF) {
@@ -82,7 +87,6 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
 	self.ProcessEvents()
-	// useUpdateQueueNos := self.ProcessEvents()
 	self.eventQueue = self.eventQueue[:0] // イベントはここでクリア
 
 	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
@@ -106,16 +110,16 @@ func (self *YAMLUI) Update(frame int) []error {
 			uiBase.loadFromVM()
 		}
 
-		// Updateを呼び出す
+		// Update
 		// ----------------------------------------
 		// Updateに渡すeventの回収
 		events := []string{}
 		for _, e := range self.eventQueue {
-			// if useUpdateQueueNos[ei] == qi {
 			if e.updateQueueNo == qi {
 				events = append(events, e.event)
 			}
 		}
+
 		// Updateを呼び出す
 		event, err := item.UpdateIF.Update(self, events)
 		if err != nil {

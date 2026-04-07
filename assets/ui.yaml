@@ -21,7 +21,7 @@
         Events: ["key:up", "key:down", "key:enter"]
         script: >
           (if ($event "key:enter")
-            (set @Action 
+            ($action 
               (switch @SelectNo "next:START" "next:CONTINUE")))
         children:
         - Type: "close_win"
