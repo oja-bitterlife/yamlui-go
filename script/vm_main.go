@@ -7,9 +7,9 @@ package script
 type VMCmdFunc func(vm *VM, args []Value) (Value, error)
 
 const (
-	VM_VAR_CAPACITY  = 128 // varsの初期容量
-	VM_RECURSION_MAX = 32  // 再帰の最大深さ
-	VM_REPEAT_MAX    = 16  // repeatの最大回数
+	VM_VAR_CAPACITY  = 32 // varsの初期容量
+	VM_RECURSION_MAX = 16 // 再帰の最大深さ
+	VM_REPEAT_MAX    = 16 // repeatの最大回数
 )
 
 // 外部との連携用データ構造体
@@ -48,10 +48,15 @@ func (vm *VM) Clone() *VM {
 // **********************************************************************
 // 実行
 func (vm *VM) Run() error {
-	results := make([]Value, len(vm.ast))
+	// resultを受け取る準備
+	if len(vm.ast) <= 1 {
+		vm.Result = NewNil() // ASTが空ならnil, ASTが1つでも上書きを期待してnil
+	} else {
+		vm.Result = NewList(make([]Value, len(vm.ast))) // ASTが複数ならリスト
+	}
 
 	// ASTを順番に評価していく
-	for _, v := range vm.ast {
+	for i, v := range vm.ast {
 		// 深さのリセット
 		vm.SetVar("vm_depth", NewNumber(0))
 		vm.SetVar("vm_depth_max", NewNumber(0))
@@ -60,20 +65,13 @@ func (vm *VM) Run() error {
 		if ret, err := vm.Eval(v); err != nil {
 			return err
 		} else {
-			results = append(results, ret)
+			// 結果を保存
+			if vm.Result.IsList() {
+				vm.Result.List[i] = ret
+			} else {
+				vm.Result = ret
+			}
 		}
-	}
-
-	// 結果
-	// ----------------------------------------
-	// 結果が1つだけならそのまま返す。複数あるならリストにして返す
-	switch len(results) {
-	case 0:
-		vm.Result = NewNil() // 結果がない場合はnil
-	case 1:
-		vm.Result = results[0] // 結果が1つだけならそのまま返す
-	default:
-		vm.Result = NewList(results) // 結果が複数あるならリストにして返す
 	}
 
 	return nil
