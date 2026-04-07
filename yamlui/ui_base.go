@@ -127,9 +127,9 @@ func (self *UIBase) loadFromVM() {
 		switch k {
 
 		case "@IsEnable":
-			self.IsEnable = v.Bool
+			self.IsEnable = v.Bool()
 		case "@Remove":
-			self.Remove = v.Bool
+			self.Remove = v.Bool()
 		case "@X":
 			self.X = v.Num
 		case "@Y":
@@ -139,7 +139,7 @@ func (self *UIBase) loadFromVM() {
 		case "@Height":
 			self.H = v.Num
 		case "@IsVisivle":
-			self.IsVisible = v.Bool
+			self.IsVisible = v.Bool()
 		case "@Text":
 			self.Text = v.Str
 		}

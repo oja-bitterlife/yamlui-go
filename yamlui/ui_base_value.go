@@ -65,11 +65,11 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 
 	if v, ok := m["IsEnable"]; ok {
-		self.IsEnable = v.Bool
+		self.IsEnable = v.Bool()
 
 	}
 	if v, ok := m["Remove"]; ok {
-		self.Remove = v.Bool
+		self.Remove = v.Bool()
 	}
 	if v, ok := m["X"]; ok {
 		self.X = v.Num
@@ -84,7 +84,7 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		self.H = v.Num
 	}
 	if v, ok := m["IsVisible"]; ok {
-		self.IsVisible = v.Bool
+		self.IsVisible = v.Bool()
 	}
 	if v, ok := m["Text"]; ok {
 		self.Text = v.Str
@@ -159,9 +159,9 @@ func (self *UIBase) PropBool(key string) bool {
 	v := self.script.GetVar(key)
 	if v.Type != script.TypeBool {
 		script.LogWarn("Prop %s is not a bool, but %s. Converting to bool.", key, v.Type.String())
-		return v.ConvertBool().Bool
+		return v.ConvertBool().Bool()
 	}
-	return v.Bool
+	return v.Bool()
 }
 
 // ==================================================

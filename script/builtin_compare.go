@@ -49,7 +49,7 @@ func eq(vm *VM, args []Value) (Value, error) {
 			return NewBool(arg0.Num == arg1.Num), nil
 		}
 		if arg0.Type == TypeBool && arg1.Type == TypeBool {
-			return NewBool(arg0.Bool == arg1.Bool), nil
+			return NewBool(arg0.Bool() == arg1.Bool()), nil
 		}
 		return Value{}, binOpTypeError("==", arg0, arg1)
 	})
@@ -64,7 +64,7 @@ func neq(vm *VM, args []Value) (Value, error) {
 			return NewBool(arg0.Num != arg1.Num), nil
 		}
 		if arg0.Type == TypeBool && arg1.Type == TypeBool {
-			return NewBool(arg0.Bool != arg1.Bool), nil
+			return NewBool(arg0.Bool() != arg1.Bool()), nil
 		}
 		return Value{}, binOpTypeError("!=: ", arg0, arg1)
 	})
@@ -107,7 +107,7 @@ func not(vm *VM, args []Value) (Value, error) {
 		}
 		// boolを反転
 		if arg0.Type == TypeBool {
-			return NewBool(!arg0.Bool), nil
+			return NewBool(!arg0.Bool()), nil
 		}
 
 		// その他の値はエラー
@@ -121,7 +121,7 @@ func and(vm *VM, args []Value) (Value, error) {
 			return Value{}, binOpTypeError("and", arg0, arg1)
 		}
 
-		return NewBool(arg0.ConvertBool().Bool && arg1.ConvertBool().Bool), nil
+		return NewBool(arg0.ConvertBool().Bool() && arg1.ConvertBool().Bool()), nil
 	})
 }
 
@@ -131,6 +131,6 @@ func or(vm *VM, args []Value) (Value, error) {
 			return Value{}, binOpTypeError("and", arg0, arg1)
 		}
 
-		return NewBool(arg0.ConvertBool().Bool || arg1.ConvertBool().Bool), nil
+		return NewBool(arg0.ConvertBool().Bool() || arg1.ConvertBool().Bool()), nil
 	})
 }

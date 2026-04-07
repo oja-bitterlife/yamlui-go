@@ -204,7 +204,7 @@ func (vm *VM) switch_(args []Value) (Value, error) {
 	case TypeNumber:
 		caseNo = int(exprVal.Num) + 1
 	case TypeBool:
-		if exprVal.Bool {
+		if exprVal.Bool() {
 			caseNo = 1
 		} else {
 			caseNo = 2

@@ -59,7 +59,7 @@ func (v Value) ToValueJSON() ([]byte, error) {
 		buf.WriteByte('}')
 
 	case TypeBool:
-		if v.Bool {
+		if v.Bool() {
 			buf.WriteString(`{"`)
 			buf.WriteString(TypeBoolStr)
 			buf.WriteString(`":true}`)

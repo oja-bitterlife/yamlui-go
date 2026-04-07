@@ -61,9 +61,8 @@ type Value struct {
 	Type ValueType
 
 	// 基本データ
-	Num  int
-	Bool bool
-	Str  string
+	Num int
+	Str string
 
 	// リスト構造 (S式や、分解済みの文字列フラグメント)
 	List []Value
@@ -99,11 +98,22 @@ func (v Value) Clone() Value {
 	return res
 }
 
+// BoolはNumに統合したので関数で取得する
+func (v Value) Bool() bool {
+	return v.Num != 0
+}
+
 // ==================================================
 // 値の生成関数
-func NewNil() Value              { return Value{Type: TypeNil} }
-func NewNumber(i int) Value      { return Value{Type: TypeNumber, Num: i} }
-func NewBool(b bool) Value       { return Value{Type: TypeBool, Bool: b} }
+func NewNil() Value         { return Value{Type: TypeNil} }
+func NewNumber(i int) Value { return Value{Type: TypeNumber, Num: i} }
+func NewBool(b bool) Value {
+	if b {
+		return Value{Type: TypeBool, Num: 1}
+	} else {
+		return Value{Type: TypeBool, Num: 0}
+	}
+}
 func NewString(s string) Value   { return Value{Type: TypeString, Str: s} }
 func NewLitList(v []Value) Value { return Value{Type: TypeLitList, List: v} }
 func NewLitMap(v ValueMap) Value { return Value{Type: TypeLitMap, Map: v} }
@@ -146,20 +156,17 @@ func (v Value) ConvertBool() Value {
 	case TypeLitMap:
 		return NewBool(len(v.Map) > 0)
 	default:
+		LogWarn("cannot convert %s to bool", v.Type.String())
 		return NewBool(false)
 	}
 }
 
 func (v Value) ConvertNumber() Value {
 	switch v.Type {
+	case TypeBool:
+		return NewNumber(v.Num)
 	case TypeNumber:
 		return v
-	case TypeBool:
-		if v.Bool {
-			return NewNumber(1)
-		} else {
-			return NewNumber(0)
-		}
 	case TypeString:
 		i, err := Atoi(v.Str)
 		if err != nil {
@@ -171,20 +178,20 @@ func (v Value) ConvertNumber() Value {
 	case TypeLitMap:
 		return NewNumber(len(v.Map))
 	default:
+		LogWarn("cannot convert %s to number", v.Type.String())
 		return NewNumber(0)
 	}
 }
 
 func (v Value) ConvertString() Value {
 	switch v.Type {
+	case TypeBool:
+		if v.Num != 0 {
+			return NewString("true")
+		}
+		return NewString("false")
 	case TypeNumber:
 		return NewString(Itoa(v.Num))
-	case TypeBool:
-		if v.Bool {
-			return NewString("true")
-		} else {
-			return NewString("false")
-		}
 	case TypeString:
 		return v
 	default:
