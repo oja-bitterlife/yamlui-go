@@ -87,7 +87,11 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
 	self.ProcessEvents()
-	self.eventQueue = self.eventQueue[:0] // イベントはここでクリア
+
+	// 参照用にコピーして、eventQueueをクリアする
+	equeue := make([]EventQueueItem, len(self.eventQueue))
+	copy(equeue, self.eventQueue)
+	self.eventQueue = self.eventQueue[:0]
 
 	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
 
@@ -114,7 +118,7 @@ func (self *YAMLUI) Update(frame int) []error {
 		// ----------------------------------------
 		// Updateに渡すeventの回収
 		events := []string{}
-		for _, e := range self.eventQueue {
+		for _, e := range equeue {
 			if e.updateQueueNo == qi {
 				events = append(events, e.event)
 			}
