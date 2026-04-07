@@ -15,7 +15,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeNumber, TypeString, TypeBool, TypeLitList:
 		return v, nil // リテラルはそのまま返す
 	case TypeProperty:
-		vv, ok := vm.vars.Map[v.Str] // 変数の値を返す
+		vv, ok := vm.Vars[v.Str] // 変数の値を返す
 		if !ok {
 			LogWarn("undefined variable: " + v.Str)
 			return NewNumber(0), nil // 定義されていない変数は0を返す
@@ -24,22 +24,22 @@ func (vm *VM) Eval(v Value) (Value, error) {
 	case TypeList:
 		// 再帰の深さをチェック
 		// ----------------------------------------
-		depth := vm.vars.Map["vm_depth"]
+		depth := vm.Vars["vm_depth"]
 		depth.Num++ // 深さを増やす
 		defer func() {
 			depth.Num-- // 深さを戻す
-			vm.vars.Map["vm_depth"] = depth
+			vm.Vars["vm_depth"] = depth
 		}()
 		if int(depth.Num) >= VM_RECURSION_MAX {
 			return Value{}, LogErr("maximum recursion depth exceeded: %d", int(depth.Num))
 		}
-		vm.vars.Map["vm_depth"] = depth
+		vm.Vars["vm_depth"] = depth
 
 		// デバッグ用: 過去の最大深さを更新
-		depthMax := vm.vars.Map["vm_depth_max"]
+		depthMax := vm.Vars["vm_depth_max"]
 		if depth.Num > depthMax.Num {
 			depthMax.Num = depth.Num
-			vm.vars.Map["vm_depth_max"] = depthMax
+			vm.Vars["vm_depth_max"] = depthMax
 		}
 
 		// ここで再帰
@@ -141,13 +141,15 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 		return vm.if_(args)
 	}
 
-	// コマンドに応じた処理を実装
-	fn, ok := vm.cmds[cleanCmd]
-	if !ok {
-		return Value{}, LogErr("unknown command: " + cleanCmd)
+	// 登録されたコマンドを探して実行
+	for _, cmdFunc := range vm.cmds {
+		fn, ok := cmdFunc(cleanCmd)
+		if ok {
+			return fn(vm, args)
+		}
 	}
 
-	return fn(vm, args)
+	return Value{}, LogErr("unknown command: " + cleanCmd)
 }
 
 // **********************************************************************
@@ -180,7 +182,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 		result = NewLitList(results)
 	}
 
-	vm.vars.Map[target] = result
+	vm.Vars[target] = result
 	return result, nil
 }
 
@@ -255,7 +257,7 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 	results := make([]Value, count)
 	for i := range count {
 		// カウンタ変数を現在の値で更新
-		vm.vars.Map[counterName] = Value{Type: TypeNumber, Num: i}
+		vm.Vars[counterName] = Value{Type: TypeNumber, Num: i}
 
 		// 第3引数：ブロックを評価
 		result, err := vm.Eval(args[2])

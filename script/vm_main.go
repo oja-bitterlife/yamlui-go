@@ -5,33 +5,31 @@ package script
 // ==================================================
 // コマンド実装の関数型
 type VMCmdFunc func(vm *VM, args []Value) (Value, error)
+type VMCmdDispatcher func(cmdName string) (VMCmdFunc, bool)
 
 const (
-	VM_VAR_CAPACITY  = 64 // varsの初期容量
+	VM_VAR_CAPACITY  = 32 // varsの初期容量
 	VM_RECURSION_MAX = 16 // 再帰の最大深さ
 	VM_REPEAT_MAX    = 16 // repeatの最大回数
 )
 
 // 外部との連携用データ構造体
 type VM struct {
-	ast    Value                // コンパイル済みコード
-	cmds   map[string]VMCmdFunc // コマンド名と実装のマッピング
-	vars   Value                // VMのメインメモリ的な
-	Result Value                // 最後の評価結果を保存する場所
+	AST    Value             // コンパイル済みコード
+	cmds   []VMCmdDispatcher // コマンド名と実装のマッピング
+	Vars   ValueMap          // VMのメインメモリ的な
+	Result Value             // 最後の評価結果を保存する場所
 }
 
 // VMの初期化
 func NewVM(valueAST Value) VM {
 	// VMの初期化
 	vm := VM{
-		ast:    valueAST,
-		cmds:   make(map[string]VMCmdFunc),
-		vars:   NewLitMap(make(map[string]Value, VM_VAR_CAPACITY)),
+		AST:    valueAST,
+		cmds:   []VMCmdDispatcher{BuiltinCmds},
+		Vars:   make(map[string]Value, VM_VAR_CAPACITY),
 		Result: Value{},
 	}
-	vm.SetBuiltinCmds()
-	vm.ClearVars()
-
 	return vm
 }
 
@@ -40,34 +38,28 @@ func (vm *VM) Clone() VM {
 	clone := *vm
 
 	// varsはCloneする
-	clone.vars = clone.vars.Clone()
+	for k, v := range vm.Vars {
+		clone.Vars[k] = v.Clone()
+	}
 
 	return clone
-}
-
-func (vm *VM) GetAST() Value {
-	return vm.ast
-}
-
-func (vm *VM) HasScript() bool {
-	return vm.ast.Type != TypeNil && len(vm.ast.List) > 0
 }
 
 // **********************************************************************
 // 実行
 func (vm *VM) Run() error {
 	// resultを受け取る準備
-	if len(vm.ast.List) <= 1 {
+	if len(vm.AST.List) <= 1 {
 		vm.Result = NewNil() // ASTが空ならnil, ASTが1つでも上書きを期待してnil
 	} else {
-		vm.Result = NewList(make([]Value, len(vm.ast.List))) // ASTが複数ならリスト
+		vm.Result = NewList(make([]Value, len(vm.AST.List))) // ASTが複数ならリスト
 	}
 
 	// ASTを順番に評価していく
-	for i, v := range vm.ast.List {
+	for i, v := range vm.AST.List {
 		// 深さのリセット
-		vm.SetVar("vm_depth", NewNumber(0))
-		vm.SetVar("vm_depth_max", NewNumber(0))
+		vm.Vars["vm_depth"] = NewNumber(0)
+		vm.Vars["vm_depth_max"] = NewNumber(0)
 
 		// 評価
 		if ret, err := vm.Eval(v); err != nil {
@@ -86,34 +78,14 @@ func (vm *VM) Run() error {
 }
 
 // **********************************************************************
-// コマンド用
-func (vm *VM) RegisterCmd(name string, fn VMCmdFunc) {
-	vm.cmds[name] = fn
+// getter/setter
+func (vm *VM) AddCmdIF(cmdDispatcher VMCmdDispatcher) {
+	vm.cmds = append(vm.cmds, cmdDispatcher)
+	for _, cmdsFunc := range vm.cmds {
+		Log("cmds: %v", cmdsFunc)
+	}
 }
 
-// デバッグ用cmds取得関数
-func (vm *VM) GetCmds() map[string]VMCmdFunc {
-	return vm.cmds
-}
-
-// **********************************************************************
-// vars用
-func (vm *VM) GetVar(name string) Value {
-	return vm.vars.Map[name]
-}
-
-func (vm *VM) GetVars() map[string]Value {
-	return vm.vars.Map
-}
-
-func (vm *VM) SetVar(name string, value Value) {
-	vm.vars.Map[name] = value
-}
-
-func (vm *VM) DeleteVar(name string) {
-	delete(vm.vars.Map, name)
-}
-
-func (vm *VM) ClearVars() {
-	clear(vm.vars.Map)
+func (vm *VM) HasScript() bool {
+	return len(vm.AST.List) > 0
 }

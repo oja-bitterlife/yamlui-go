@@ -2,7 +2,7 @@ package script
 
 // **********************************************************************
 // キャスト系のbuiltin
-var castCmds = map[string]func(*VM, []Value) (Value, error){
+var castCmds = map[string]VMCmdFunc{
 	"bool": castBool,
 	"str":  castStr,
 	"num":  castNum,

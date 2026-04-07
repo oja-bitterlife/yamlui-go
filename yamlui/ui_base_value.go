@@ -1,6 +1,8 @@
 package yamlui
 
 import (
+	"maps"
+
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -27,8 +29,8 @@ func (self *UIBase) ToValue() script.Value {
 		"H":           script.NewNumber(self.H),
 		"IsVisible":   script.NewBool(self.IsVisible),
 		"Text":        script.NewString(self.Text),
-		"script":      self.script.GetAST(),
-		"scriptVars":  script.NewLitMap(self.script.GetVars()),
+		"script":      self.script.AST,
+		"scriptVars":  script.NewLitMap(self.script.Vars),
 	})
 }
 
@@ -90,26 +92,15 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		self.Text = v.Str
 	}
 
-	// scriptはVMの作成とcmdの登録を行う
+	// scriptはASTのへコピーとVarsへの流し込みを行う
 	if v, ok := m["script"]; ok {
-		script := script.NewVM(v)
-		self.setUIScriptCmds(&script)
-		self.script = script
+		self.script.AST = v
 	}
 	if v, ok := m["scriptVars"]; ok {
 		if v.Type != script.TypeLitMap {
 			return script.LogErr("Expected scriptVars to be MapType: " + v.Type.String())
 		}
-		for k, varVal := range v.Map {
-			self.script.SetVar(k, varVal)
-		}
-	}
-
-	// PropはMapTypeであればそのまま流し込む。なければ空のまま
-	if prop, ok := m["Prop"]; ok {
-		if prop.Type != script.TypeLitMap {
-			return script.LogErr("Expected Prop to be MapType: " + prop.Type.String())
-		}
+		maps.Copy(self.script.Vars, v.Map)
 	}
 
 	return nil
@@ -120,73 +111,58 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 // ==================================================
 // 設定
 func (self *UIBase) SetPropStr(key string, str string) {
-	self.script.SetVar(key, script.NewString(str))
+	self.script.Vars[key] = script.NewString(str)
 }
 
 func (self *UIBase) AddPropNum(key string, num int) {
-	self.script.SetVar(key, script.NewNumber(self.PropNum(key)+num))
+	self.script.Vars[key] = script.NewNumber(self.PropNum(key) + num)
 }
 
 func (self *UIBase) SetPropNum(key string, num int) {
-	self.script.SetVar(key, script.NewNumber(num))
+	self.script.Vars[key] = script.NewNumber(num)
 }
 
 func (self *UIBase) SetPropBool(key string, b bool) {
-	self.script.SetVar(key, script.NewBool(b))
+	self.script.Vars[key] = script.NewBool(b)
 }
 
 // ==================================================
 // 取り出すだけ
 func (self *UIBase) PropStr(key string) string {
-	v := self.script.GetVar(key)
-	if v.Type != script.TypeString {
-		script.LogWarn("Prop %s is not a string, but %s. Converting to string.", v.Type.String())
-		return v.ConvertString().Str
-	}
-	return v.Str
+	return self.script.Vars.GetStr(key, "")
 }
 
 func (self *UIBase) PropNum(key string) int {
-	v := self.script.GetVar(key)
-	if v.Type != script.TypeNumber {
-		script.LogWarn("Prop %s is not a number, but %s. Converting to number.", key, v.Type.String())
-		return v.ConvertNumber().Num
-	}
-	return v.Num
+	return self.script.Vars.GetNum(key, 0)
 }
 
 func (self *UIBase) PropBool(key string) bool {
-	v := self.script.GetVar(key)
-	if v.Type != script.TypeBool {
-		script.LogWarn("Prop %s is not a bool, but %s. Converting to bool.", key, v.Type.String())
-		return v.ConvertBool().Bool()
-	}
-	return v.Bool()
+	return self.script.Vars.GetBool(key, false)
 }
 
 // ==================================================
 // 取り出してクリアする
 func (self *UIBase) TakePropStr(key string) string {
 	str := self.PropStr(key)
-	self.script.DeleteVar(key)
+	delete(self.script.Vars, key)
 	return str
 }
 
 func (self *UIBase) TakePropNum(key string) int {
 	num := self.PropNum(key)
-	self.script.DeleteVar(key)
+	delete(self.script.Vars, key)
 	return num
 }
 
 func (self *UIBase) TakePropBool(key string) bool {
 	b := self.PropBool(key)
-	self.script.DeleteVar(key)
+	delete(self.script.Vars, key)
 	return b
 }
 
 // ==================================================
 // Propの存在チェック
 func (self *UIBase) HasProp(key string) bool {
-	_, ok := self.script.GetVars()[key]
+	_, ok := self.script.Vars[key]
 	return ok
 }

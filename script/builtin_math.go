@@ -6,7 +6,7 @@ import (
 
 // **********************************************************************
 // 数学系のbuiltin
-var mathCmds = map[string]func(*VM, []Value) (Value, error){
+var mathCmds = map[string]VMCmdFunc{
 	"+":   add,
 	"-":   sub,
 	"*":   mul,

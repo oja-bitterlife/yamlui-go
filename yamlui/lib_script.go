@@ -8,26 +8,12 @@ import (
 )
 
 // **********************************************************************
-const (
-	// UIイベントのプロパティ名のプレフィックス
-	UIEventPrefix   = "UIEvent."
-	UIEventAtPrefix = "@" + UIEventPrefix
-)
-
-// vmのPropにUIのイベントをセットする
-func (self *UIBase) storeScriptEvent(events []string) {
-	for _, event := range events {
-		self.script.SetVar(UIEventAtPrefix+event, script.NewBool(true))
-	}
-}
-
-// **********************************************************************
 // scriptコマンドを登録する
-func (self *UIBase) setUIScriptCmds(vm *script.VM) {
-	vm.RegisterCmd("event",
-		func(vm *script.VM, args []script.Value) (script.Value, error) {
-			return self.scriptEvent(vm, args)
-		})
+func (ui *UIBase) UIScriptCmds(cmdName string) (script.VMCmdFunc, bool) {
+	if cmdName == "event" {
+		return ui.scriptEvent, true
+	}
+	return nil, false
 }
 
 // ==================================================
@@ -49,8 +35,8 @@ func (ui *UIBase) scriptEvent(vm *script.VM, args []script.Value) (script.Value,
 	}
 
 	// vm.varsの中にあるかpath.Matchでチェックする
-	for k := range vm.GetVars() {
-		event, ok := strings.CutPrefix(k, UIEventAtPrefix)
+	for k := range vm.Vars {
+		event, ok := strings.CutPrefix(k, "@")
 		if !ok {
 			continue // プレフィックスが違うものはスキップ
 		}

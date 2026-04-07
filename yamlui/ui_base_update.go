@@ -24,7 +24,7 @@ type UpdateTreeIF interface {
 type UpdateQueueItem struct {
 	UpdateIF UpdateIF
 	z        int
-	Events   []string
+	recv     []string
 }
 
 func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
@@ -82,9 +82,9 @@ func (self *YAMLUI) Update(frame int) []error {
 	}
 
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
-	// self.ProcessEvents()
+	self.ProcessEvents()
 	self.eventQueue = self.eventQueue[:0] // イベントはここでクリア
-	return errorList
+
 	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
 
 	// ソートされたqueueを順番に実行する
@@ -96,7 +96,6 @@ func (self *YAMLUI) Update(frame int) []error {
 		if uiBase.script.HasScript() {
 			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
 			uiBase.storeToVM()
-			uiBase.storeScriptEvent(item.Events) // @UIEventを追加
 
 			// スクリプトを実行
 			if err := uiBase.script.Run(); err != nil {
@@ -109,7 +108,7 @@ func (self *YAMLUI) Update(frame int) []error {
 
 		// Updateを呼び出す
 		// ----------------------------------------
-		event, err := item.UpdateIF.Update(self, item.Events)
+		event, err := item.UpdateIF.Update(self, item.recv)
 		if err != nil {
 			errorList = append(errorList, err)
 		}
@@ -149,7 +148,6 @@ func (self *UIBase) recUpdateTree(lib *YAMLUI, z int) []error {
 				lib.updateQueue = append(lib.updateQueue, UpdateQueueItem{
 					UpdateIF: child.updateIF,
 					z:        z,
-					Events:   []string{}, // イベントはProcessEventsで振り分ける
 				})
 			}
 

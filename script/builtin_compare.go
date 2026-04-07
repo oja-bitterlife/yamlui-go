@@ -2,7 +2,7 @@ package script
 
 // **********************************************************************
 // 比較系のbuiltin
-var compareCmds = map[string]func(*VM, []Value) (Value, error){
+var compareCmds = map[string]VMCmdFunc{
 	">":   grator,
 	"<":   less,
 	"==":  eq,

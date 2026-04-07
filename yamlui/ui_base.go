@@ -64,6 +64,7 @@ func NewUIBase() *UIBase {
 
 	// ScriptVM
 	ui.script = script.NewVM(script.Value{})
+	ui.script.AddCmdIF(ui.UIScriptCmds)
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
@@ -108,22 +109,22 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 // ScriptVMとの連携
 func (self *UIBase) storeToVM() {
 	// スクリプトで使うFrameはUpdateCountを入れる
-	self.script.SetVar("@Frame", script.NewNumber(self.UpdateCount))
+	self.script.Vars["@Frame"] = script.NewNumber(self.UpdateCount)
 
 	// プロパティの送信
-	self.script.SetVar("@IsEnable", script.NewBool(self.IsEnable))
-	self.script.SetVar("@Remove", script.NewBool(self.Remove))
-	self.script.SetVar("@X", script.NewNumber(self.X))
-	self.script.SetVar("@Y", script.NewNumber(self.Y))
-	self.script.SetVar("@Width", script.NewNumber(self.W))
-	self.script.SetVar("@Height", script.NewNumber(self.H))
-	self.script.SetVar("@IsVisivle", script.NewBool(self.IsVisible))
-	self.script.SetVar("@Text", script.NewString(self.Text))
+	self.script.Vars["@IsEnable"] = script.NewBool(self.IsEnable)
+	self.script.Vars["@Remove"] = script.NewBool(self.Remove)
+	self.script.Vars["@X"] = script.NewNumber(self.X)
+	self.script.Vars["@Y"] = script.NewNumber(self.Y)
+	self.script.Vars["@Width"] = script.NewNumber(self.W)
+	self.script.Vars["@Height"] = script.NewNumber(self.H)
+	self.script.Vars["@IsVisivle"] = script.NewBool(self.IsVisible)
+	self.script.Vars["@Text"] = script.NewString(self.Text)
 }
 
 func (self *UIBase) loadFromVM() {
 	// UIBaseのプロパティの受信
-	for k, v := range self.script.GetVars() {
+	for k, v := range self.script.Vars {
 		switch k {
 
 		case "@IsEnable":
@@ -148,7 +149,7 @@ func (self *UIBase) loadFromVM() {
 
 // ==================================================
 // getter/setter
-func (self *UIBase) GetScriptVM() script.VM {
+func (self *UIBase) GetVM() script.VM {
 	return self.script
 }
 

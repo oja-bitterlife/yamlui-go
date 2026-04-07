@@ -1,24 +1,19 @@
 package script
 
 // ==================================================
-// 組み込みコマンドの登録
-// mapを渡して複数のコマンドを登録する
-func (vm *VM) registerCmdList(cmds map[string]func(vm *VM, args []Value) (Value, error)) {
-	for name, fn := range cmds {
-		vm.RegisterCmd(name, fn)
+// 組み込みコマンドの実行
+
+func BuiltinCmds(cmdName string) (VMCmdFunc, bool) {
+	if mathCmd, ok := mathCmds[cmdName]; ok {
+		return mathCmd, true
 	}
-}
-
-// 組み込みコマンドをまとめて登録
-func (vm *VM) SetBuiltinCmds() {
-	// 数学関数を追加
-	vm.registerCmdList(mathCmds)
-
-	// 比較系関数を追加
-	vm.registerCmdList(compareCmds)
-
-	// キャスト系関数を追加
-	vm.registerCmdList(castCmds)
+	if compareCmd, ok := compareCmds[cmdName]; ok {
+		return compareCmd, true
+	}
+	if castCmd, ok := castCmds[cmdName]; ok {
+		return castCmd, true
+	}
+	return nil, false
 }
 
 // ==================================================

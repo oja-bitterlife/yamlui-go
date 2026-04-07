@@ -59,7 +59,7 @@ func (self *YAMLUI) ProcessEvents() {
 
 			// マッチしたイベントはupdateQueueのEventsに保存する
 			if matchedAny {
-				self.updateQueue[i].Events = append(self.updateQueue[i].Events, event)
+				self.updateQueue[i].recv = append(self.updateQueue[i].recv, event)
 			}
 		}
 	}
