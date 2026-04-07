@@ -19,10 +19,6 @@ func (self *YAMLUI) RemoveEvent(event string) {
 	}
 }
 
-func (self *YAMLUI) ClearEvents() {
-	self.eventQueue = []string{}
-}
-
 // ワイルドカードでイベントチェックする便利関数
 func (self *YAMLUI) HasEvent(matchStr string, events []string) bool {
 	for _, event := range events {
@@ -44,13 +40,11 @@ func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
 // イベント処理
 // UpdateQueueのEventsにイベントを振り分ける
 func (self *YAMLUI) ProcessEvents() {
-	// Updateの後ろからイベント処理
-	checkEvents := self.eventQueue[:]
-	for i := len(self.updateQueue) - 1; i >= 0; i-- {
+	// イベントを順番にUpdateQueueの後ろから振り分ける
+	for _, event := range self.eventQueue {
 
-		// イベントを1つずつ確認する
-		remainEvents := []string{} // マッチしなかったイベントをためておくリスト
-		for _, event := range checkEvents {
+		// Updateの後ろからイベント処理
+		for i := len(self.updateQueue) - 1; i >= 0; i-- {
 
 			// 受信設定と一致したイベントがあるか確認する
 			matchedAny := false
@@ -66,16 +60,7 @@ func (self *YAMLUI) ProcessEvents() {
 			// マッチしたイベントはupdateQueueのEventsに保存する
 			if matchedAny {
 				self.updateQueue[i].Events = append(self.updateQueue[i].Events, event)
-			} else {
-				// マッチしなかったイベントは次のUIで確認するために残しておく
-				remainEvents = append(remainEvents, event)
 			}
 		}
-
-		// 次のUIはマッチしなかったイベントだけを確認する
-		checkEvents = remainEvents
 	}
-
-	// 最後までマッチしなかったイベントは残しておく
-	self.eventQueue = checkEvents
 }

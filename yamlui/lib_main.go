@@ -8,7 +8,7 @@ import (
 
 const (
 	EVENT_USING_MAX = 8  // 同時に発生するイベントの最大数
-	UI_USING_MAX    = 64 // 同時に使用するUIの最大数
+	UI_USING_MAX    = 32 // 同時に使用するUIの最大数
 )
 
 type YAMLUI struct {
