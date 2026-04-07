@@ -30,7 +30,7 @@ func (vm *VM) Eval(v Value) (Value, error) {
 			depth.Num-- // 深さを戻す
 			vm.vars.Map["vm_depth"] = depth
 		}()
-		if int(depth.Num) >= vm.maxRecursion {
+		if int(depth.Num) >= VM_RECURSION_MAX {
 			return Value{}, LogErr("maximum recursion depth exceeded: %d", int(depth.Num))
 		}
 		vm.vars.Map["vm_depth"] = depth
@@ -247,8 +247,8 @@ func (vm *VM) repeat(args []Value) (Value, error) {
 	count := int(countVal.Num)
 
 	// 繰り返し回数の上限をチェック
-	if count > vm.maxRepeat {
-		return Value{}, LogErr("repeat count exceeds maximum limit: %d (max: %d)", count, vm.maxRepeat)
+	if count > VM_REPEAT_MAX {
+		return Value{}, LogErr("repeat count exceeds maximum limit of %d: %d", VM_REPEAT_MAX, count)
 	}
 
 	// 繰り返し回数分ループ

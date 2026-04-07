@@ -71,6 +71,7 @@ func (self *YAMLUI) Draw(sw, sh int) {
 	slices.SortStableFunc(self.drawQueue, func(a, b DrawQueueItem) int {
 		return a.z - b.z
 	})
+
 	// ソートされたqueueを順番に実行する
 	for _, item := range self.drawQueue {
 		item.drawIF.Draw(item.x, item.y, item.ctx)

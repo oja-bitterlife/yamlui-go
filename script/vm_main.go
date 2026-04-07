@@ -6,16 +6,18 @@ package script
 // コマンド実装の関数型
 type VMCmdFunc func(vm *VM, args []Value) (Value, error)
 
+const (
+	VM_VAR_CAPACITY  = 128 // varsの初期容量
+	VM_RECURSION_MAX = 32  // 再帰の最大深さ
+	VM_REPEAT_MAX    = 16  // repeatの最大回数
+)
+
 // 外部との連携用データ構造体
 type VM struct {
 	ast    []Value              // コンパイル済みコード
 	cmds   map[string]VMCmdFunc // コマンド名と実装のマッピング
 	vars   Value                // VMのメインメモリ的な
 	Result Value                // 最後の評価結果を保存する場所
-
-	// 制御用
-	maxRecursion int // 再帰の最大深さ
-	maxRepeat    int // repeatの最大回数
 }
 
 // VMの初期化
@@ -24,11 +26,8 @@ func NewVM(valueAST Value) (*VM, error) {
 	vm := &VM{
 		ast:    valueAST.List,
 		cmds:   make(map[string]VMCmdFunc),
-		vars:   NewLitMap(make(map[string]Value, 128)), // 固定長のMapを用意しておく。足りなければ自動拡張される
+		vars:   NewLitMap(make(map[string]Value, VM_VAR_CAPACITY)),
 		Result: Value{},
-
-		maxRecursion: 64,
-		maxRepeat:    256,
 	}
 	SetBuiltinCmds(vm)
 	vm.ClearVars()
