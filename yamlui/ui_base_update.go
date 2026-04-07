@@ -52,7 +52,7 @@ func (self *YAMLUI) Update(frame int) []error {
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
 	if err := self.root.recUpdateTree(self, 0); err != nil {
-		// errorList = append(errorList, err...)
+		errorList = append(errorList, err...)
 	}
 
 	// updateQueueに溜まったUpdateを実行する
@@ -82,9 +82,9 @@ func (self *YAMLUI) Update(frame int) []error {
 	}
 
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
-	self.ProcessEvents()
+	// self.ProcessEvents()
 	self.eventQueue = self.eventQueue[:0] // イベントはここでクリア
-
+	return errorList
 	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
 
 	// ソートされたqueueを順番に実行する
