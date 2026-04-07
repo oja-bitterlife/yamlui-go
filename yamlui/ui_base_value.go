@@ -15,8 +15,6 @@ func (self *UIBase) ToValue() script.Value {
 		events[i] = script.NewString(event)
 	}
 
-	scriptValue := self.script.ToValue()
-
 	return script.NewLitMap(script.ValueMap{
 		"ID":          script.NewString(self.ID),
 		"UpdateCount": script.NewNumber(self.UpdateCount),
@@ -29,7 +27,8 @@ func (self *UIBase) ToValue() script.Value {
 		"H":           script.NewNumber(self.H),
 		"IsVisible":   script.NewBool(self.IsVisible),
 		"Text":        script.NewString(self.Text),
-		"script":      scriptValue,
+		"script":      self.script.GetAST(),
+		"scriptVars":  script.NewLitMap(self.script.GetVars()),
 	})
 }
 
@@ -96,6 +95,14 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		script := script.NewVM(v)
 		self.setUIScriptCmds(&script)
 		self.script = script
+	}
+	if v, ok := m["scriptVars"]; ok {
+		if v.Type != script.TypeLitMap {
+			return script.LogErr("Expected scriptVars to be MapType: " + v.Type.String())
+		}
+		for k, varVal := range v.Map {
+			self.script.SetVar(k, varVal)
+		}
 	}
 
 	// PropはMapTypeであればそのまま流し込む。なければ空のまま

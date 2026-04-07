@@ -45,12 +45,12 @@ func (vm *VM) Clone() VM {
 	return clone
 }
 
-func (vm *VM) ToValue() Value {
+func (vm *VM) GetAST() Value {
 	return vm.ast
 }
 
 func (vm *VM) HasScript() bool {
-	return len(vm.ast.List) > 0
+	return vm.ast.Type != TypeNil && len(vm.ast.List) > 0
 }
 
 // **********************************************************************
