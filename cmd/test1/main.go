@@ -133,7 +133,6 @@ func (m model) View() string {
 
 	m.lib.Draw(m.width, m.height)
 	return ""
-
 	// 色の設定
 	bgStyle := lipgloss.NewStyle().
 		Background(lipgloss.Color("#000080")). // 紺色背景

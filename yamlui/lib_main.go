@@ -17,9 +17,10 @@ type YAMLUI struct {
 	refObj map[string]UIComponent[*UIBase] // Component生成用リファレンスオブジェクト
 
 	// Updateの時に使うもの
-	SystemFrame int // システム時間
-	eventQueue  []EventQueueItem
-	updateQueue []UpdateQueueItem
+	SystemFrame  int // システム時間
+	eventQueue   []EventQueueItem
+	eventReserve []EventQueueItem
+	updateQueue  []UpdateQueueItem
 
 	// Drawの時に使うもの
 	Screen    Area
@@ -31,8 +32,9 @@ func NewYAMLUI() *YAMLUI {
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
-		eventQueue:  make([]EventQueueItem, 0, EVENT_USING_MAX),
-		updateQueue: make([]UpdateQueueItem, 0, UI_USING_MAX),
+		eventQueue:   make([]EventQueueItem, 0, EVENT_USING_MAX),
+		eventReserve: make([]EventQueueItem, 0, EVENT_USING_MAX),
+		updateQueue:  make([]UpdateQueueItem, 0, UI_USING_MAX),
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
 	}

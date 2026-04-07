@@ -88,15 +88,8 @@ func (self *YAMLUI) Update(frame int) []error {
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
 	self.ProcessEvents()
 
-	// 参照用にコピーして、eventQueueをクリアする
-	equeue := make([]EventQueueItem, len(self.eventQueue))
-	copy(equeue, self.eventQueue)
-	self.eventQueue = self.eventQueue[:0]
-
-	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
-
 	// ソートされたqueueを順番に実行する
-	for qi, item := range self.updateQueue {
+	for _, item := range self.updateQueue {
 		uiBase := item.UpdateIF.GetUIBase()
 
 		// スクリプトがあれば走らせる
@@ -118,8 +111,8 @@ func (self *YAMLUI) Update(frame int) []error {
 		// ----------------------------------------
 		// Updateに渡すeventの回収
 		events := []string{}
-		for _, e := range equeue {
-			if e.updateQueueNo == qi {
+		for _, e := range self.eventQueue {
+			if e.updateQueueID == uiBase.ID {
 				events = append(events, e.event)
 			}
 		}
@@ -132,9 +125,14 @@ func (self *YAMLUI) Update(frame int) []error {
 
 		// Updateの実行後にイベントが発生(event!="")していればキューに追加
 		if event != "" {
-			self.AddEvent(event)
+			self.ReserveEvent(event)
 		}
 	}
+
+	// eventReserveを次のeventQueueとしてコピーして、eventReserveをクリアする
+	self.eventQueue = self.eventQueue[:0] // eventQueueをクリアする
+	self.eventQueue = append(self.eventQueue[:0], self.eventReserve...)
+	self.eventReserve = self.eventReserve[:0]
 
 	// 実行カウントを進める
 	// ----------------------------------------

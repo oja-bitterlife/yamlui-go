@@ -10,13 +10,20 @@ import (
 // イベントキュー
 type EventQueueItem struct {
 	event         string
-	updateQueueNo int // 初期値は-1。ProcessEventsでUpdateQueueのどれに対応するかセットされる
+	updateQueueID string
 }
 
 func (lib *YAMLUI) AddEvent(event string) {
 	lib.eventQueue = append(lib.eventQueue, EventQueueItem{
 		event:         event,
-		updateQueueNo: -1, // UpdateQueueNoはProcessEventsでセットされる
+		updateQueueID: "", // UpdateQueueIDはProcessEventsでセットされる
+	})
+}
+
+func (lib *YAMLUI) ReserveEvent(event string) {
+	lib.eventReserve = append(lib.eventReserve, EventQueueItem{
+		event:         event,
+		updateQueueID: "", // UpdateQueueIDはProcessEventsでセットされる
 	})
 }
 
@@ -58,10 +65,11 @@ func (lib *YAMLUI) ProcessEvents() {
 
 		// Updateの後ろからイベント処理
 		for i := len(lib.updateQueue) - 1; i >= 0; i-- {
+			uiBase := lib.updateQueue[i].UpdateIF.GetUIBase()
 
 			// 受信設定と一致したイベントがあるか確認する
 			matchedAny := false
-			for _, wildStr := range lib.updateQueue[i].UpdateIF.GetUIBase().Events {
+			for _, wildStr := range uiBase.Events {
 
 				// ワイルドカード(path.Match)でマッチング
 				if match, _ := path.Match(wildStr, e.event); match {
@@ -72,7 +80,7 @@ func (lib *YAMLUI) ProcessEvents() {
 
 			// マッチしたイベントはUpdateQueueのどれに対応するかセットする
 			if matchedAny {
-				lib.eventQueue[ei].updateQueueNo = i
+				lib.eventQueue[ei].updateQueueID = uiBase.ID
 			}
 		}
 	}

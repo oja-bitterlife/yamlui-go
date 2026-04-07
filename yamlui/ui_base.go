@@ -55,7 +55,6 @@ func NewUIBase() *UIBase {
 	ui := &UIBase{}
 	newID := atomic.AddInt32(&lastID, 1)
 	ui.ID = "UIBase_" + script.Itoa(int(newID))
-	lastID++
 	ui.IsEnable = true
 	ui.IsVisible = true
 	// とりあえず大きな値を入れておく

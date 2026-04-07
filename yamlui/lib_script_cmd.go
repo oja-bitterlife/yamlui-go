@@ -2,7 +2,6 @@ package yamlui
 
 import (
 	"path"
-	"strings"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -33,16 +32,14 @@ func (lib *YAMLUI) scriptEvent(vm *script.VM, args []script.Value) (script.Value
 		return script.Value{}, script.LogErr("event command expects a string argument, but got " + value.Type.String())
 	}
 
-	// vm.varsの中にあるかpath.Matchでチェックする
-	for k := range vm.Vars {
-		event, ok := strings.CutPrefix(k, "@")
-		if !ok {
-			continue // プレフィックスが違うものはスキップ
-		}
-
-		// path.Matchでイベント名をマッチさせる
-		if match, err := path.Match(value.Str, event); err == nil && match {
-			return script.NewBool(true), nil // マッチしたらtrueを返す
+	// eventQueueの中にあるかpath.Matchでチェックする
+	for _, eq := range lib.eventQueue {
+		// UpdateQueueIDが同じものだけチェックする
+		if eq.updateQueueID == vm.Vars["@ID"].Str {
+			// path.Matchでイベント名をマッチさせる
+			if match, err := path.Match(value.Str, eq.event); err == nil && match {
+				return script.NewBool(true), nil // マッチしたらtrueを返す
+			}
 		}
 	}
 	return script.NewBool(false), nil // マッチしなかったらfalseを返す
@@ -64,7 +61,7 @@ func (lib *YAMLUI) scriptAction(vm *script.VM, args []script.Value) (script.Valu
 		return script.Value{}, script.LogErr("action command expects a string argument, but got " + value.Type.String())
 	}
 
-	lib.AddEvent(value.Str) // イベントを追加
+	lib.ReserveEvent(value.Str) // イベントを追加
 
 	return value, nil
 }
