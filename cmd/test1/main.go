@@ -107,7 +107,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.lib.AddEvent("key:enter")
 		}
 
-		TraceMemory() // メモリ使用状況をログに出力
+		// TraceMemory() // メモリ使用状況をログに出力
 	}
 
 	// Update
@@ -132,7 +132,7 @@ func (m model) View() string {
 	}
 
 	m.lib.Draw(m.width, m.height)
-	return ""
+
 	// 色の設定
 	bgStyle := lipgloss.NewStyle().
 		Background(lipgloss.Color("#000080")). // 紺色背景

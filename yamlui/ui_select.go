@@ -4,7 +4,7 @@ import "github.com/oja-bitterlife/yamlui-go/script"
 
 const (
 	// 選択のProp名
-	PROP_SELECT_NO = "SelectNo"
+	PROP_SELECT_NO = "@SelectNo"
 )
 
 // **********************************************************************

@@ -112,7 +112,7 @@ func (self *YAMLUI) Update(frame int) []error {
 		// Updateに渡すeventの回収
 		events := []string{}
 		for _, e := range self.eventQueue {
-			if e.updateQueueID == uiBase.ID {
+			if e.receivedID == uiBase.ID {
 				events = append(events, e.event)
 			}
 		}

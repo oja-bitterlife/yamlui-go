@@ -9,21 +9,21 @@ import (
 // ==================================================
 // イベントキュー
 type EventQueueItem struct {
-	event         string
-	updateQueueID string
+	event      string
+	receivedID string // 受信したUIBaseのID。ProcessEventsでセットされる
 }
 
 func (lib *YAMLUI) AddEvent(event string) {
 	lib.eventQueue = append(lib.eventQueue, EventQueueItem{
-		event:         event,
-		updateQueueID: "", // UpdateQueueIDはProcessEventsでセットされる
+		event:      event,
+		receivedID: "",
 	})
 }
 
 func (lib *YAMLUI) ReserveEvent(event string) {
 	lib.eventReserve = append(lib.eventReserve, EventQueueItem{
-		event:         event,
-		updateQueueID: "", // UpdateQueueIDはProcessEventsでセットされる
+		event:      event,
+		receivedID: "",
 	})
 }
 
@@ -80,7 +80,7 @@ func (lib *YAMLUI) ProcessEvents() {
 
 			// マッチしたイベントはUpdateQueueのどれに対応するかセットする
 			if matchedAny {
-				lib.eventQueue[ei].updateQueueID = uiBase.ID
+				lib.eventQueue[ei].receivedID = uiBase.ID
 			}
 		}
 	}

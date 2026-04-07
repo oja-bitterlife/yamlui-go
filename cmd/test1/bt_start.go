@@ -65,11 +65,6 @@ func (self *BTStart) Update(lib *yamlui.YAMLUI, events []string) (string, error)
 		}
 	}
 
-	// スクリプトによってActionがセットされている場合
-	if self.GetUIBase().HasProp("Action") {
-		script.Log("Action: " + self.GetUIBase().PropStr("Action"))
-		return self.GetUIBase().TakePropStr("Action"), nil
-	}
 	return "", nil
 }
 

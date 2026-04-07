@@ -35,7 +35,7 @@ func (lib *YAMLUI) scriptEvent(vm *script.VM, args []script.Value) (script.Value
 	// eventQueueの中にあるかpath.Matchでチェックする
 	for _, eq := range lib.eventQueue {
 		// UpdateQueueIDが同じものだけチェックする
-		if eq.updateQueueID == vm.Vars["@ID"].Str {
+		if eq.receivedID == vm.Vars["@ID"].Str {
 			// path.Matchでイベント名をマッチさせる
 			if match, err := path.Match(value.Str, eq.event); err == nil && match {
 				return script.NewBool(true), nil // マッチしたらtrueを返す
