@@ -67,6 +67,8 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
 
+	TraceMemory() // 初期化時のメモリ使用状況をログに出力
+
 	return m
 }
 
@@ -104,6 +106,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Type == tea.KeyEnter {
 			m.lib.AddEvent("key:enter")
 		}
+
+		TraceMemory() // メモリ使用状況をログに出力
 	}
 
 	// Update
