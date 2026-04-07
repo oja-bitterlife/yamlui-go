@@ -55,8 +55,10 @@ func NewUIBase() *UIBase {
 	ui := &UIBase{}
 	newID := atomic.AddInt32(&lastID, 1)
 	ui.ID = "UIBase_" + script.Itoa(int(newID))
+
 	ui.IsEnable = true
 	ui.IsVisible = true
+
 	// とりあえず大きな値を入れておく
 	ui.W = 65536
 	ui.H = 65536
@@ -108,6 +110,9 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 func (self *UIBase) storeToVM() {
 	// スクリプトで使うFrameはUpdateCountを入れる
 	self.script.Vars["@Frame"] = script.NewNumber(self.UpdateCount)
+
+	// IDは参照用で送る
+	self.script.Vars["@ID"] = script.NewString(self.ID)
 
 	// プロパティの送信
 	self.script.Vars["@IsEnable"] = script.NewBool(self.IsEnable)
