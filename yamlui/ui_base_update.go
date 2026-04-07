@@ -24,7 +24,6 @@ type UpdateTreeIF interface {
 type UpdateQueueItem struct {
 	UpdateIF UpdateIF
 	z        int
-	recv     []string
 }
 
 func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
@@ -83,12 +82,13 @@ func (self *YAMLUI) Update(frame int) []error {
 
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
 	self.ProcessEvents()
+	// useUpdateQueueNos := self.ProcessEvents()
 	self.eventQueue = self.eventQueue[:0] // イベントはここでクリア
 
 	// ここ以降でself.eventQueueに入るイベントはUpateで入るイベント
 
 	// ソートされたqueueを順番に実行する
-	for _, item := range self.updateQueue {
+	for qi, item := range self.updateQueue {
 		uiBase := item.UpdateIF.GetUIBase()
 
 		// スクリプトがあれば走らせる
@@ -108,7 +108,16 @@ func (self *YAMLUI) Update(frame int) []error {
 
 		// Updateを呼び出す
 		// ----------------------------------------
-		event, err := item.UpdateIF.Update(self, item.recv)
+		// Updateに渡すeventの回収
+		events := []string{}
+		for _, e := range self.eventQueue {
+			// if useUpdateQueueNos[ei] == qi {
+			if e.updateQueueNo == qi {
+				events = append(events, e.event)
+			}
+		}
+		// Updateを呼び出す
+		event, err := item.UpdateIF.Update(self, events)
 		if err != nil {
 			errorList = append(errorList, err)
 		}
@@ -117,7 +126,6 @@ func (self *YAMLUI) Update(frame int) []error {
 		if event != "" {
 			self.AddEvent(event)
 		}
-
 	}
 
 	// 実行カウントを進める

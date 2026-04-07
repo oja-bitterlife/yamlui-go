@@ -6,20 +6,32 @@ import (
 
 // **********************************************************************
 // イベント管理
+// ==================================================
+// イベントキュー
+type EventQueueItem struct {
+	event         string
+	updateQueueNo int // 初期値は-1。ProcessEventsでUpdateQueueのどれに対応するかセットされる
+}
+
 func (self *YAMLUI) AddEvent(event string) {
-	self.eventQueue = append(self.eventQueue, event)
+	self.eventQueue = append(self.eventQueue, EventQueueItem{
+		event:         event,
+		updateQueueNo: -1, // UpdateQueueNoはProcessEventsでセットされる
+	})
 }
 
 func (self *YAMLUI) RemoveEvent(event string) {
 	for i, e := range self.eventQueue {
-		if e == event {
+		if e.event == event {
 			self.eventQueue = append(self.eventQueue[:i], self.eventQueue[i+1:]...)
 			return
 		}
 	}
 }
 
-// ワイルドカードでイベントチェックする便利関数
+// ==================================================
+// イベントチェック.ワイルドカードでイベントチェックする
+// 発生したイベントの中に、matchStrにマッチするものがあるか
 func (self *YAMLUI) HasEvent(matchStr string, events []string) bool {
 	for _, event := range events {
 		if match := self.MatchEvent(matchStr, event); match {
@@ -29,6 +41,7 @@ func (self *YAMLUI) HasEvent(matchStr string, events []string) bool {
 	return false
 }
 
+// そのイベントがワイルドカードにマッチするか
 func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
 	if match, _ := path.Match(matchStr, event); match {
 		return true
@@ -41,7 +54,7 @@ func (self *YAMLUI) MatchEvent(matchStr string, event string) bool {
 // UpdateQueueのEventsにイベントを振り分ける
 func (self *YAMLUI) ProcessEvents() {
 	// イベントを順番にUpdateQueueの後ろから振り分ける
-	for _, event := range self.eventQueue {
+	for ei, e := range self.eventQueue {
 
 		// Updateの後ろからイベント処理
 		for i := len(self.updateQueue) - 1; i >= 0; i-- {
@@ -51,15 +64,15 @@ func (self *YAMLUI) ProcessEvents() {
 			for _, wildStr := range self.updateQueue[i].UpdateIF.GetUIBase().Events {
 
 				// ワイルドカード(path.Match)でマッチング
-				if match, _ := path.Match(wildStr, event); match {
+				if match, _ := path.Match(wildStr, e.event); match {
 					matchedAny = true
 					break // 1つでもマッチしたらこのUIのもの！
 				}
 			}
 
-			// マッチしたイベントはupdateQueueのEventsに保存する
+			// マッチしたイベントはUpdateQueueのどれに対応するかセットする
 			if matchedAny {
-				self.updateQueue[i].recv = append(self.updateQueue[i].recv, event)
+				self.eventQueue[ei].updateQueueNo = i
 			}
 		}
 	}

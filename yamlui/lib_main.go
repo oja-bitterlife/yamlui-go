@@ -18,7 +18,7 @@ type YAMLUI struct {
 
 	// Updateの時に使うもの
 	SystemFrame int // システム時間
-	eventQueue  []string
+	eventQueue  []EventQueueItem
 	updateQueue []UpdateQueueItem
 
 	// Drawの時に使うもの
@@ -31,7 +31,7 @@ func NewYAMLUI() *YAMLUI {
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
-		eventQueue:  make([]string, 0, EVENT_USING_MAX),
+		eventQueue:  make([]EventQueueItem, 0, EVENT_USING_MAX),
 		updateQueue: make([]UpdateQueueItem, 0, UI_USING_MAX),
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
@@ -49,7 +49,7 @@ func (self *YAMLUI) GetRoot() *UIBase {
 }
 
 // デバッグ用。ないとログもままならないので
-func (self *YAMLUI) GetEvents() []string {
+func (self *YAMLUI) GetEvents() []EventQueueItem {
 	return self.eventQueue
 }
 
