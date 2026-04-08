@@ -35,6 +35,8 @@ func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
 // **********************************************************************
 // 呼び出し口
 func (lib *YAMLUI) Dispatch(event string) error {
+	lib.mtx.Lock()
+	defer lib.mtx.Unlock()
 
 	// updateQueueをクリア
 	lib.updateQueue = lib.updateQueue[:0]

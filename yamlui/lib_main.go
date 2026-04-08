@@ -2,6 +2,7 @@ package yamlui
 
 import (
 	"path"
+	"sync"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -15,6 +16,7 @@ type YAMLUI struct {
 	// UIツリー構築用
 	root   *UIBase
 	refObj map[string]UIComponent[*UIBase] // Component生成用リファレンスオブジェクト
+	mtx    sync.RWMutex
 
 	// Updateの時に使うもの
 	eventChannel chan string

@@ -54,6 +54,9 @@ func NewDrawContext(lib *YAMLUI, self *UIBase, parentClip Area) DrawContext {
 // **********************************************************************
 // 呼び出し口
 func (lib *YAMLUI) Draw(sw, sh int) {
+	lib.mtx.RLock()
+	defer lib.mtx.RUnlock()
+
 	// 描画領域をセット
 	lib.Screen = NewArea(0, 0, sw, sh)
 

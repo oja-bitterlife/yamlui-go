@@ -82,9 +82,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.String() == "q" || msg.Type == tea.KeyCtrlC {
 			return m, tea.Quit
 		}
-		if msg.String() == "s" {
-			m.lib.Stop() // YAMLUIのイベントループを停止
-		}
 
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
@@ -107,7 +104,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.lib.SendEvent("key:enter")
 		}
 
-		// TraceMemory() // メモリ使用状況をログに出力
+		TraceMemory() // メモリ使用状況をログに出力
 	}
 
 	return m, nil
