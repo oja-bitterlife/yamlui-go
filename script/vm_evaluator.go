@@ -1,9 +1,5 @@
 package script
 
-import (
-	"strings"
-)
-
 // **********************************************************************
 // 評価関数
 // ==================================================
@@ -82,7 +78,7 @@ func (vm *VM) evalList(list []Value) (Value, error) {
 	cmd := list[0].Str
 
 	// !で始まるコマンドは先に引数を評価
-	if strings.HasPrefix(cmd, "!") {
+	if HasPrefix(cmd, "!") {
 		// 引数は先に評価
 		args, err := vm.EvalAll(list[1:])
 		if err != nil {
@@ -107,7 +103,7 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 		return NewLitList(args), nil
 	}
 
-	cleanCmd := strings.TrimPrefix(cmd, "$")
+	cleanCmd := TrimPrefix(cmd, "$")
 
 	// 組み込みコマンドはここで直接処理する
 	prefixError := func() (Value, error) {
@@ -166,7 +162,7 @@ func (vm *VM) setVar(args []Value) (Value, error) {
 
 	// 第一引数は保存先
 	target := args[0].Str
-	if !strings.HasPrefix(target, "@") && !strings.HasPrefix(target, "_") {
+	if !HasPrefix(target, "@") && !HasPrefix(target, "_") {
 		return Value{}, LogErr("set target must start with '@' or '_': " + target)
 	}
 
