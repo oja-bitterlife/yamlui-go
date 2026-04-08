@@ -37,18 +37,18 @@ func (self *BTLabel) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTLabel) Draw(x, y int, ctx yamlui.DrawContext) {
+func (self *BTLabel) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
 	if x < 0 || y < 0 {
 		return // 負の座標は描画しない
 	}
-	if x >= ctx.Clip.Right() || y >= ctx.Clip.Bottom() {
+	if x >= clip.Right() || y >= clip.Bottom() {
 		return // クリップ範囲外は描画しない
 	}
 
 	line := self.UIBase.Text
 	for j, char := range line {
 		// 横幅(clip.W)を超えないようにガード
-		if j >= int(ctx.Clip.W) {
+		if j >= int(clip.W) {
 			break
 		}
 		// Canvas の (x + j, y) に char を書き込む

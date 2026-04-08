@@ -37,7 +37,7 @@ func (self *BTTitle) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTTitle) Draw(x, y int, ctx yamlui.DrawContext) {
+func (self *BTTitle) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
 	// 64x24のエリア内での描画
 	logo := []string{
 		` __     __      __  __  _      _    _  _____  _ `,
@@ -50,13 +50,13 @@ func (self *BTTitle) Draw(x, y int, ctx yamlui.DrawContext) {
 
 	for i, line := range logo {
 		drawY := int(y) + i
-		if ctx.Clip.ContainsY(drawY) == false {
+		if clip.ContainsY(drawY) == false {
 			continue
 		}
 
 		for j, char := range line {
 			drawX := int(x) + j
-			if ctx.Clip.ContainsX(drawX) == false {
+			if clip.ContainsX(drawX) == false {
 				continue
 			}
 			self.model.canvas[drawY][drawX] = Cell{Rune: char, Color: "white"}

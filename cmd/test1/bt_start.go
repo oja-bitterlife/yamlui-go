@@ -66,17 +66,17 @@ func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) 
 }
 
 // Draw
-func (self *BTStart) Draw(x, y int, ctx yamlui.DrawContext) {
+func (self *BTStart) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
 
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
-		if i >= int(ctx.Clip.H) {
+		if i >= int(clip.H) {
 			break
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := ctx.Clip.Y + i/self.SelBase.RowsNum
-		x := ctx.Clip.X + (i % self.SelBase.RowsNum)
+		y := clip.Y + i/self.SelBase.RowsNum
+		x := clip.X + (i % self.SelBase.RowsNum)
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "
@@ -89,7 +89,7 @@ func (self *BTStart) Draw(x, y int, ctx yamlui.DrawContext) {
 		line += self.texts[i]
 		for j, char := range line {
 			// 横幅(clip.W)を超えないようにガード
-			if j >= int(ctx.Clip.W) {
+			if j >= int(clip.W) {
 				break
 			}
 			// Canvas の (x + j, y) に char を書き込む

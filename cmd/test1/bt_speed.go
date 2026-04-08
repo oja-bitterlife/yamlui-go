@@ -65,8 +65,8 @@ func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) 
 	return "", nil
 }
 
-func (self *BTSpeed) Draw(x, y int, ctx yamlui.DrawContext) {
-	clipW, clipH := ctx.Clip.WH()
+func (self *BTSpeed) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+	clipW, clipH := clip.WH()
 
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない

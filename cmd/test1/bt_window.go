@@ -44,8 +44,8 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
-	drawArea := ctx.Clip
+func (self *BTWindow) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+	drawArea := clip
 
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {

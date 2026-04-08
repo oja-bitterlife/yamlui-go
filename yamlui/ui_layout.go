@@ -77,7 +77,7 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // DrawTreeのOverride
-func (self *UILayout) DrawTree(z int, x, y int, ctx DrawContext) {
+func (self *UILayout) DrawTree(z int, x, y int, clip Area, ctx DrawContext) {
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
 	selfW, selfH := self.GetUIBase().Area().WH()
@@ -119,7 +119,7 @@ func (self *UILayout) DrawTree(z int, x, y int, ctx DrawContext) {
 	parentArea.H -= bottom
 
 	// Left/Topマージン分座標をずらす
-	ctx.Clip = Area{
+	newClip := Area{
 		X: alignX + left,
 		Y: alignY + top,
 		W: selfW,
@@ -127,5 +127,5 @@ func (self *UILayout) DrawTree(z int, x, y int, ctx DrawContext) {
 	}.Clip(parentArea)
 
 	// 元のDrawTreeを呼び出す
-	self.GetUIBase().RecDrawTree(z, alignX+left, alignY+top, ctx)
+	self.GetUIBase().RecDrawTree(z, alignX+left, alignY+top, newClip, ctx)
 }
