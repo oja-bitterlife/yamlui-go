@@ -9,20 +9,20 @@ const TITLE_CLOSING_EVENT = "title_closing"
 
 type BTCloseWin struct {
 	uiBlock *yamlui.UIBlock
-	lib     *model
+	model   *model
 }
 
-func NewBTCloseWin(lib *model) *BTCloseWin {
+func NewBTCloseWin(model *model) *BTCloseWin {
 	return &BTCloseWin{
 		uiBlock: yamlui.NewUIBlock(),
-		lib:     lib,
+		model:   model,
 	}
 }
 
 func (self *BTCloseWin) Clone() yamlui.UICloned {
 	return &BTCloseWin{
 		uiBlock: self.uiBlock.Clone().(*yamlui.UIBlock),
-		lib:     self.lib,
+		model:   self.model,
 	}
 }
 
@@ -40,12 +40,16 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 }
 
 func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {
-	if self.uiBlock.IsStarted() == false {
+	if lib.MatchEvent("next:*", event) {
 		self.uiBlock.StartBlockTimer(lib.Frame, 30) // 30フレームのブロック
 	}
 }
 
 func (self *BTCloseWin) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
+	if self.uiBlock.IsStarted() == false {
+		return // タイマーが開始していない場合は描画しない
+	}
+
 	win := lib.FindByID("win:title")
 	if win == nil {
 		script.LogErr("BTCloseWin: win:title not found")
@@ -59,5 +63,6 @@ func (self *BTCloseWin) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 		win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(lib.Frame, 100))
 	}
 
-	lib.SendEvent("*")
+	// bubble tea に更新を通知して再描画させる
+	self.model.BubbleTeaUpdate()
 }

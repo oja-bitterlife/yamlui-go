@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -84,6 +85,15 @@ func initialModel() model {
 
 func (m model) Init() tea.Cmd {
 	return nil
+}
+
+type TickMsg time.Time
+
+// 33ms後にTickMsgを投げるコマンド
+func (m model) BubbleTeaUpdate() tea.Cmd {
+	return tea.Tick(33*time.Millisecond, func(t time.Time) tea.Msg {
+		return TickMsg(t)
+	})
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {

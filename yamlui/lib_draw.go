@@ -87,6 +87,8 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 	for _, item := range lib.drawQueue {
 		item.drawIF.Draw(lib, item.x, item.y, item.clip)
 	}
+
+	lib.Frame++
 }
 
 // **********************************************************************

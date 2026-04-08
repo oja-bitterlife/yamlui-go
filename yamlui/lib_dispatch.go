@@ -3,6 +3,8 @@ package yamlui
 import (
 	"path"
 	"slices"
+
+	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
@@ -78,8 +80,6 @@ func (lib *YAMLUI) dispatch(event string) {
 
 	// Update後にRemoveを処理する。Removeがtrueの要素は子供もろとも削除する
 	lib.root.recRemove()
-
-	lib.Frame++ // フレームを進める
 }
 
 // **********************************************************************
@@ -118,6 +118,14 @@ func (self *UIBase) recRemove() {
 
 // **********************************************************************
 // イベント処理
+func (lib *YAMLUI) MatchEvent(wildStr string, event string) bool {
+	match, err := path.Match(wildStr, event)
+	if err != nil {
+		script.LogErr("Invalid event pattern: %s", wildStr)
+	}
+	return match
+}
+
 // Dispatch対象のUIを探す
 func (lib *YAMLUI) processEvents(event string) DispatchIF {
 	// Updateの後ろからイベント処理
@@ -125,19 +133,12 @@ func (lib *YAMLUI) processEvents(event string) DispatchIF {
 		uiBase := lib.dispatchQueue[i].DispatchIF.GetUIBase()
 
 		// 受信設定と一致したイベントがあるか確認する
-		matchedAny := false
 		for _, wildStr := range uiBase.Events {
-
 			// ワイルドカード(path.Match)でマッチング
-			if match, _ := path.Match(wildStr, event); match {
-				matchedAny = true
-				break // 1つでもマッチしたらこのUIのもの！
+			if match := lib.MatchEvent(wildStr, event); match {
+				// 1つでもマッチしたらこのUIのもの！
+				return lib.dispatchQueue[i].DispatchIF
 			}
-		}
-
-		// マッチしたイベントはUpdateQueueのどれに対応するかセットする
-		if matchedAny {
-			return lib.dispatchQueue[i].DispatchIF
 		}
 	}
 	return nil
