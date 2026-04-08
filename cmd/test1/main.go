@@ -93,15 +93,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// // 横方向の移動 (NextGridX)
 		if msg.Type == tea.KeyLeft {
-			m.lib.SendEvent("key:left")
+			m.lib.CallEvent("key:left")
 		}
 		if msg.Type == tea.KeyRight {
-			m.lib.SendEvent("key:right")
+			m.lib.CallEvent("key:right")
 		}
 
 		// Enterキーで選択
 		if msg.Type == tea.KeyEnter {
-			m.lib.SendEvent("key:enter")
+			m.lib.CallEvent("key:enter")
 		}
 
 		TraceMemory() // メモリ使用状況をログに出力
