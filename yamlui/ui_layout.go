@@ -80,15 +80,15 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // DrawTreeのOverride
-func (self *UILayout) DrawTree(z float64, parentClip Area, lib *YAMLUI, x, y int, clip Area) {
+func (self *UILayout) DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeContext {
 	// 面倒なので先にintにしておく
-	parentW, parentH := parentClip.WH()
+	parentW, parentH := ctx.ParentClip.WH()
 	selfW, selfH := self.GetUIBase().Area().WH()
 
 	// 絶対座標対応
 	if self.IsAbs {
-		x = lib.Screen.X
-		y = lib.Screen.Y
+		ctx.X = lib.Screen.X
+		ctx.Y = lib.Screen.Y
 	}
 
 	// Align系のプロパティを考慮して、子の描画領域を計算する
@@ -107,8 +107,8 @@ func (self *UILayout) DrawTree(z float64, parentClip Area, lib *YAMLUI, x, y int
 		offsetY = (parentH - selfH) / 2
 	}
 	// alignされた座標
-	alignX := x + offsetX
-	alignY := y + offsetY
+	alignX := ctx.X + offsetX
+	alignY := ctx.Y + offsetY
 
 	// マージンを考慮して、子の描画領域を計算する
 	left := self.MarginLeft + self.MarginX + self.Margin
@@ -117,7 +117,7 @@ func (self *UILayout) DrawTree(z float64, parentClip Area, lib *YAMLUI, x, y int
 	bottom := self.MarginBottom + self.MarginY + self.Margin
 
 	// Right/Bottomマージン分親のエリアから引いておく
-	parentArea := parentClip
+	parentArea := ctx.ParentClip
 	parentArea.W -= right
 	parentArea.H -= bottom
 
@@ -129,6 +129,11 @@ func (self *UILayout) DrawTree(z float64, parentClip Area, lib *YAMLUI, x, y int
 		H: selfH,
 	}.Clip(parentArea)
 
-	// 元のDrawTreeを呼び出す
-	self.GetUIBase().RecDrawTree(z, parentClip, lib, alignX+left, alignY+top, newClip)
+	// コンテキストの更新
+	ctx.X = alignX + left
+	ctx.Y = alignY + top
+	ctx.Clip = newClip
+
+	// 更新したコンテキストを返す
+	return ctx
 }
