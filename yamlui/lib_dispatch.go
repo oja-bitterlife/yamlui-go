@@ -21,16 +21,8 @@ type DispatchIF interface {
 	GetUIBase() *UIBase
 }
 
-type DispatchTreeIF interface {
-	DispatchTree(lib *YAMLUI, z int) error
-}
-
 func (self *UIBase) SetDispatchIF(dispatchIF DispatchIF) {
 	self.dispatchIF = dispatchIF
-}
-
-func (self *UIBase) SetDispatchTreeIF(dispatchTreeIF DispatchTreeIF) {
-	self.dispatchTreeIF = dispatchTreeIF
 }
 
 // **********************************************************************
@@ -61,7 +53,7 @@ func (lib *YAMLUI) dispatch(event string) error {
 	})
 
 	// イベントをDispatchの前に処理しイベントを通知する対象を決定する
-	dispatchIF := lib.ProcessEvents(event)
+	dispatchIF := lib.processEvents(event)
 	if dispatchIF == nil {
 		// 処理するUIがなかった
 		return nil
@@ -114,15 +106,9 @@ func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) error {
 				})
 			}
 
-			// UpdateTreeIFがあればそちらを呼び出す。なければ再帰的に呼び出す
-			if child.dispatchTreeIF != nil {
-				if err := child.dispatchTreeIF.DispatchTree(lib, z+1); err != nil {
-					return err
-				}
-			} else {
-				if err := child.recDispatchTree(lib, z+1); err != nil {
-					return err
-				}
+			// 再帰的に呼び出す
+			if err := child.recDispatchTree(lib, z+1); err != nil {
+				return err
 			}
 		}
 	}
@@ -147,7 +133,7 @@ func (self *UIBase) recRemove() {
 // **********************************************************************
 // イベント処理
 // Dispatch対象のUIを探す
-func (lib *YAMLUI) ProcessEvents(event string) DispatchIF {
+func (lib *YAMLUI) processEvents(event string) DispatchIF {
 	// Updateの後ろからイベント処理
 	for i := len(lib.dispatchQueue) - 1; i >= 0; i-- {
 		uiBase := lib.dispatchQueue[i].DispatchIF.GetUIBase()

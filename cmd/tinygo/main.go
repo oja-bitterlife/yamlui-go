@@ -21,7 +21,7 @@ func main() {
 	if err := lib.Start(uiData); err != nil {
 		panic(err)
 	}
-	lib.Draw(0, 0)
+	lib.Draw(0, 0, 800, 600)
 	lib.Stop()
 
 	print("UI loaded successfully!")

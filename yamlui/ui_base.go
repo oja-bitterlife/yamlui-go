@@ -43,10 +43,9 @@ type UIBase struct {
 
 	// インターフェース(ランタイム用)
 	// ----------------------------------------
-	dispatchIF     DispatchIF
-	dispatchTreeIF DispatchTreeIF
-	drawIF         DrawIF
-	drawTreeIF     DrawTreeIF
+	dispatchIF DispatchIF
+	drawIF     DrawIF
+	drawTreeIF DrawTreeIF // z順を変更したいときに使う
 }
 
 func NewUIBase() *UIBase {
