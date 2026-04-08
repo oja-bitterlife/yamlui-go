@@ -53,27 +53,27 @@ func NewDrawContext(lib *YAMLUI, self *UIBase, parentClip Area) DrawContext {
 
 // **********************************************************************
 // 呼び出し口
-func (self *YAMLUI) Draw(sw, sh int) {
+func (lib *YAMLUI) Draw(sw, sh int) {
 	// 描画領域をセット
-	self.Screen = NewArea(0, 0, sw, sh)
+	lib.Screen = NewArea(0, 0, sw, sh)
 
 	// drawQueueをクリア
-	self.drawQueue = self.drawQueue[:0]
+	lib.drawQueue = lib.drawQueue[:0]
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
-	ctx := NewDrawContext(self, self.root, self.Screen)
-	self.root.RecDrawTree(0, 0, 0, ctx)
+	ctx := NewDrawContext(lib, lib.root, lib.Screen)
+	lib.root.RecDrawTree(0, 0, 0, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
 	// ----------------------------------------
 	// Z順でソートする
-	slices.SortStableFunc(self.drawQueue, func(a, b DrawQueueItem) int {
+	slices.SortStableFunc(lib.drawQueue, func(a, b DrawQueueItem) int {
 		return a.z - b.z
 	})
 
 	// ソートされたqueueを順番に実行する
-	for _, item := range self.drawQueue {
+	for _, item := range lib.drawQueue {
 		item.drawIF.Draw(item.x, item.y, item.ctx)
 	}
 }

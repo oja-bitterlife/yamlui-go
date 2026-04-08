@@ -62,11 +62,9 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to read ui.json: %v", err))
 	}
 
-	if err = m.lib.Load(fileData); err != nil {
-		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
+	if err := m.lib.Start(fileData); err != nil {
+		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
 	}
-
-	m.lib.Run()
 
 	return m
 }
@@ -83,6 +81,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// 'q' か 'ctrl+c' で終了
 		if msg.String() == "q" || msg.Type == tea.KeyCtrlC {
 			return m, tea.Quit
+		}
+		if msg.String() == "s" {
+			m.lib.Stop() // YAMLUIのイベントループを停止
 		}
 
 		// 縦方向の移動 (NextGridY)

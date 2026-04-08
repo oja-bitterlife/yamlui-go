@@ -70,6 +70,32 @@ func (lib *YAMLUI) UIBuild(type_ string, refObj UIComponent[*UIBase]) {
 }
 
 // **********************************************************************
+// UIのイベントループを開始する関数。引数はUIのJSON
+func (lib *YAMLUI) Start(valueJSON []byte) error {
+	if err := lib.Load(valueJSON); err != nil {
+		return err
+	}
+
+	// ここでYAMLUIのgoruoutineを走らせる
+	go func() {
+		// channelがCloseされるまでイベントを待ち続ける
+		for event := range lib.eventChannel {
+			// イベントが来たらUpdateを呼び出す
+			if err := lib.Dispatch(event); err != nil {
+				script.LogErr("Error in Update: " + err.Error())
+			}
+		}
+
+		script.Log("YAMLUI: Event channel closed, stopping event loop")
+	}()
+	return nil
+}
+
+func (lib *YAMLUI) Stop() {
+	close(lib.eventChannel)
+}
+
+// **********************************************************************
 // UITreeの構築（再帰的に子要素も構築）
 func (lib *YAMLUI) Load(valueJson []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
@@ -163,19 +189,4 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 	}
 
 	return nil
-}
-
-func (lib *YAMLUI) Run() {
-	// ここでYAMLUIのgoruoutineを走らせる
-	go func() {
-		for {
-			// ここでイベントを待ち受ける
-			event := <-lib.eventChannel
-
-			// イベントが来たらUpdateを呼び出す
-			if err := lib.Dispatch(event); err != nil {
-				script.LogErr("Error in Update: " + err.Error())
-			}
-		}
-	}()
 }
