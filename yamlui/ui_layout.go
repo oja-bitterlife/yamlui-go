@@ -7,6 +7,9 @@ import (
 type UILayout struct {
 	UIBase *UIBase
 
+	// Layout用のプロパティ.ここに置くとprivate扱いになる
+	// publicにしたい場合はGetUIBase().SetPropで保存する
+	// ==================================================
 	// Margin用
 	Margin       int
 	MarginTop    int
@@ -77,15 +80,15 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // DrawTreeのOverride
-func (self *UILayout) DrawTree(z float64, x, y int, clip Area, ctx DrawContext) {
+func (self *UILayout) DrawTree(z float64, parentClip Area, lib *YAMLUI, x, y int, clip Area) {
 	// 面倒なので先にintにしておく
-	parentW, parentH := ctx.ParentClip.WH()
+	parentW, parentH := parentClip.WH()
 	selfW, selfH := self.GetUIBase().Area().WH()
 
 	// 絶対座標対応
 	if self.IsAbs {
-		x = ctx.Lib.Screen.X
-		y = ctx.Lib.Screen.Y
+		x = lib.Screen.X
+		y = lib.Screen.Y
 	}
 
 	// Align系のプロパティを考慮して、子の描画領域を計算する
@@ -114,7 +117,7 @@ func (self *UILayout) DrawTree(z float64, x, y int, clip Area, ctx DrawContext) 
 	bottom := self.MarginBottom + self.MarginY + self.Margin
 
 	// Right/Bottomマージン分親のエリアから引いておく
-	parentArea := ctx.ParentClip
+	parentArea := parentClip
 	parentArea.W -= right
 	parentArea.H -= bottom
 
@@ -127,5 +130,5 @@ func (self *UILayout) DrawTree(z float64, x, y int, clip Area, ctx DrawContext) 
 	}.Clip(parentArea)
 
 	// 元のDrawTreeを呼び出す
-	self.GetUIBase().RecDrawTree(z, alignX+left, alignY+top, newClip, ctx)
+	self.GetUIBase().RecDrawTree(z, parentClip, lib, alignX+left, alignY+top, newClip)
 }

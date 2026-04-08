@@ -44,7 +44,7 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTWindow) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	drawArea := clip
 
 	// closing中

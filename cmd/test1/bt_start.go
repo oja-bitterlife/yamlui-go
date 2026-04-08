@@ -66,7 +66,7 @@ func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) 
 }
 
 // Draw
-func (self *BTStart) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+func (self *BTStart) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない

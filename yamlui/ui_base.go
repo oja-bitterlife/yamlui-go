@@ -105,11 +105,12 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // ScriptVMとの連携
-func (self *UIBase) storeToVM(event string) {
+func (self *UIBase) storeToVM(frame int, event string) {
 
 	// 参照用で送るもの
 	self.script.Vars["@ID"] = script.NewString(self.ID)
 	self.script.Vars["@Event"] = script.NewString(event)
+	self.script.Vars["@Frame"] = script.NewNumber(frame)
 
 	// プロパティの送信
 	self.script.Vars["@IsEnable"] = script.NewBool(self.IsEnable)

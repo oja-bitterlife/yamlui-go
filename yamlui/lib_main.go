@@ -25,6 +25,7 @@ type YAMLUI struct {
 	dispatchQueue []DispatchQueueItem
 
 	// Drawの時に使うもの
+	Frame     int
 	Screen    Area
 	drawQueue []DrawQueueItem
 }

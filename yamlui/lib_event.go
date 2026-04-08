@@ -72,7 +72,7 @@ func (lib *YAMLUI) dispatch(event string) error {
 	// ----------------------------------------
 	if uiBase.HasScript() {
 		// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
-		uiBase.storeToVM(event)
+		uiBase.storeToVM(lib.Frame, event)
 
 		// スクリプトを実行
 		if err := uiBase.script.Run(); err != nil {
@@ -94,6 +94,8 @@ func (lib *YAMLUI) dispatch(event string) error {
 
 	// Update後にRemoveを処理する。Removeがtrueの要素は子供もろとも削除する
 	lib.root.recRemove()
+
+	lib.Frame++ // フレームを進める
 
 	return nil
 }

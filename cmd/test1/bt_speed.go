@@ -65,7 +65,7 @@ func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) 
 	return "", nil
 }
 
-func (self *BTSpeed) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+func (self *BTSpeed) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	clipW, clipH := clip.WH()
 
 	for i := range self.SelBase.ItemNum {

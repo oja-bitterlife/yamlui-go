@@ -5,7 +5,9 @@ import (
 )
 
 type UIBlock struct {
-	UIBase *UIBase
+	UIBase    *UIBase
+	Timer     Timer
+	isStarted bool
 }
 
 func NewUIBlock() *UIBlock {
@@ -17,11 +19,28 @@ func NewUIBlock() *UIBlock {
 // ==================================================
 // setter/getter
 // イベントを指定してブロックする。引数なしならすべてのイベントをブロックする
-func (self *UIBlock) SetBlock(args ...string) {
+func (self *UIBlock) StartBlock(args ...string) {
+	self.isStarted = true
+
 	if len(args) == 0 {
 		args = []string{"*"}
 	}
-	self.GetUIBase().Events = args
+	self.GetUIBase().Events = self.GetUIBase().Events[:0] // いったん空にする
+	self.GetUIBase().Events = append(self.GetUIBase().Events, args...)
+}
+
+func (self *UIBlock) StartBlockTimer(startFrame, duration int, args ...string) {
+	self.Timer = NewTimer(startFrame, duration)
+	self.StartBlock(args...)
+}
+
+func (self *UIBlock) EndBlock() {
+	self.isStarted = false
+	self.GetUIBase().Events = self.GetUIBase().Events[:0] // ブロックしているイベントをクリア
+}
+
+func (self *UIBlock) IsStarted() bool {
+	return self.isStarted
 }
 
 // **********************************************************************

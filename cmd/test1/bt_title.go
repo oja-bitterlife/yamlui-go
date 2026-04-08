@@ -37,7 +37,7 @@ func (self *BTTitle) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTTitle) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+func (self *BTTitle) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	// 64x24のエリア内での描画
 	logo := []string{
 		` __     __      __  __  _      _    _  _____  _ `,

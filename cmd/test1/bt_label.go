@@ -37,7 +37,7 @@ func (self *BTLabel) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTLabel) Draw(x, y int, clip yamlui.Area, ctx yamlui.DrawContext) {
+func (self *BTLabel) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	if x < 0 || y < 0 {
 		return // 負の座標は描画しない
 	}

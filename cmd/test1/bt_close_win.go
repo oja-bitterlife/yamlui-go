@@ -35,32 +35,29 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 		return err
 	}
 	self.GetUIBase().SetDispatchIF(self)
+	self.GetUIBase().SetDrawIF(self)
 	return nil
 }
 
 func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
-	// "next:*"イベントがあったら30フレーム後にウィンドウを閉じるタイマーをセットする
-	// if lib.HasEvent("next:*", events) {
-	// 	self.uiBlock.StartBlockTimer(10)
-	// 	return TITLE_CLOSING_EVENT, nil
-	// }
-	//
-	// // タイマーが終わるまでイベントを繋いでおく
-	// if lib.HasEvent(TITLE_CLOSING_EVENT, events) {
-	// 	win := lib.FindByID("win:title")
-	// 	if win == nil {
-	// 		return "", script.LogErr("BTCloseWin: win:title not found")
-	// 	}
-	//
-	// 	// タイマーが終了したらウィンドウを閉じる
-	// 	if self.uiBlock.IsTimerFinish() {
-	// 		win.Remove = true
-	// 	} else {
-	// 		win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(self.GetUIBase().UpdateCount, 100))
-	// 	}
-	//
-	// 	return TITLE_CLOSING_EVENT, nil
-	// }
-	//
+	self.uiBlock.StartBlockTimer(lib.Frame, 30) // 30フレームのブロック
 	return "", nil
+}
+
+func (self *BTCloseWin) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
+	if self.uiBlock.IsStarted() == false {
+		return // ブロックしていない
+	}
+
+	win := lib.FindByID("win:title")
+	if win == nil {
+		script.LogErr("BTCloseWin: win:title not found")
+	}
+
+	// タイマーが終了したらウィンドウを閉じる
+	if self.uiBlock.Timer.IsFinish(lib.Frame) {
+		win.Remove = true
+	} else {
+		win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(lib.Frame, 100))
+	}
 }
