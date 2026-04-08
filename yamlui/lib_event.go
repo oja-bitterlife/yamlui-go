@@ -4,36 +4,9 @@ import (
 	"path"
 )
 
-// **********************************************************************
-// イベント管理
-// ==================================================
-// イベントキュー
-type EventQueueItem struct {
-	event      string
-	receivedID string // 受信したUIBaseのID。ProcessEventsでセットされる
-}
-
-func (lib *YAMLUI) AddEvent(event string) {
-	lib.eventQueue = append(lib.eventQueue, EventQueueItem{
-		event:      event,
-		receivedID: "",
-	})
-}
-
-func (lib *YAMLUI) ReserveEvent(event string) {
-	lib.eventReserve = append(lib.eventReserve, EventQueueItem{
-		event:      event,
-		receivedID: "",
-	})
-}
-
-func (lib *YAMLUI) RemoveEvent(event string) {
-	for i, e := range lib.eventQueue {
-		if e.event == event {
-			lib.eventQueue = append(lib.eventQueue[:i], lib.eventQueue[i+1:]...)
-			return
-		}
-	}
+func (lib *YAMLUI) SendEvent(event string) {
+	// goroutineでイベントを送る
+	lib.eventChannel <- event
 }
 
 // ==================================================
@@ -59,29 +32,26 @@ func (lib *YAMLUI) MatchEvent(matchStr string, event string) bool {
 // **********************************************************************
 // イベント処理
 // UpdateQueueのEventsにイベントを振り分ける
-func (lib *YAMLUI) ProcessEvents() {
-	// イベントを順番にUpdateQueueの後ろから振り分ける
-	for ei, e := range lib.eventQueue {
+func (lib *YAMLUI) ProcessEvents(event string) UpdateIF {
+	// Updateの後ろからイベント処理
+	for i := len(lib.updateQueue) - 1; i >= 0; i-- {
+		uiBase := lib.updateQueue[i].UpdateIF.GetUIBase()
 
-		// Updateの後ろからイベント処理
-		for i := len(lib.updateQueue) - 1; i >= 0; i-- {
-			uiBase := lib.updateQueue[i].UpdateIF.GetUIBase()
+		// 受信設定と一致したイベントがあるか確認する
+		matchedAny := false
+		for _, wildStr := range uiBase.Events {
 
-			// 受信設定と一致したイベントがあるか確認する
-			matchedAny := false
-			for _, wildStr := range uiBase.Events {
-
-				// ワイルドカード(path.Match)でマッチング
-				if match, _ := path.Match(wildStr, e.event); match {
-					matchedAny = true
-					break // 1つでもマッチしたらこのUIのもの！
-				}
-			}
-
-			// マッチしたイベントはUpdateQueueのどれに対応するかセットする
-			if matchedAny {
-				lib.eventQueue[ei].receivedID = uiBase.ID
+			// ワイルドカード(path.Match)でマッチング
+			if match, _ := path.Match(wildStr, event); match {
+				matchedAny = true
+				break // 1つでもマッチしたらこのUIのもの！
 			}
 		}
+
+		// マッチしたイベントはUpdateQueueのどれに対応するかセットする
+		if matchedAny {
+			return lib.updateQueue[i].UpdateIF
+		}
 	}
+	return nil
 }

@@ -38,29 +38,29 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, events []string) (string, error) {
+func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, event string) (string, error) {
 	// "next:*"イベントがあったら30フレーム後にウィンドウを閉じるタイマーをセットする
-	if lib.HasEvent("next:*", events) {
-		self.uiBlock.StartBlockTimer(10)
-		return TITLE_CLOSING_EVENT, nil
-	}
-
-	// タイマーが終わるまでイベントを繋いでおく
-	if lib.HasEvent(TITLE_CLOSING_EVENT, events) {
-		win := lib.FindByID("win:title")
-		if win == nil {
-			return "", script.LogErr("BTCloseWin: win:title not found")
-		}
-
-		// タイマーが終了したらウィンドウを閉じる
-		if self.uiBlock.IsTimerFinish() {
-			win.Remove = true
-		} else {
-			win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(self.GetUIBase().UpdateCount, 100))
-		}
-
-		return TITLE_CLOSING_EVENT, nil
-	}
-
+	// if lib.HasEvent("next:*", events) {
+	// 	self.uiBlock.StartBlockTimer(10)
+	// 	return TITLE_CLOSING_EVENT, nil
+	// }
+	//
+	// // タイマーが終わるまでイベントを繋いでおく
+	// if lib.HasEvent(TITLE_CLOSING_EVENT, events) {
+	// 	win := lib.FindByID("win:title")
+	// 	if win == nil {
+	// 		return "", script.LogErr("BTCloseWin: win:title not found")
+	// 	}
+	//
+	// 	// タイマーが終了したらウィンドウを閉じる
+	// 	if self.uiBlock.IsTimerFinish() {
+	// 		win.Remove = true
+	// 	} else {
+	// 		win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(self.GetUIBase().UpdateCount, 100))
+	// 	}
+	//
+	// 	return TITLE_CLOSING_EVENT, nil
+	// }
+	//
 	return "", nil
 }

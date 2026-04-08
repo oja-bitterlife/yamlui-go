@@ -6,7 +6,6 @@ import (
 
 type UIBlock struct {
 	UIBase *UIBase
-	Timer  Timer
 }
 
 func NewUIBlock() *UIBlock {
@@ -23,16 +22,6 @@ func (self *UIBlock) SetBlock(args ...string) {
 		args = []string{"*"}
 	}
 	self.GetUIBase().Events = args
-}
-
-// タイマーをセットしてブロックを開始する。durationはフレーム数。TimerEventはタイマーが終了したときのイベント名
-func (self *UIBlock) StartBlockTimer(duration int, args ...string) {
-	self.Timer = NewTimer(self.GetUIBase().UpdateCount, duration)
-	self.SetBlock(args...)
-}
-
-func (self *UIBlock) IsTimerFinish() bool {
-	return self.Timer.IsFinish(self.GetUIBase().UpdateCount)
 }
 
 // **********************************************************************

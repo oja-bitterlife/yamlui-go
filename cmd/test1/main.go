@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -67,6 +66,8 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
 
+	m.lib.Run()
+
 	return m
 }
 
@@ -86,39 +87,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
-			m.lib.AddEvent("key:up")
+			m.lib.SendEvent("key:up")
 		}
 		if msg.Type == tea.KeyDown {
-			m.lib.AddEvent("key:down")
+			m.lib.SendEvent("key:down")
 		}
 
 		// // 横方向の移動 (NextGridX)
 		if msg.Type == tea.KeyLeft {
-			m.lib.AddEvent("key:left")
+			m.lib.SendEvent("key:left")
 		}
 		if msg.Type == tea.KeyRight {
-			m.lib.AddEvent("key:right")
+			m.lib.SendEvent("key:right")
 		}
 
 		// Enterキーで選択
 		if msg.Type == tea.KeyEnter {
-			m.lib.AddEvent("key:enter")
+			m.lib.SendEvent("key:enter")
 		}
 
 		// TraceMemory() // メモリ使用状況をログに出力
 	}
 
-	// Update
-	errorList := m.lib.Update(m.frame)
-	for _, err := range errorList {
-		script.LogFatal("Error during update: %v", err)
-	}
-	if len(m.lib.GetEvents()) > 0 {
-		duration := time.Duration(33 * time.Millisecond)
-		return m, tea.Tick(duration, func(t time.Time) tea.Msg {
-			return struct{}{} // 空のメッセージを返す
-		})
-	}
 	return m, nil
 }
 

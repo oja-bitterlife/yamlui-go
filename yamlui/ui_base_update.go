@@ -14,25 +14,14 @@ type UpdateQueueItem struct {
 }
 
 // ==================================================
-// OnInit
-type OnInitIF interface {
-	OnInit(lib *YAMLUI) (string, error)
-	GetUIBase() *UIBase
-}
-
-func (self *UIBase) SetOnInitIF(onInitIF OnInitIF) {
-	self.onInitIF = onInitIF
-}
-
-// ==================================================
 // Update
 type UpdateIF interface {
-	Update(lib *YAMLUI, events []string) (string, error)
+	Update(lib *YAMLUI, event string) (string, error)
 	GetUIBase() *UIBase
 }
 
 type UpdateTreeIF interface {
-	UpdateTree(lib *YAMLUI, z int) []error
+	UpdateTree(lib *YAMLUI, z int) error
 }
 
 func (self *UIBase) SetUpdateIF(updateIF UpdateIF) {
@@ -45,115 +34,67 @@ func (self *UIBase) SetUpdateTreeIF(updateTreeIF UpdateTreeIF) {
 
 // **********************************************************************
 // 呼び出し口
-func (self *YAMLUI) Update(frame int) []error {
-	errorList := []error{}
-
-	self.SystemFrame = frame
+func (lib *YAMLUI) Dispatch(event string) error {
 
 	// updateQueueをクリア
-	self.updateQueue = self.updateQueue[:0]
+	lib.updateQueue = lib.updateQueue[:0]
 
 	// 更新コンテキストを作成してUpdateTreeを呼び出す
 	// ----------------------------------------
-	if err := self.root.recUpdateTree(self, 0); err != nil {
-		errorList = append(errorList, err...)
+	if err := lib.root.recUpdateTree(lib, 0); err != nil {
+		return err
 	}
 
 	// updateQueueに溜まったUpdateを実行する
 	// ----------------------------------------
 	// Z順でソートする
-	slices.SortStableFunc(self.updateQueue, func(a, b UpdateQueueItem) int {
+	slices.SortStableFunc(lib.updateQueue, func(a, b UpdateQueueItem) int {
 		return a.z - b.z
 	})
 
-	// UpdateCountが0のときはInitとみなしてOnInitを呼び出す
-	for _, item := range self.updateQueue {
-		uiBase := item.UpdateIF.GetUIBase()
-
-		// OnInitを呼び出す
-		// ----------------------------------------
-		if uiBase.UpdateCount == 0 && uiBase.onInitIF != nil {
-			event, err := uiBase.onInitIF.OnInit(self)
-			if err != nil {
-				errorList = append(errorList, err)
-			}
-
-			// OnIniteの実行後にイベントが発生(event!="")していればキューに追加
-			if event != "" {
-				self.AddEvent(event)
-			}
-		}
-	}
-
 	// イベントをUpdateの前に処理し、Updateにイベントを通知する
-	self.ProcessEvents()
+	updateIF := lib.ProcessEvents(event)
+	if updateIF == nil {
+		// 処理するUIがなかった
+		return nil
+	}
+	uiBase := updateIF.GetUIBase()
 
-	// ソートされたqueueを順番に実行する
-	for _, item := range self.updateQueue {
-		uiBase := item.UpdateIF.GetUIBase()
+	// スクリプトがあれば走らせる
+	// ----------------------------------------
+	if uiBase.HasScript() {
+		// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
+		uiBase.storeToVM(event)
 
-		// スクリプトがあれば走らせる
-		// ----------------------------------------
-		if uiBase.HasScript() {
-			// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
-			uiBase.storeToVM()
-
-			// スクリプトを実行
-			if err := uiBase.script.Run(); err != nil {
-				errorList = append(errorList, err)
-			}
-
-			// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
-			uiBase.loadFromVM()
+		// スクリプトを実行
+		if err := uiBase.script.Run(); err != nil {
+			return err
 		}
 
-		// Update
-		// ----------------------------------------
-		// Updateに渡すeventの回収
-		events := []string{}
-		for _, e := range self.eventQueue {
-			if e.receivedID == uiBase.ID {
-				events = append(events, e.event)
-			}
-		}
-
-		// Updateを呼び出す
-		event, err := item.UpdateIF.Update(self, events)
-		if err != nil {
-			errorList = append(errorList, err)
-		}
-
-		// Updateの実行後にイベントが発生(event!="")していればキューに追加
-		if event != "" {
-			self.ReserveEvent(event)
-		}
+		// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
+		uiBase.loadFromVM()
 	}
 
-	// eventReserveを次のeventQueueとしてコピーして、eventReserveをクリアする
-	self.eventQueue = self.eventQueue[:0] // eventQueueをクリアする
-	self.eventQueue = append(self.eventQueue[:0], self.eventReserve...)
-	self.eventReserve = self.eventReserve[:0]
-
-	// 実行カウントを進める
+	// Update
 	// ----------------------------------------
-	for _, item := range self.updateQueue {
-		uiBase := item.UpdateIF.GetUIBase()
-		uiBase.UpdateCount++
+	// Updateを呼び出す
+	if nextEvent, err := updateIF.Update(lib, event); err != nil {
+		return err
+	} else if nextEvent != "" {
+		// Updateからイベントが返ってきたら処理する
 	}
 
 	// Update後にRemoveを処理する。Removeがtrueの要素は子供もろとも削除する
-	self.root.recRemove()
+	lib.root.recRemove()
 
-	return errorList
+	return nil
 }
 
 // **********************************************************************
 // 再帰実行
 // ==================================================
 // UpdateTreeの再帰
-func (self *UIBase) recUpdateTree(lib *YAMLUI, z int) []error {
-	errorList := []error{}
-
+func (self *UIBase) recUpdateTree(lib *YAMLUI, z int) error {
 	// 子供の更新
 	for _, child := range self.children {
 		if child.IsEnable {
@@ -168,17 +109,17 @@ func (self *UIBase) recUpdateTree(lib *YAMLUI, z int) []error {
 			// UpdateTreeIFがあればそちらを呼び出す。なければ再帰的に呼び出す
 			if child.updateTreeIF != nil {
 				if err := child.updateTreeIF.UpdateTree(lib, z+1); err != nil {
-					errorList = append(errorList, err...)
+					return err
 				}
 			} else {
 				if err := child.recUpdateTree(lib, z+1); err != nil {
-					errorList = append(errorList, err...)
+					return err
 				}
 			}
 		}
 	}
 
-	return errorList
+	return nil
 }
 
 // ==================================================

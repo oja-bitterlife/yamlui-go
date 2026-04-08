@@ -18,19 +18,18 @@ func (self *UIBase) ToValue() script.Value {
 	}
 
 	return script.NewLitMap(script.ValueMap{
-		"ID":          script.NewString(self.ID),
-		"UpdateCount": script.NewNumber(self.UpdateCount),
-		"Events":      script.NewLitList(events),
-		"IsEnable":    script.NewBool(self.IsEnable),
-		"Remove":      script.NewBool(self.Remove),
-		"X":           script.NewNumber(self.X),
-		"Y":           script.NewNumber(self.Y),
-		"W":           script.NewNumber(self.W),
-		"H":           script.NewNumber(self.H),
-		"IsVisible":   script.NewBool(self.IsVisible),
-		"Text":        script.NewString(self.Text),
-		"script":      self.script.AST,
-		"scriptVars":  script.NewLitMap(self.script.Vars),
+		"ID":         script.NewString(self.ID),
+		"Events":     script.NewLitList(events),
+		"IsEnable":   script.NewBool(self.IsEnable),
+		"Remove":     script.NewBool(self.Remove),
+		"X":          script.NewNumber(self.X),
+		"Y":          script.NewNumber(self.Y),
+		"W":          script.NewNumber(self.W),
+		"H":          script.NewNumber(self.H),
+		"IsVisible":  script.NewBool(self.IsVisible),
+		"Text":       script.NewString(self.Text),
+		"script":     self.script.AST,
+		"scriptVars": script.NewLitMap(self.script.Vars),
 	})
 }
 
@@ -45,9 +44,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	// キーがあれば流し込む。なければデフォルト値のまま
 	if v, ok := m["ID"]; ok {
 		self.ID = v.Str
-	}
-	if v, ok := m["UpdateCount"]; ok {
-		self.UpdateCount = int(v.Num)
 	}
 
 	// EventsはStringのリストであることを確認してから流し込む

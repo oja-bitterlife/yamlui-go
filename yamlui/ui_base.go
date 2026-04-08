@@ -14,8 +14,7 @@ var lastID int32
 type UIBase struct {
 	// ==================================================
 	// Scriptで更新させないもの
-	ID          string
-	UpdateCount int // @Frameとして送り込む
+	ID string
 
 	// Event
 	Events []string
@@ -44,7 +43,6 @@ type UIBase struct {
 
 	// インターフェース(ランタイム用)
 	// ----------------------------------------
-	onInitIF     OnInitIF
 	updateIF     UpdateIF
 	updateTreeIF UpdateTreeIF
 	drawIF       DrawIF
@@ -107,12 +105,11 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // ScriptVMとの連携
-func (self *UIBase) storeToVM() {
-	// スクリプトで使うFrameはUpdateCountを入れる
-	self.script.Vars["@Frame"] = script.NewNumber(self.UpdateCount)
+func (self *UIBase) storeToVM(event string) {
 
-	// IDは参照用で送る
+	// 参照用で送るもの
 	self.script.Vars["@ID"] = script.NewString(self.ID)
+	self.script.Vars["@Event"] = script.NewString(event)
 
 	// プロパティの送信
 	self.script.Vars["@IsEnable"] = script.NewBool(self.IsEnable)

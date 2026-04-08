@@ -1,17 +1,20 @@
 package script
 
+import "path"
+
 // **********************************************************************
 // 比較系のbuiltin
 var compareCmds = map[string]VMCmdFunc{
-	">":   grator,
-	"<":   less,
-	"==":  eq,
-	"!=":  neq,
-	">=":  ge,
-	"<=":  le,
-	"not": not,
-	"and": and,
-	"or":  or,
+	">":     grator,
+	"<":     less,
+	"==":    eq,
+	"!=":    neq,
+	">=":    ge,
+	"<=":    le,
+	"not":   not,
+	"and":   and,
+	"or":    or,
+	"match": match,
 }
 
 // ==================================================
@@ -132,5 +135,18 @@ func or(vm *VM, args []Value) (Value, error) {
 		}
 
 		return NewBool(arg0.ConvertBool().Bool() || arg1.ConvertBool().Bool()), nil
+	})
+}
+
+// ==================================================
+// 文字列マッチ
+func match(vm *VM, args []Value) (Value, error) {
+	return binOp(vm, "or", args, func(vm *VM, arg0 Value, arg1 Value) (Value, error) {
+		if arg0.Type == TypeString && arg1.Type == TypeString {
+			if match, err := path.Match(arg0.Str, arg1.Str); err == nil && match {
+				return NewBool(true), nil // マッチしたらtrueを返す
+			}
+		}
+		return NewBool(false), nil
 	})
 }

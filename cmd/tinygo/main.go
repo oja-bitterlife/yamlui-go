@@ -18,7 +18,7 @@ func main() {
 	// vm := lib.GetRoot().GetVM()
 	// vm.Run()
 
-	lib.Update(0)
+	lib.Dispatch()
 	lib.Draw(0, 0)
 
 	print("UI loaded successfully!")

@@ -17,9 +17,7 @@ type YAMLUI struct {
 	refObj map[string]UIComponent[*UIBase] // Component生成用リファレンスオブジェクト
 
 	// Updateの時に使うもの
-	SystemFrame  int // システム時間
-	eventQueue   []EventQueueItem
-	eventReserve []EventQueueItem
+	eventChannel chan string
 	updateQueue  []UpdateQueueItem
 
 	// Drawの時に使うもの
@@ -32,8 +30,7 @@ func NewYAMLUI() *YAMLUI {
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
-		eventQueue:   make([]EventQueueItem, 0, EVENT_USING_MAX),
-		eventReserve: make([]EventQueueItem, 0, EVENT_USING_MAX),
+		eventChannel: make(chan string, EVENT_USING_MAX),
 		updateQueue:  make([]UpdateQueueItem, 0, UI_USING_MAX),
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
@@ -53,11 +50,6 @@ func (lib *YAMLUI) FindByID(id string) *UIBase {
 
 func (lib *YAMLUI) GetRoot() *UIBase {
 	return lib.root
-}
-
-// デバッグ用。ないとログもままならないので
-func (lib *YAMLUI) GetEvents() []EventQueueItem {
-	return lib.eventQueue
 }
 
 // **********************************************************************
@@ -171,4 +163,19 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 	}
 
 	return nil
+}
+
+func (lib *YAMLUI) Run() {
+	// ここでYAMLUIのgoruoutineを走らせる
+	go func() {
+		for {
+			// ここでイベントを待ち受ける
+			event := <-lib.eventChannel
+
+			// イベントが来たらUpdateを呼び出す
+			if err := lib.Dispatch(event); err != nil {
+				script.LogErr("Error in Update: " + err.Error())
+			}
+		}
+	}()
 }

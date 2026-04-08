@@ -40,23 +40,18 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 	// クローズのアニメーションのために元の高さを保存
 	self.orgH = self.GetUIBase().H
 
-	self.GetUIBase().SetUpdateIF(self)
 	self.GetUIBase().SetDrawIF(self)
 	return nil
 }
 
-func (self *BTWindow) Update(lib *yamlui.YAMLUI, events []string) (string, error) {
+func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
+	drawArea := ctx.Clip
+
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {
 		// close_ratioに応じて上から閉じていくようにY座標を計算
 		self.GetUIBase().H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
 	}
-
-	return "", nil
-}
-
-func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
-	drawArea := ctx.Clip
 
 	// 3. 描画ループ
 	for dy := int(drawArea.Top()); dy < int(drawArea.Bottom()); dy++ {
