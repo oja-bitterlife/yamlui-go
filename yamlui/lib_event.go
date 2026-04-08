@@ -2,31 +2,36 @@ package yamlui
 
 import (
 	"path"
+	"time"
 )
 
+// **********************************************************************
+// 完了検知のための構造体
+type eventContext struct {
+	name string
+	done chan struct{}
+}
+
+// イベント送信
 func (lib *YAMLUI) SendEvent(event string) {
 	// goroutineでイベントを送る
-	lib.eventChannel <- event
+	lib.eventChannel <- eventContext{
+		name: event,
+		done: nil,
+	}
 }
 
-// ==================================================
-// イベントチェック.ワイルドカードでイベントチェックする
-// 発生したイベントの中に、matchStrにマッチするものがあるか
-func (lib *YAMLUI) HasEvent(matchStr string, events []string) bool {
-	for _, event := range events {
-		if match := lib.MatchEvent(matchStr, event); match {
-			return true
-		}
-	}
-	return false
-}
+// デバッグ用：3秒経っても反応がなければパニックさせる
+func (lib *YAMLUI) CallEvent(name string) {
+	done := make(chan struct{})
+	lib.eventChannel <- eventContext{name: name, done: done}
 
-// そのイベントがワイルドカードにマッチするか
-func (lib *YAMLUI) MatchEvent(matchStr string, event string) bool {
-	if match, _ := path.Match(matchStr, event); match {
-		return true
+	select {
+	case <-done:
+		// 正常終了
+	case <-time.After(3 * time.Second):
+		panic("CallEvent Deadlock detected! Event: " + name)
 	}
-	return false
 }
 
 // **********************************************************************

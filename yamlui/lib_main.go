@@ -19,7 +19,7 @@ type YAMLUI struct {
 	mtx    sync.RWMutex
 
 	// Updateの時に使うもの
-	eventChannel chan string
+	eventChannel chan eventContext
 	updateQueue  []UpdateQueueItem
 
 	// Drawの時に使うもの
@@ -32,7 +32,7 @@ func NewYAMLUI() *YAMLUI {
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
-		eventChannel: make(chan string, EVENT_USING_MAX),
+		eventChannel: make(chan eventContext, EVENT_USING_MAX),
 		updateQueue:  make([]UpdateQueueItem, 0, UI_USING_MAX),
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
@@ -83,8 +83,13 @@ func (lib *YAMLUI) Start(valueJSON []byte) error {
 		// channelがCloseされるまでイベントを待ち続ける
 		for event := range lib.eventChannel {
 			// イベントが来たらUpdateを呼び出す
-			if err := lib.Dispatch(event); err != nil {
+			if err := lib.Dispatch(event.name); err != nil {
 				script.LogErr("Error in Update: " + err.Error())
+			}
+
+			// イベント処理が終わったら、イベントの完了を待っているgoroutineを解放する
+			if event.done != nil {
+				close(event.done)
 			}
 		}
 

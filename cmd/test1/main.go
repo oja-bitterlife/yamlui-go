@@ -85,10 +85,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
-			m.lib.SendEvent("key:up")
+			m.lib.CallEvent("key:up")
 		}
 		if msg.Type == tea.KeyDown {
-			m.lib.SendEvent("key:down")
+			m.lib.CallEvent("key:down")
 		}
 
 		// // 横方向の移動 (NextGridX)
