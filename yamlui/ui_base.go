@@ -43,10 +43,10 @@ type UIBase struct {
 
 	// インターフェース(ランタイム用)
 	// ----------------------------------------
-	updateIF     UpdateIF
-	updateTreeIF UpdateTreeIF
-	drawIF       DrawIF
-	drawTreeIF   DrawTreeIF
+	dispatchIF     DispatchIF
+	dispatchTreeIF DispatchTreeIF
+	drawIF         DrawIF
+	drawTreeIF     DrawTreeIF
 }
 
 func NewUIBase() *UIBase {

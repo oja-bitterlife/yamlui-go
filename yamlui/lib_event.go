@@ -2,7 +2,6 @@ package yamlui
 
 import (
 	"path"
-	"time"
 )
 
 // **********************************************************************
@@ -21,26 +20,32 @@ func (lib *YAMLUI) SendEvent(event string) {
 	}
 }
 
-// デバッグ用：3秒経っても反応がなければパニックさせる
+// イベントを送信して完了を待つ
 func (lib *YAMLUI) CallEvent(name string) {
+	if lib.isLock.Load() {
+		panic("Updaate/Draw中にイベントを呼び出すことはできません")
+	}
+
 	done := make(chan struct{})
 	lib.eventChannel <- eventContext{name: name, done: done}
+	<-done
+}
 
-	select {
-	case <-done:
-		// 正常終了
-	case <-time.After(3 * time.Second):
-		panic("CallEvent Deadlock detected! Event: " + name)
+// そもそもgoroutinを使わない
+func (lib *YAMLUI) DispatchEvent(name string) {
+	if lib.isLock.Load() {
+		panic("Updaate/Draw中にイベントを呼び出すことはできません")
 	}
+	lib.dispatch(name)
 }
 
 // **********************************************************************
 // イベント処理
 // UpdateQueueのEventsにイベントを振り分ける
-func (lib *YAMLUI) ProcessEvents(event string) UpdateIF {
+func (lib *YAMLUI) ProcessEvents(event string) DispatchIF {
 	// Updateの後ろからイベント処理
-	for i := len(lib.updateQueue) - 1; i >= 0; i-- {
-		uiBase := lib.updateQueue[i].UpdateIF.GetUIBase()
+	for i := len(lib.dispatchQueue) - 1; i >= 0; i-- {
+		uiBase := lib.dispatchQueue[i].DispatchIF.GetUIBase()
 
 		// 受信設定と一致したイベントがあるか確認する
 		matchedAny := false
@@ -55,7 +60,7 @@ func (lib *YAMLUI) ProcessEvents(event string) UpdateIF {
 
 		// マッチしたイベントはUpdateQueueのどれに対応するかセットする
 		if matchedAny {
-			return lib.updateQueue[i].UpdateIF
+			return lib.dispatchQueue[i].DispatchIF
 		}
 	}
 	return nil

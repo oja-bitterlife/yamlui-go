@@ -49,13 +49,13 @@ func (self *BTStart) Setup(type_ string, data script.ValueMap) error {
 	self.SelBase.RowsNum = max(int(data["RowsNum"].Num), 1) // RowsNumは1以上にする
 
 	self.SelBase.UIBase.SetDrawIF(self)
-	self.SelBase.UIBase.SetUpdateIF(self)
+	self.SelBase.UIBase.SetDispatchIF(self)
 
 	return nil
 }
 
-// Update
-func (self *BTStart) Update(lib *yamlui.YAMLUI, event string) (string, error) {
+// Dispatch
+func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
 	if event == "key:up" {
 		self.SelBase.NextGridY(-1, true)
 	}

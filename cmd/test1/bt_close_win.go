@@ -34,11 +34,11 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 	if err := self.uiBlock.Setup(type_, data); err != nil { // super call
 		return err
 	}
-	self.GetUIBase().SetUpdateIF(self)
+	self.GetUIBase().SetDispatchIF(self)
 	return nil
 }
 
-func (self *BTCloseWin) Update(lib *yamlui.YAMLUI, event string) (string, error) {
+func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
 	// "next:*"イベントがあったら30フレーム後にウィンドウを閉じるタイマーをセットする
 	// if lib.HasEvent("next:*", events) {
 	// 	self.uiBlock.StartBlockTimer(10)

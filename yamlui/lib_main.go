@@ -3,6 +3,7 @@ package yamlui
 import (
 	"path"
 	"sync"
+	"sync/atomic"
 
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
@@ -16,11 +17,12 @@ type YAMLUI struct {
 	// UIツリー構築用
 	root   *UIBase
 	refObj map[string]UIComponent[*UIBase] // Component生成用リファレンスオブジェクト
-	mtx    sync.RWMutex
 
 	// Updateの時に使うもの
-	eventChannel chan eventContext
-	updateQueue  []UpdateQueueItem
+	mtx           sync.RWMutex
+	isLock        atomic.Bool
+	eventChannel  chan eventContext
+	dispatchQueue []DispatchQueueItem
 
 	// Drawの時に使うもの
 	Screen    Area
@@ -32,8 +34,8 @@ func NewYAMLUI() *YAMLUI {
 		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
-		eventChannel: make(chan eventContext, EVENT_USING_MAX),
-		updateQueue:  make([]UpdateQueueItem, 0, UI_USING_MAX),
+		eventChannel:  make(chan eventContext, EVENT_USING_MAX),
+		dispatchQueue: make([]DispatchQueueItem, 0, UI_USING_MAX),
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
 	}
@@ -83,7 +85,7 @@ func (lib *YAMLUI) Start(valueJSON []byte) error {
 		// channelがCloseされるまでイベントを待ち続ける
 		for event := range lib.eventChannel {
 			// イベントが来たらUpdateを呼び出す
-			if err := lib.Dispatch(event.name); err != nil {
+			if err := lib.dispatch(event.name); err != nil {
 				script.LogErr("Error in Update: " + err.Error())
 			}
 

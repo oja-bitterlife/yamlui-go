@@ -48,14 +48,14 @@ func (self *BTSpeed) Setup(type_ string, data script.ValueMap) error {
 	self.SelBase.ItemNum = len(texts)
 	self.SelBase.RowsNum = max(int(data["RowsNum"].Num), 1) // RowsNumは1以上にする
 
-	self.SelBase.UIBase.SetUpdateIF(self)
+	self.SelBase.UIBase.SetDispatchIF(self)
 	self.SelBase.UIBase.SetDrawIF(self)
 
 	return nil
 }
 
-// Update
-func (self *BTSpeed) Update(lib *yamlui.YAMLUI, event string) (string, error) {
+// Dispatch
+func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
 	if event == "key:left" {
 		self.SelBase.NextGridX(-1, true)
 	}
