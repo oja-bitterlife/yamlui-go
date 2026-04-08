@@ -15,11 +15,11 @@ func main() {
 		panic(err)
 	}
 
-	vm, err := lib.GetRoot().GetScriptVM()
-	if err != nil {
-		panic(err)
-	}
-	vm.Run()
+	// vm := lib.GetRoot().GetVM()
+	// vm.Run()
+
+	lib.Update(0)
+	lib.Draw(0, 0)
 
 	print("UI loaded successfully!")
 }

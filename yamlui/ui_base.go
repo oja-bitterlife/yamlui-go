@@ -156,6 +156,11 @@ func (self *UIBase) HasScript() bool {
 	return len(self.script.AST.List) > 0
 }
 
+// VM単体でテストしたいときにアクセスするための関数
+func (self *UIBase) GetVM() *script.VM {
+	return &self.script
+}
+
 // **********************************************************************
 // Tree構造化
 // ==================================================
