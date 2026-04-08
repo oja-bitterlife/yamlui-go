@@ -35,6 +35,8 @@ func Itoa(num int) string {
 	}
 
 	var sb strings.Builder
+	sb.Grow(11) // intの最大値は10桁 + 符号
+
 	if num < 0 {
 		sb.WriteByte('-')
 		num = -num
@@ -107,6 +109,8 @@ func Atoi(s string) (int, error) {
 // Quoteは、文字列をエスケープしてダブルクオートで囲む関数
 func Quote(s string) string {
 	var sb strings.Builder
+	sb.Grow(len(s) + 8) // エスケープで増える分を考慮して少し余裕を持たせる
+
 	sb.WriteByte('"')
 	for _, c := range s {
 		switch c {
@@ -125,6 +129,7 @@ func Quote(s string) string {
 		}
 	}
 	sb.WriteByte('"')
+
 	return sb.String()
 }
 
@@ -135,6 +140,8 @@ func Unquote(s string) (string, error) {
 	}
 
 	var sb strings.Builder
+	sb.Grow(len(s)) // 元の長さと同じか小さくなる
+
 	for i := 1; i < len(s)-1; i++ {
 		c := s[i]
 		if c == '\\' {
@@ -167,6 +174,8 @@ func Unquote(s string) (string, error) {
 
 func ToLower(s string) string {
 	var sb strings.Builder
+	sb.Grow(len(s))
+
 	for _, c := range s {
 		if 'A' <= c && c <= 'Z' {
 			sb.WriteRune(c + ('a' - 'A'))
@@ -174,6 +183,7 @@ func ToLower(s string) string {
 			sb.WriteRune(c)
 		}
 	}
+
 	return sb.String()
 }
 

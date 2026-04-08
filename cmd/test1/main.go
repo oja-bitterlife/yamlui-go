@@ -67,8 +67,6 @@ func initialModel() model {
 		panic(fmt.Sprintf("Failed to load UI from JSON: %v", err))
 	}
 
-	TraceMemory() // 初期化時のメモリ使用状況をログに出力
-
 	return m
 }
 
