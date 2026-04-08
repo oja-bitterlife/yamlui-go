@@ -1,9 +1,5 @@
 package script
 
-import (
-	"strings"
-)
-
 // **********************************************************************
 // 数学系のbuiltin
 var mathCmds = map[string]VMCmdFunc{
@@ -44,11 +40,12 @@ func sub(vm *VM, args []Value) (Value, error) {
 func mul(vm *VM, args []Value) (Value, error) {
 	return binOp(vm, "*", args, func(vm *VM, arg0 Value, arg1 Value) (Value, error) {
 		repeatStr := func(s string, n int) string {
-			var str strings.Builder
-			for range n {
-				str.WriteString(s)
+			// 文字列をn回転送するだけ
+			buf := make([]byte, len(s)*n)
+			for i := range n {
+				copy(buf[i*len(s):], s)
 			}
-			return str.String()
+			return string(buf)
 		}
 		if arg0.Type == TypeString && arg1.Type == TypeNumber {
 			return NewString(repeatStr(arg0.Str, int(arg1.Num))), nil
