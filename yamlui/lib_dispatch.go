@@ -84,11 +84,11 @@ func (lib *YAMLUI) dispatch(event string) error {
 
 	// Update
 	// ----------------------------------------
-	// Updateを呼び出す
+	// Dispatchを呼び出す
 	if nextEvent, err := dispatchIF.Dispatch(lib, event); err != nil {
 		return err
 	} else if nextEvent != "" {
-		// Updateからイベントが返ってきたら処理する
+		lib.SendEvent(nextEvent)
 	}
 
 	// Update後にRemoveを処理する。Removeがtrueの要素は子供もろとも削除する

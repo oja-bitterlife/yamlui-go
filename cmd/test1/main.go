@@ -22,6 +22,7 @@ type Cell struct {
 
 type model struct {
 	lib    *yamlui.YAMLUI
+	lib2   *yamlui.YAMLUI
 	width  int
 	height int
 	frame  int
@@ -34,6 +35,7 @@ type model struct {
 func initialModel() model {
 	m := model{
 		lib:    yamlui.NewYAMLUI(),
+		lib2:   yamlui.NewYAMLUI(),
 		width:  68,
 		height: 26,
 	}
@@ -56,6 +58,14 @@ func initialModel() model {
 	m.lib.UIBuild("speed", NewBTSpeed(&m))
 	m.lib.UIBuild("close_win", NewBTCloseWin(&m))
 
+	m.lib2.UIBuild("window", NewBTWindow(&m))
+	m.lib2.UIBuild("title", NewBTTitle(&m))
+	m.lib2.UIBuild("area", yamlui.NewUILayout())
+	m.lib2.UIBuild("start", NewBTStart(&m))
+	m.lib2.UIBuild("label", NewBTLabel(&m))
+	m.lib2.UIBuild("speed", NewBTSpeed(&m))
+	m.lib2.UIBuild("close_win", NewBTCloseWin(&m))
+
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")
 	if err != nil {
@@ -63,6 +73,9 @@ func initialModel() model {
 	}
 
 	if err := m.lib.Start(fileData); err != nil {
+		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
+	}
+	if err := m.lib2.Start(fileData); err != nil {
 		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
 	}
 
@@ -86,17 +99,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
 			m.lib.CallEvent("key:up")
+			m.lib2.CallEvent("key:down")
 		}
 		if msg.Type == tea.KeyDown {
 			m.lib.CallEvent("key:down")
+			m.lib2.CallEvent("key:up")
 		}
 
 		// // 横方向の移動 (NextGridX)
 		if msg.Type == tea.KeyLeft {
 			m.lib.CallEvent("key:left")
+			m.lib2.CallEvent("key:right")
 		}
 		if msg.Type == tea.KeyRight {
 			m.lib.CallEvent("key:right")
+			m.lib2.CallEvent("key:left")
 		}
 
 		// Enterキーで選択
@@ -117,8 +134,9 @@ func (m model) View() string {
 		}
 	}
 
-	m.lib.Draw(m.width, m.height)
-	return ""
+	m.lib.Draw(0, 0, m.width, m.height)
+	m.lib2.Draw(8, 3, m.width, m.height)
+
 	// 色の設定
 	bgStyle := lipgloss.NewStyle().
 		Background(lipgloss.Color("#000080")). // 紺色背景

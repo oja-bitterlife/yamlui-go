@@ -53,7 +53,7 @@ func NewDrawContext(lib *YAMLUI, self *UIBase, parentClip Area) DrawContext {
 
 // **********************************************************************
 // 呼び出し口
-func (lib *YAMLUI) Draw(sw, sh int) {
+func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 	lib.mtx.RLock()
 	lib.isLock.Store(true)
 	defer func() {
@@ -62,7 +62,7 @@ func (lib *YAMLUI) Draw(sw, sh int) {
 	}()
 
 	// 描画領域をセット
-	lib.Screen = NewArea(0, 0, sw, sh)
+	lib.Screen = NewArea(sx, sy, sw, sh)
 
 	// drawQueueをクリア
 	lib.drawQueue = lib.drawQueue[:0]
@@ -70,7 +70,7 @@ func (lib *YAMLUI) Draw(sw, sh int) {
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
 	ctx := NewDrawContext(lib, lib.root, lib.Screen)
-	lib.root.RecDrawTree(0, 0, 0, ctx)
+	lib.root.RecDrawTree(0, sx, sy, ctx)
 
 	// drawQueueに溜まった描画命令を実行する
 	// ----------------------------------------

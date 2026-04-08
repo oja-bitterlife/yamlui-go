@@ -89,7 +89,9 @@ func (self *BTWindow) Draw(x, y int, ctx yamlui.DrawContext) {
 			// キャンバスの物理境界チェックをして書き込み
 			if dy >= 0 && dy < len(self.model.canvas) && dx >= 0 && dx < len(self.model.canvas[dy]) {
 				if drawArea.Contains(dx, dy) {
-					self.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
+					if r != ' ' {
+						self.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
+					}
 				}
 			}
 		}

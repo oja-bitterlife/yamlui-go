@@ -41,7 +41,7 @@ func (lib *YAMLUI) DispatchEvent(name string) {
 
 // **********************************************************************
 // イベント処理
-// UpdateQueueのEventsにイベントを振り分ける
+// Dispatch対象のUIを探す
 func (lib *YAMLUI) ProcessEvents(event string) DispatchIF {
 	// Updateの後ろからイベント処理
 	for i := len(lib.dispatchQueue) - 1; i >= 0; i-- {

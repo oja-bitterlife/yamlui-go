@@ -29,7 +29,7 @@ func (lib *YAMLUI) scriptAction(vm *script.VM, args []script.Value) (script.Valu
 		return script.Value{}, script.LogErr("action command expects a string argument, but got " + value.Type.String())
 	}
 
-	// lib.ReserveEvent(value.Str) // イベントを追加
+	lib.SendEvent(value.Str) // イベントを追加
 
 	return value, nil
 }
