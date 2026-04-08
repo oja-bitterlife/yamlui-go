@@ -13,7 +13,7 @@ type DrawContext struct {
 // 直接DrawIFを呼び出すのではなく、DrawTreeの中でDrawQueueItemにしてキューに入れる
 type DrawQueueItem struct {
 	drawIF DrawIF
-	z      int
+	z      float64
 	x      int
 	y      int
 	clip   Area
@@ -27,7 +27,7 @@ type DrawIF interface {
 
 // Align操作が必要な時とか、DrawTreeを自前で実装したいときのインターフェース
 type DrawTreeIF interface {
-	DrawTree(z int, x, y int, clip Area, ctx DrawContext)
+	DrawTree(z float64, x, y int, clip Area, ctx DrawContext)
 }
 
 func (self *UIBase) SetDrawIF(drawIF DrawIF) {
@@ -72,7 +72,13 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 	// ----------------------------------------
 	// Z順でソートする
 	slices.SortStableFunc(lib.drawQueue, func(a, b DrawQueueItem) int {
-		return a.z - b.z
+		if a.z < b.z {
+			return -1
+		}
+		if a.z > b.z {
+			return 1
+		}
+		return 0
 	})
 
 	// ソートされたqueueを順番に実行する
@@ -83,7 +89,7 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 
 // **********************************************************************
 // DrawTreeの再帰実行
-func (self *UIBase) RecDrawTree(z int, x, y int, clip Area, ctx DrawContext) {
+func (self *UIBase) RecDrawTree(z float64, x, y int, clip Area, ctx DrawContext) {
 	// 子供の描画
 	for _, child := range self.children {
 		if child.IsVisible {

@@ -77,7 +77,7 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // DrawTreeのOverride
-func (self *UILayout) DrawTree(z int, x, y int, clip Area, ctx DrawContext) {
+func (self *UILayout) DrawTree(z float64, x, y int, clip Area, ctx DrawContext) {
 	// 面倒なので先にintにしておく
 	parentW, parentH := ctx.ParentClip.WH()
 	selfW, selfH := self.GetUIBase().Area().WH()
