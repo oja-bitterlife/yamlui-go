@@ -17,7 +17,7 @@ type DispatchQueueItem struct {
 // ==================================================
 // Update
 type DispatchIF interface {
-	Dispatch(lib *YAMLUI, event string) (string, error)
+	Dispatch(lib *YAMLUI, event string)
 	GetUIBase() *UIBase
 }
 
@@ -27,7 +27,7 @@ func (self *UIBase) SetDispatchIF(dispatchIF DispatchIF) {
 
 // **********************************************************************
 // 呼び出し口
-func (lib *YAMLUI) dispatch(event string) error {
+func (lib *YAMLUI) dispatch(event string) {
 	// 最初にLock
 	lib.mtx.Lock()
 	lib.isLock.Store(true)
@@ -41,9 +41,7 @@ func (lib *YAMLUI) dispatch(event string) error {
 
 	// 更新コンテキストを作成してDispatchTreeを呼び出す
 	// ----------------------------------------
-	if err := lib.root.recDispatchTree(lib, 0); err != nil {
-		return err
-	}
+	lib.root.recDispatchTree(lib, 0)
 
 	// queueに溜まったDispatchを実行する
 	// ----------------------------------------
@@ -56,7 +54,7 @@ func (lib *YAMLUI) dispatch(event string) error {
 	dispatchIF := lib.processEvents(event)
 	if dispatchIF == nil {
 		// 処理するUIがなかった
-		return nil
+		return
 	}
 	uiBase := dispatchIF.GetUIBase()
 
@@ -67,9 +65,7 @@ func (lib *YAMLUI) dispatch(event string) error {
 		uiBase.storeToVM(lib.Frame, event)
 
 		// スクリプトを実行
-		if err := uiBase.script.Run(); err != nil {
-			return err
-		}
+		uiBase.script.Run()
 
 		// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
 		uiBase.loadFromVM()
@@ -78,23 +74,17 @@ func (lib *YAMLUI) dispatch(event string) error {
 	// Update
 	// ----------------------------------------
 	// Dispatchを呼び出す
-	if nextEvent, err := dispatchIF.Dispatch(lib, event); err != nil {
-		return err
-	} else if nextEvent != "" {
-		lib.SendEvent(nextEvent)
-	}
+	dispatchIF.Dispatch(lib, event)
 
 	// Update後にRemoveを処理する。Removeがtrueの要素は子供もろとも削除する
 	lib.root.recRemove()
 
 	lib.Frame++ // フレームを進める
-
-	return nil
 }
 
 // **********************************************************************
 // 再帰でTreeをDispatchQueueに入れる
-func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) error {
+func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) {
 	// 子供の更新
 	for _, child := range self.children {
 		if child.IsEnable {
@@ -107,13 +97,9 @@ func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) error {
 			}
 
 			// 再帰的に呼び出す
-			if err := child.recDispatchTree(lib, z+1); err != nil {
-				return err
-			}
+			child.recDispatchTree(lib, z+1)
 		}
 	}
-
-	return nil
 }
 
 // ==================================================

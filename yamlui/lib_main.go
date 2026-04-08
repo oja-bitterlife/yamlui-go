@@ -86,17 +86,13 @@ func (lib *YAMLUI) Start(valueJSON []byte) error {
 		// channelがCloseされるまでイベントを待ち続ける
 		for event := range lib.eventChannel {
 			// イベントが来たらUpdateを呼び出す
-			if err := lib.dispatch(event.name); err != nil {
-				script.LogErr("Error in Update: " + err.Error())
-			}
+			lib.dispatch(event.name)
 
 			// イベント処理が終わったら、イベントの完了を待っているgoroutineを解放する
 			if event.done != nil {
 				close(event.done)
 			}
 		}
-
-		script.Log("YAMLUI: Event channel closed, stopping event loop")
 	}()
 	return nil
 }
@@ -106,7 +102,8 @@ func (lib *YAMLUI) Stop() {
 }
 
 // **********************************************************************
-// UITreeの構築（再帰的に子要素も構築）
+// goroutineを使わない場合はこっち
+// lib.DispatchEvent()と組み合わせて使う
 func (lib *YAMLUI) Load(valueJson []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
 	value, err := script.NewFromValueJSON(valueJson)

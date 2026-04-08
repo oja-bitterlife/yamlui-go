@@ -39,25 +39,25 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 	return nil
 }
 
-func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
-	self.uiBlock.StartBlockTimer(lib.Frame, 30) // 30フレームのブロック
-	return "", nil
+func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {
+	if self.uiBlock.IsStarted() == false {
+		self.uiBlock.StartBlockTimer(lib.Frame, 30) // 30フレームのブロック
+	}
 }
 
 func (self *BTCloseWin) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
-	if self.uiBlock.IsStarted() == false {
-		return // ブロックしていない
-	}
-
 	win := lib.FindByID("win:title")
 	if win == nil {
 		script.LogErr("BTCloseWin: win:title not found")
 	}
-
+	// frame
+	script.Log("BTCloseWin: frame=%d", lib.Frame)
 	// タイマーが終了したらウィンドウを閉じる
 	if self.uiBlock.Timer.IsFinish(lib.Frame) {
 		win.Remove = true
 	} else {
 		win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(lib.Frame, 100))
 	}
+
+	lib.SendEvent("*")
 }

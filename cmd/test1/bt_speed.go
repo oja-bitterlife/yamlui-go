@@ -55,14 +55,13 @@ func (self *BTSpeed) Setup(type_ string, data script.ValueMap) error {
 }
 
 // Dispatch
-func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
+func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) {
 	if event == "key:left" {
 		self.SelBase.NextGridX(-1, true)
 	}
 	if event == "key:right" {
 		self.SelBase.NextGridX(1, true)
 	}
-	return "", nil
 }
 
 func (self *BTSpeed) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {

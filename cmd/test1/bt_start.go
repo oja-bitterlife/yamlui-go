@@ -55,14 +55,13 @@ func (self *BTStart) Setup(type_ string, data script.ValueMap) error {
 }
 
 // Dispatch
-func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) (string, error) {
+func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) {
 	if event == "key:up" {
 		self.SelBase.NextGridY(-1, true)
 	}
 	if event == "key:down" {
 		self.SelBase.NextGridY(1, true)
 	}
-	return "", nil
 }
 
 // Draw
