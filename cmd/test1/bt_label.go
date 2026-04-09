@@ -45,7 +45,7 @@ func (self *BTLabel) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 		return // クリップ範囲外は描画しない
 	}
 
-	line := self.UIBase.Text
+	line := self.GetUIBase().PropStr("Text")
 	for j, char := range line {
 		// 横幅(clip.W)を超えないようにガード
 		if j >= int(clip.W) {

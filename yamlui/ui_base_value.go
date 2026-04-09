@@ -1,8 +1,6 @@
 package yamlui
 
 import (
-	"maps"
-
 	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
@@ -17,20 +15,29 @@ func (self *UIBase) ToValue() script.Value {
 		events[i] = script.NewString(event)
 	}
 
-	return script.NewLitMap(script.ValueMap{
-		"ID":         script.NewString(self.ID),
-		"Events":     script.NewLitList(events),
-		"IsEnable":   script.NewBool(self.IsEnable),
-		"Remove":     script.NewBool(self.Remove),
-		"X":          script.NewNumber(self.X),
-		"Y":          script.NewNumber(self.Y),
-		"W":          script.NewNumber(self.W),
-		"H":          script.NewNumber(self.H),
-		"IsVisible":  script.NewBool(self.IsVisible),
-		"Text":       script.NewString(self.Text),
-		"script":     self.script.AST,
-		"scriptVars": script.NewLitMap(self.script.Vars),
-	})
+	// UIBaseの基本的なプロパティをValueMapに入れる
+	data := script.ValueMap{
+		"ID":       script.NewString(self.ID),
+		"Events":   script.NewLitList(events),
+		"IsEnable": script.NewBool(self.IsEnable),
+		"Remove":   script.NewBool(self.Remove),
+		"X":        script.NewNumber(self.X),
+		"Y":        script.NewNumber(self.Y),
+		"W":        script.NewNumber(self.W),
+		"H":        script.NewNumber(self.H),
+		"script":   self.script.AST,
+	}
+
+	// Propertyは@付きの名前でVarsに入っているものをValueMapに入れる
+	for k, v := range self.script.Vars {
+		// @付きだけ回収する.@がないものはlocal変数
+		if len(k) > 0 && k[0] == '@' {
+			// @を外して入れる
+			data[k[1:]] = v
+		}
+	}
+
+	return script.NewLitMap(data)
 }
 
 // ==================================================
@@ -41,62 +48,41 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 	}
 	m := value.Map
 
-	// キーがあれば流し込む。なければデフォルト値のまま
-	if v, ok := m["ID"]; ok {
-		self.ID = v.Str
-	}
-
-	// EventsはStringのリストであることを確認してから流し込む
-	if v, ok := m["Events"]; ok {
-		if v.Type != script.TypeLitList {
-			return script.LogErr("Expected Events to be ListType: " + v.Type.String())
-		}
-
-		events := make([]string, len(v.List))
-		for i, eventVal := range v.List {
-			if eventVal.Type != script.TypeString {
-				return script.LogErr("Expected Events to be List of String: " + eventVal.Type.String())
+	for k, v := range m {
+		switch k {
+		case "ID":
+			self.ID = v.Str
+		case "Events":
+			if v.Type != script.TypeLitList {
+				return script.LogErr("Expected Events to be ListType: " + v.Type.String())
 			}
-			events[i] = eventVal.Str
+
+			events := make([]string, len(v.List))
+			for i, eventVal := range v.List {
+				if eventVal.Type != script.TypeString {
+					return script.LogErr("Expected Events to be List of String: " + eventVal.Type.String())
+				}
+				events[i] = eventVal.Str
+			}
+			self.Events = events
+		case "IsEnable":
+			self.IsEnable = v.Bool()
+		case "Remove":
+			self.Remove = v.Bool()
+		case "X":
+			self.X = v.Num
+		case "Y":
+			self.Y = v.Num
+		case "W":
+			self.W = v.Num
+		case "H":
+			self.H = v.Num
+		case "script":
+			self.script.AST = v
+		default:
+			// その他のPropertyは@をつけてVMのVarsに流し込む
+			self.script.Vars["@"+k] = v
 		}
-		self.Events = events
-	}
-
-	if v, ok := m["IsEnable"]; ok {
-		self.IsEnable = v.Bool()
-
-	}
-	if v, ok := m["Remove"]; ok {
-		self.Remove = v.Bool()
-	}
-	if v, ok := m["X"]; ok {
-		self.X = v.Num
-	}
-	if v, ok := m["Y"]; ok {
-		self.Y = v.Num
-	}
-	if v, ok := m["W"]; ok {
-		self.W = v.Num
-	}
-	if v, ok := m["H"]; ok {
-		self.H = v.Num
-	}
-	if v, ok := m["IsVisible"]; ok {
-		self.IsVisible = v.Bool()
-	}
-	if v, ok := m["Text"]; ok {
-		self.Text = v.Str
-	}
-
-	// scriptはASTのへコピーとVarsへの流し込みを行う
-	if v, ok := m["script"]; ok {
-		self.script.AST = v
-	}
-	if v, ok := m["scriptVars"]; ok {
-		if v.Type != script.TypeLitMap {
-			return script.LogErr("Expected scriptVars to be MapType: " + v.Type.String())
-		}
-		maps.Copy(self.script.Vars, v.Map)
 	}
 
 	return nil

@@ -30,10 +30,6 @@ type UIBase struct {
 	W int
 	H int
 
-	// 表示
-	IsVisible bool
-	Text      string
-
 	// ScriptVM. VarsはUIBaseのプロパティと共有
 	script script.VM
 
@@ -54,7 +50,6 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	ui.ID = id
 
 	ui.IsEnable = true
-	ui.IsVisible = true
 
 	// とりあえず大きな値を入れておく
 	ui.W = 65536
@@ -134,8 +129,6 @@ func (self *UIBase) storeToVM(frame int, event string) {
 	self.script.Vars["@Y"] = script.NewNumber(self.Y)
 	self.script.Vars["@Width"] = script.NewNumber(self.W)
 	self.script.Vars["@Height"] = script.NewNumber(self.H)
-	self.script.Vars["@IsVisivle"] = script.NewBool(self.IsVisible)
-	self.script.Vars["@Text"] = script.NewString(self.Text)
 }
 
 func (self *UIBase) loadFromVM() {
@@ -155,10 +148,6 @@ func (self *UIBase) loadFromVM() {
 			self.W = v.Num
 		case "@Height":
 			self.H = v.Num
-		case "@IsVisivle":
-			self.IsVisible = v.Bool()
-		case "@Text":
-			self.Text = v.Str
 		}
 	}
 }
