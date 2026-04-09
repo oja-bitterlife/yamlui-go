@@ -36,6 +36,7 @@ func (self *BTSpeed) Clone() yamlui.UICloned {
 
 // Dispatch
 func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) {
+	lib.Log("%s", event)
 	switch event {
 	case yamlui.EVENT_UI_ONCREATE:
 		// ,区切りのTextを分解してTrimしてtextsに格納
@@ -48,11 +49,11 @@ func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) {
 		// ItemNumをtextsの数に設定
 		self.SelBase.ItemNum = len(texts)
 
-	case "key:up":
-		self.SelBase.NextGridY(-1, true)
+	case "key:left":
+		self.SelBase.NextGridX(-1, true)
 
-	case "key:down":
-		self.SelBase.NextGridY(1, true)
+	case "key:right":
+		self.SelBase.NextGridX(1, true)
 	}
 }
 

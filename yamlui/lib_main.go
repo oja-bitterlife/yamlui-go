@@ -187,25 +187,27 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 
 	var ui *UIBase
 	if matchObj != nil {
-		// 登録されたUICloneableからUIを複製して構築
+		// 登録されたUICloneableからUIをCloneして構築
+		// ----------------------------------------
 		component := matchObj.Clone()
 		ui = component.GetUIBase()
 
-		// ValueからUIBaseに流し込む
-		ui.LoadFromValue(value)
-
-		// もしDrawIFやDrawTreeIFを実装しているなら、UIにセットする
+		// もしDrawIFやDrawTreeIFを実装しているならUIにセットする
+		if if_, ok := component.(DispatchIF); ok {
+			ui.dispatchIF = if_
+		}
 		if if_, ok := component.(DrawIF); ok {
 			ui.drawIF = if_
 		}
 		if if_, ok := component.(DrawTreeIF); ok {
 			ui.drawTreeIF = if_
 		}
-		if if_, ok := component.(DispatchIF); ok {
-			ui.dispatchIF = if_
-		}
 
-		// さらに細かい構築を行う?
+		// ----------------------------------------
+		// ValueからUIBaseに流し込む
+		ui.LoadFromValue(value)
+
+		// さらに細かい構築も行う?
 		if if_, ok := component.(DispatchIF); ok {
 			if_.Dispatch(lib, EVENT_UI_ONCREATE)
 		}
