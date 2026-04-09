@@ -35,7 +35,7 @@ func (self *BTSpeed) Setup(type_ string) {
 	self.SelBase.Setup(type_)
 
 	// ,区切りのTextを分解してTrimしてtextsに格納
-	texts := strings.Split(self.GetUIBase().PropStr("Text"), ",")
+	texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
 	for i := range texts {
 		texts[i] = strings.TrimSpace(texts[i])
 	}

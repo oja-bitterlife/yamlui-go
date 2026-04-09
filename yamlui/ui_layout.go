@@ -49,23 +49,23 @@ func (self *UILayout) Setup(type_ string) {
 	self.UIBase.SetDrawTreeFilterIF(self)
 
 	// デフォルトはMargin=0
-	self.Margin = self.UIBase.PropNum("Margin")
-	self.MarginTop = self.UIBase.PropNum("MarginTop")
-	self.MarginBottom = self.UIBase.PropNum("MarginBottom")
-	self.MarginLeft = self.UIBase.PropNum("MarginLeft")
-	self.MarginRight = self.UIBase.PropNum("MarginRight")
-	self.MarginX = self.UIBase.PropNum("MarginX")
-	self.MarginY = self.UIBase.PropNum("MarginY")
+	self.Margin = self.UIBase.PropNum("@Margin")
+	self.MarginTop = self.UIBase.PropNum("@MarginTop")
+	self.MarginBottom = self.UIBase.PropNum("@MarginBottom")
+	self.MarginLeft = self.UIBase.PropNum("@MarginLeft")
+	self.MarginRight = self.UIBase.PropNum("@MarginRight")
+	self.MarginX = self.UIBase.PropNum("@MarginX")
+	self.MarginY = self.UIBase.PropNum("@MarginY")
 
 	// Align系のプロパティはデフォルトはfalse
-	self.AlignCenter = self.UIBase.PropBool("AlignCenter")
-	self.AlignCenterX = self.UIBase.PropBool("AlignCenterX")
-	self.AlignCenterY = self.UIBase.PropBool("AlignCenterY")
-	self.AlignRight = self.UIBase.PropBool("AlignRight")
-	self.AlignBottom = self.UIBase.PropBool("AlignBottom")
+	self.AlignCenter = self.UIBase.PropBool("@AlignCenter")
+	self.AlignCenterX = self.UIBase.PropBool("@AlignCenterX")
+	self.AlignCenterY = self.UIBase.PropBool("@AlignCenterY")
+	self.AlignRight = self.UIBase.PropBool("@AlignRight")
+	self.AlignBottom = self.UIBase.PropBool("@AlignBottom")
 
 	// IsAbsのデフォルトはfalse
-	self.IsAbs = self.UIBase.PropBool("IsAbs")
+	self.IsAbs = self.UIBase.PropBool("@IsAbs")
 }
 
 // **********************************************************************
