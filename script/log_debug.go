@@ -75,17 +75,16 @@ var logger = slog.New(&PrettyHandler{out: os.Stderr})
 // ログ出力
 // ==================================================
 // 共通出力関数
-// 共通出力関数
-func logPrint(level slog.Level, msg string, args ...any) string {
+func PrintLogCommon(level slog.Level, caller int, msg string, args ...any) string {
 	fmtMsg := fmt.Sprintf(msg, args...)
 
 	// 1. 呼び出し元のPCを取得
-	// [呼び出し元] -> [Log/LogWarn] -> [logPrint]
+	// [呼び出し元] -> [Log/LogWarn] -> [PrintLogCommon]
 	// なので、3階層上を指定する必要があります
 	var pc uintptr
 	var pcs [1]uintptr
-	// runtime.Callers を使うのが一般的です (skip=3: logPrint, Log, 呼び出し元)
-	runtime.Callers(3, pcs[:])
+	// runtime.Callers を使うのが一般的です (skip=3: PrintLogCommon, Log, 呼び出し元)
+	runtime.Callers(caller, pcs[:])
 	pc = pcs[0]
 
 	r := slog.NewRecord(time.Now(), level, fmtMsg, pc)
@@ -96,19 +95,19 @@ func logPrint(level slog.Level, msg string, args ...any) string {
 // ==================================================
 // 各ログレベルの出力
 func Log(msg string, args ...any) {
-	logPrint(slog.LevelInfo, msg, args...)
+	PrintLogCommon(slog.LevelInfo, 3, msg, args...)
 }
 
 func LogWarn(msg string, args ...any) {
-	logPrint(slog.LevelWarn, msg, args...)
+	PrintLogCommon(slog.LevelWarn, 3, msg, args...)
 }
 
 func LogErr(msg string, args ...any) error {
-	fmtMsg := logPrint(slog.LevelError, msg, args...)
+	fmtMsg := PrintLogCommon(slog.LevelError, 3, msg, args...)
 	return errors.New(fmtMsg)
 }
 
 func LogFatal(msg string, args ...any) {
-	fmtMsg := logPrint(slog.LevelError, msg, args...)
+	fmtMsg := PrintLogCommon(slog.LevelError, 3, msg, args...)
 	panic(fmtMsg)
 }

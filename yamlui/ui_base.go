@@ -16,22 +16,14 @@ type UIBase struct {
 	// Scriptで更新させないもの
 	ID string
 
-	// Event
-	Events []string
-
-	// ==================================================
-	// スクリプトで更新できるプロパティ
-	// 座標
-	X int
-	Y int
-	W int
-	H int
-
 	// ScriptVM. VarsはUIBaseのプロパティと共有
 	script script.VM
 
-	// ==================================================
+	// Event
+	Events []string // キャッチするイベント
+
 	// 保存しないもの
+	// ==================================================
 	children []*UIBase
 
 	// インターフェース(ランタイム用)
@@ -59,21 +51,16 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	}
 	ui.script = script.NewVM(cmdsID)
 
-	// 0以外の初期値は入れておく
-	// ----------------------------------------
-
-	// とりあえず大きな値を入れておく
-	ui.W = 65536
-	ui.H = 65536
-
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
 	ui.children = []*UIBase{}
 
-	// Varsにデフォルトのプロパティを入れておく
+	// 0以外の初期値はVarsに入れておく
 	// ----------------------------------------
 	ui.SetPropBool(PROP_IS_ENABLE, true)
 	ui.SetPropBool(PROP_IS_VISIBLE, true)
+	ui.SetPropNum(PROP_W, 65536)
+	ui.SetPropNum(PROP_H, 65536)
 
 	return ui
 }
@@ -118,35 +105,11 @@ func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
 
 // **********************************************************************
 // ScriptVMとの連携
+// 参照用で送る
 func (self *UIBase) storeToVM(frame int, event string) {
-
-	// 参照用で送るもの
 	self.script.Vars["@ID"] = script.NewString(self.ID)
 	self.script.Vars["@Event"] = script.NewString(event)
 	self.script.Vars["@Frame"] = script.NewNumber(frame)
-
-	// プロパティの送信
-	self.script.Vars["@X"] = script.NewNumber(self.X)
-	self.script.Vars["@Y"] = script.NewNumber(self.Y)
-	self.script.Vars["@Width"] = script.NewNumber(self.W)
-	self.script.Vars["@Height"] = script.NewNumber(self.H)
-}
-
-func (self *UIBase) loadFromVM() {
-	// UIBaseのプロパティの受信
-	for k, v := range self.script.Vars {
-		switch k {
-
-		case "@X":
-			self.X = v.Num
-		case "@Y":
-			self.Y = v.Num
-		case "@Width":
-			self.W = v.Num
-		case "@Height":
-			self.H = v.Num
-		}
-	}
 }
 
 // ==================================================

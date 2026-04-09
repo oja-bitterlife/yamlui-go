@@ -39,9 +39,11 @@ func (vm *VM) Clone() VM {
 	clone := *vm
 
 	// varsはCloneする
+	newVars := make(map[string]Value, len(vm.Vars))
 	for k, v := range vm.Vars {
-		clone.Vars[k] = v.Clone()
+		newVars[k] = v.Clone()
 	}
+	clone.Vars = newVars
 
 	return clone
 }
@@ -105,7 +107,7 @@ func (vm *VM) DeleteVMCmds() {
 func (vm *VM) Run() error {
 	// resultを受け取る準備
 	if len(vm.AST.List) <= 1 {
-		vm.Result = NewNil() // ASTが空ならnil, ASTが1つでも上書きを期待してnil
+		vm.Result = NewNil() // 結果を一つ返す
 	} else {
 		vm.Result = NewList(make([]Value, len(vm.AST.List))) // ASTが複数ならリスト
 	}

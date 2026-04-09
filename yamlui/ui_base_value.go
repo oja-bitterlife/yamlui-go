@@ -19,10 +19,6 @@ func (self *UIBase) ToValue() script.Value {
 	data := script.ValueMap{
 		"ID":     script.NewString(self.ID),
 		"Events": script.NewLitList(events),
-		"X":      script.NewNumber(self.X),
-		"Y":      script.NewNumber(self.Y),
-		"W":      script.NewNumber(self.W),
-		"H":      script.NewNumber(self.H),
 		"script": self.script.AST,
 	}
 
@@ -50,6 +46,10 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 		switch k {
 		case "ID":
 			self.ID = v.Str
+
+		case "script":
+			self.script.AST = v
+
 		case "Events":
 			if v.Type != script.TypeLitList {
 				return script.LogErr("Expected Events to be ListType: " + v.Type.String())
@@ -63,19 +63,10 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 				events[i] = eventVal.Str
 			}
 			self.Events = events
-		case "X":
-			self.X = v.Num
-		case "Y":
-			self.Y = v.Num
-		case "W":
-			self.W = v.Num
-		case "H":
-			self.H = v.Num
-		case "script":
-			self.script.AST = v
 
-		case "Type", "children":
+		case "children":
 			// 処理しないもの
+
 		default:
 			// その他のPropertyは@をつけてVMのVarsに流し込む
 			self.script.Vars["@"+k] = v
@@ -120,23 +111,9 @@ func (self *UIBase) PropBool(key string) bool {
 }
 
 // ==================================================
-// 取り出してクリアする
-func (self *UIBase) TakePropStr(key string) string {
-	str := self.PropStr(key)
+// 削除
+func (self *UIBase) DeleteProp(key string) {
 	delete(self.script.Vars, key)
-	return str
-}
-
-func (self *UIBase) TakePropNum(key string) int {
-	num := self.PropNum(key)
-	delete(self.script.Vars, key)
-	return num
-}
-
-func (self *UIBase) TakePropBool(key string) bool {
-	b := self.PropBool(key)
-	delete(self.script.Vars, key)
-	return b
 }
 
 // ==================================================

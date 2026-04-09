@@ -38,7 +38,8 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 	}
 
 	// クローズのアニメーションのために元の高さを保存
-	self.orgH = self.GetUIBase().H
+	uiArea := self.GetUIBase().Area()
+	self.orgH = uiArea.H
 
 	self.GetUIBase().SetDrawIF(self)
 	return nil
@@ -46,11 +47,12 @@ func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
 
 func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	drawArea := clip
+	uiArea := self.GetUIBase().Area()
 
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {
 		// close_ratioに応じて上から閉じていくようにY座標を計算
-		self.GetUIBase().H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
+		drawArea.H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
 	}
 
 	// 3. 描画ループ
@@ -59,7 +61,7 @@ func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 
 			// dx, dy が本来の自分の領域のどこに当たるかで文字を決める
 			isLeft := (dx == x)
-			isRight := (dx == x+self.GetUIBase().W-1)
+			isRight := (dx == x+uiArea.W-1)
 			isTop := (dy == y)
 			isBottom := (dy == y+self.orgH-1)
 

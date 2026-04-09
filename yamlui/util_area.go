@@ -26,22 +26,33 @@ func NewArea(x, y, w, h int) Area {
 // UIBase用機能
 // UIBase から Area を取得する
 func (self *UIBase) Area() Area {
+	var W, H int
+	if self.HasProp(PROP_W) {
+		W = self.PropNum(PROP_W)
+	} else {
+		W = 65536
+	}
+	if self.HasProp(PROP_H) {
+		H = self.PropNum(PROP_H)
+	} else {
+		H = 65536
+	}
 	return Area{
-		X: self.X,
-		Y: self.Y,
-		W: self.W,
-		H: self.H,
+		X: self.PropNum(PROP_X),
+		Y: self.PropNum(PROP_Y),
+		W: W,
+		H: H,
 	}
 }
 
 func (self *UIBase) SetXY(x, y int) {
-	self.X = x
-	self.Y = y
+	self.SetPropNum(PROP_X, x)
+	self.SetPropNum(PROP_Y, y)
 }
 
 func (self *UIBase) SetWH(w, h int) {
-	self.W = w
-	self.H = h
+	self.SetPropNum(PROP_W, w)
+	self.SetPropNum(PROP_H, h)
 }
 
 func (self *UIBase) SetRect(x, y, w, h int) {

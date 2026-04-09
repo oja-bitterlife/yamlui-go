@@ -61,14 +61,11 @@ func (lib *YAMLUI) dispatch(event string) {
 	// スクリプトがあれば走らせる
 	// ----------------------------------------
 	if uiBase.HasScript() {
-		// スクリプトを実行する前に、UIBaseのプロパティをVMに保存しておく
+		// スクリプトを実行する前に、いくつかのプロパティをVMに保存しておく
 		uiBase.storeToVM(lib.Frame, event)
 
 		// スクリプトを実行
 		uiBase.script.Run()
-
-		// スクリプトを実行した後に、VMからUIBaseのプロパティを更新する
-		uiBase.loadFromVM()
 	}
 
 	// Update
