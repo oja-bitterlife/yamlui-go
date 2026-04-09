@@ -81,7 +81,6 @@ func (lib *YAMLUI) RegisterVMCmd(name string, cmdFunc script.VMCmdFunc) {
 type UIComponent[T any] interface {
 	GetUIBase() *UIBase
 	Clone() UICloned
-	Setup(lib *YAMLUI, type_ string)
 }
 
 // 簡易アクセス用
@@ -195,8 +194,21 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 		// ValueからUIBaseに流し込む
 		ui.LoadFromValue(value)
 
-		// Setup関数でさらに細かい構築を行う
-		component.Setup(lib, type_)
+		// もしDrawIFやDrawTreeIFを実装しているなら、UIにセットする
+		if if_, ok := component.(DrawIF); ok {
+			ui.drawIF = if_
+		}
+		if if_, ok := component.(DrawTreeIF); ok {
+			ui.drawTreeIF = if_
+		}
+		if if_, ok := component.(DispatchIF); ok {
+			ui.dispatchIF = if_
+		}
+
+		// さらに細かい構築を行う?
+		if if_, ok := component.(DispatchIF); ok {
+			if_.Dispatch(lib, EVENT_UI_ONCREATE)
+		}
 
 	} else {
 		// エラー終了せず警告で進めてみる

@@ -50,5 +50,3 @@ func (self *UIBlock) Clone() UICloned {
 		UIBase: self.GetUIBase().Clone(),
 	}
 }
-
-func (self *UIBlock) Setup(lib *YAMLUI, type_ string) {}

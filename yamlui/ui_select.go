@@ -38,8 +38,6 @@ func (self *UISelect) Clone() UICloned {
 	}
 }
 
-func (self *UISelect) Setup(lib *YAMLUI, type_ string) {}
-
 // **********************************************************************
 // 選択の操作
 // step: 移動量（正の数で下/右、負の数で上/左）

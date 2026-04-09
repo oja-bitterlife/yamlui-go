@@ -10,10 +10,12 @@ type BTTitle struct {
 }
 
 func NewBTTitle(lib *yamlui.YAMLUI, model *model) *BTTitle {
-	return &BTTitle{
+	title := &BTTitle{
 		UIBase: yamlui.NewUIBase(lib),
 		model:  model,
 	}
+	title.GetUIBase().SetDrawIF(title)
+	return title
 }
 
 func (self *BTTitle) GetUIBase() *yamlui.UIBase {
@@ -25,10 +27,6 @@ func (self *BTTitle) Clone() yamlui.UICloned {
 		UIBase: self.UIBase.Clone(),
 		model:  self.model,
 	}
-}
-
-func (self *BTTitle) Setup(lib *yamlui.YAMLUI, type_ string) {
-	self.UIBase.SetDrawIF(self)
 }
 
 func (self *BTTitle) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {

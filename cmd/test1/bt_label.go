@@ -10,10 +10,12 @@ type BTLabel struct {
 }
 
 func NewBTLabel(lib *yamlui.YAMLUI, m *model) *BTLabel {
-	return &BTLabel{
+	label := &BTLabel{
 		UIBase: yamlui.NewUIBase(lib),
 		model:  m,
 	}
+	label.GetUIBase().SetDrawIF(label)
+	return label
 }
 
 func (self *BTLabel) GetUIBase() *yamlui.UIBase {
@@ -25,10 +27,6 @@ func (self *BTLabel) Clone() yamlui.UICloned {
 		UIBase: self.UIBase.Clone(),
 		model:  self.model,
 	}
-}
-
-func (self *BTLabel) Setup(lib *yamlui.YAMLUI, type_ string) {
-	self.UIBase.SetDrawIF(self)
 }
 
 func (self *BTLabel) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {

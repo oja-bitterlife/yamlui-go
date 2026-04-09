@@ -27,9 +27,12 @@ type UILayout struct {
 }
 
 func NewUILayout(lib *YAMLUI) *UILayout {
-	return &UILayout{
+	layout := &UILayout{
 		UIBase: NewUIBase(lib),
 	}
+	layout.UIBase.SetDrawTreeFilterIF(layout)
+	layout.UIBase.SetDispatchIF(layout)
+	return layout
 }
 
 // **********************************************************************
@@ -44,9 +47,10 @@ func (self *UILayout) Clone() UICloned {
 	return &newLayout
 }
 
-func (self *UILayout) Setup(lib *YAMLUI, type_ string) {
-	// DrawTreeIFをセット
-	self.UIBase.SetDrawTreeFilterIF(self)
+func (self *UILayout) Dispatch(lib *YAMLUI, event string) {
+	if event != EVENT_UI_ONCREATE {
+		return
+	}
 
 	// デフォルトはMargin=0
 	self.Margin = self.UIBase.PropNum("@Margin")

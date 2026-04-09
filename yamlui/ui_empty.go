@@ -24,5 +24,3 @@ func (self *UIEmpty) Clone() UICloned {
 		UIBase: self.UIBase.Clone(),
 	}
 }
-
-func (self *UIEmpty) Setup(lib *YAMLUI, type_ string) {}

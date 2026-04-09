@@ -37,3 +37,11 @@ const (
 
 	PROP_IS_ABS = "@IsAbs"
 )
+
+// **********************************************************************
+// YUIBaseのイベント名
+// YAMLのイベントで使えるので一覧化
+const (
+	// Event
+	EVENT_UI_ONCREATE = "OnUICreate"
+)

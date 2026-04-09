@@ -98,9 +98,6 @@ func (self *UIBase) Clone() *UIBase {
 	return &clone
 }
 
-// 基本的にはUIBaseは何もしない.super call対応
-func (self *UIBase) Setup(lib *YAMLUI, type_ string) {}
-
 // **********************************************************************
 // ScriptVMとの連携
 // 参照用で送る

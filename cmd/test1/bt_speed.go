@@ -13,10 +13,13 @@ type BTSpeed struct {
 }
 
 func NewBTSpeed(lib *yamlui.YAMLUI, model *model) *BTSpeed {
-	return &BTSpeed{
+	speed := &BTSpeed{
 		SelBase: yamlui.NewUISelect(lib, 0, 3),
 		model:   model,
 	}
+	speed.GetUIBase().SetDispatchIF(speed)
+	speed.GetUIBase().SetDrawIF(speed)
+	return speed
 }
 
 func (self *BTSpeed) GetUIBase() *yamlui.UIBase {
@@ -31,28 +34,25 @@ func (self *BTSpeed) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string) {
-	// ,区切りのTextを分解してTrimしてtextsに格納
-	texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
-	for i := range texts {
-		texts[i] = strings.TrimSpace(texts[i])
-	}
-	self.texts = texts
-
-	// ItemNumをtextsの数に設定
-	self.SelBase.ItemNum = len(texts)
-
-	self.SelBase.UIBase.SetDispatchIF(self)
-	self.SelBase.UIBase.SetDrawIF(self)
-}
-
 // Dispatch
 func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) {
-	if event == "key:left" {
-		self.SelBase.NextGridX(-1, true)
-	}
-	if event == "key:right" {
-		self.SelBase.NextGridX(1, true)
+	switch event {
+	case yamlui.EVENT_UI_ONCREATE:
+		// ,区切りのTextを分解してTrimしてtextsに格納
+		texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
+		for i := range texts {
+			texts[i] = strings.TrimSpace(texts[i])
+		}
+		self.texts = texts
+
+		// ItemNumをtextsの数に設定
+		self.SelBase.ItemNum = len(texts)
+
+	case "key:up":
+		self.SelBase.NextGridY(-1, true)
+
+	case "key:down":
+		self.SelBase.NextGridY(1, true)
 	}
 }
 

@@ -13,10 +13,13 @@ type BTStart struct {
 }
 
 func NewBTStart(lib *yamlui.YAMLUI, model *model) *BTStart {
-	return &BTStart{
+	start := &BTStart{
 		SelBase: yamlui.NewUISelect(lib, 0, 1),
 		model:   model,
 	}
+	start.GetUIBase().SetDrawIF(start)
+	start.GetUIBase().SetDispatchIF(start)
+	return start
 }
 
 func (self *BTStart) GetUIBase() *yamlui.UIBase {
@@ -31,34 +34,30 @@ func (self *BTStart) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTStart) Setup(lib *yamlui.YAMLUI, type_ string) {
-	// ,区切りのTextを分解してTrimしてtextsに格納
-	texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
-	for i := range texts {
-		texts[i] = strings.TrimSpace(texts[i])
-	}
-	self.texts = texts
-
-	// ItemNumをtextsの数に設定
-	self.SelBase.ItemNum = len(texts)
-
-	self.SelBase.UIBase.SetDrawIF(self)
-	self.SelBase.UIBase.SetDispatchIF(self)
-}
-
 // Dispatch
 func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) {
-	if event == "key:up" {
+	switch event {
+	case yamlui.EVENT_UI_ONCREATE:
+		lib.Log(self.GetUIBase().PropStr(yamlui.PROP_TEXT))
+		// ,区切りのTextを分解してTrimしてtextsに格納
+		texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
+		for i := range texts {
+			texts[i] = strings.TrimSpace(texts[i])
+		}
+		self.texts = texts
+
+		// ItemNumをtextsの数に設定
+		self.SelBase.ItemNum = len(texts)
+	case "key:up":
 		self.SelBase.NextGridY(-1, true)
-	}
-	if event == "key:down" {
+
+	case "key:down":
 		self.SelBase.NextGridY(1, true)
 	}
 }
 
 // Draw
 func (self *BTStart) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
-
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
 		if i >= int(clip.H) {

@@ -11,10 +11,12 @@ type BTWindow struct {
 }
 
 func NewBTWindow(lib *yamlui.YAMLUI, m *model) *BTWindow {
-	return &BTWindow{
+	win := &BTWindow{
 		UIBase: yamlui.NewUIBase(lib),
 		model:  m,
 	}
+	win.GetUIBase().SetDrawIF(win)
+	return win
 }
 
 // **********************************************************************
@@ -31,14 +33,6 @@ func (self *BTWindow) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTWindow) Setup(lib *yamlui.YAMLUI, type_ string) {
-	// クローズのアニメーションのために元の高さを保存
-	uiArea := self.GetUIBase().Area()
-	self.orgH = uiArea.H
-
-	self.GetUIBase().SetDrawIF(self)
-}
-
 func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	drawArea := clip
 	uiArea := self.GetUIBase().Area()
@@ -46,7 +40,7 @@ func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {
 		// close_ratioに応じて上から閉じていくようにY座標を計算
-		drawArea.H = self.orgH * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
+		drawArea.H = uiArea.H * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
 	}
 
 	// 3. 描画ループ
