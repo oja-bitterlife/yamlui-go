@@ -53,7 +53,7 @@ func (lib *YAMLUI) FindByID(id string) *UIBase {
 	return lib.root.FindChildByID(id)
 }
 
-func (lib *YAMLUI) GetRoot() *UIBase {
+func (lib *YAMLUI) Root() *UIBase {
 	return lib.root
 }
 
