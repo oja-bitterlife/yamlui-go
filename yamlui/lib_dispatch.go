@@ -12,18 +12,17 @@ import (
 type DispatchQueueItem struct {
 	DispatchIF DispatchIF
 	z          int
+	uiBase     *UIBase
 }
 
 // ==================================================
 // Update
 type DispatchIF interface {
 	Dispatch(lib *YAMLUI, event string)
-	GetUIBase() *UIBase
 }
 
-func (self *UIBase) SetDispatchIF(dispatchIF DispatchIF) {
-	self.dispatchIF = dispatchIF
-}
+// 実装確認君
+func (self *UIBase) CheckDispatchIF(dispatchIF DispatchIF) {}
 
 // **********************************************************************
 // 呼び出し口
@@ -51,12 +50,11 @@ func (lib *YAMLUI) dispatch(event string) {
 	})
 
 	// イベントをDispatchの前に処理しイベントを通知する対象を決定する
-	dispatchIF := lib.processEvents(event)
-	if dispatchIF == nil {
+	dispatchIF, uiBase := lib.processEvents(event)
+	if dispatchIF == nil || uiBase == nil {
 		// 処理するUIがなかった
 		return
 	}
-	uiBase := dispatchIF.GetUIBase()
 
 	// スクリプトがあれば走らせる
 	// ----------------------------------------
@@ -88,6 +86,7 @@ func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) {
 				lib.dispatchQueue = append(lib.dispatchQueue, DispatchQueueItem{
 					DispatchIF: child.dispatchIF,
 					z:          z,
+					uiBase:     child,
 				})
 			}
 
@@ -122,21 +121,21 @@ func (lib *YAMLUI) MatchEvent(wildStr string, event string) bool {
 }
 
 // Dispatch対象のUIを探す
-func (lib *YAMLUI) processEvents(event string) DispatchIF {
+func (lib *YAMLUI) processEvents(event string) (DispatchIF, *UIBase) {
 	// Updateの後ろからイベント処理
 	for i := len(lib.dispatchQueue) - 1; i >= 0; i-- {
-		uiBase := lib.dispatchQueue[i].DispatchIF.GetUIBase()
+		uiBase := lib.dispatchQueue[i].uiBase
 
 		// 受信設定と一致したイベントがあるか確認する
 		for _, wildStr := range uiBase.Events {
 			// ワイルドカード(path.Match)でマッチング
 			if match := lib.MatchEvent(wildStr, event); match {
 				// 1つでもマッチしたらこのUIのもの！
-				return lib.dispatchQueue[i].DispatchIF
+				return lib.dispatchQueue[i].DispatchIF, uiBase
 			}
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 // **********************************************************************

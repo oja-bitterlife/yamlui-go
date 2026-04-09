@@ -11,12 +11,10 @@ type BTWindow struct {
 }
 
 func NewBTWindow(lib *yamlui.YAMLUI, m *model) *BTWindow {
-	win := &BTWindow{
+	return &BTWindow{
 		UIBase: yamlui.NewUIBase(lib),
 		model:  m,
 	}
-	win.GetUIBase().SetDrawIF(win)
-	return win
 }
 
 // **********************************************************************

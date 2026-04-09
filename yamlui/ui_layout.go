@@ -30,8 +30,6 @@ func NewUILayout(lib *YAMLUI) *UILayout {
 	layout := &UILayout{
 		UIBase: NewUIBase(lib),
 	}
-	layout.UIBase.SetDrawTreeFilterIF(layout)
-	layout.UIBase.SetDispatchIF(layout)
 	return layout
 }
 

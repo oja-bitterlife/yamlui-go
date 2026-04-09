@@ -10,12 +10,10 @@ type BTTitle struct {
 }
 
 func NewBTTitle(lib *yamlui.YAMLUI, model *model) *BTTitle {
-	title := &BTTitle{
+	return &BTTitle{
 		UIBase: yamlui.NewUIBase(lib),
 		model:  model,
 	}
-	title.GetUIBase().SetDrawIF(title)
-	return title
 }
 
 func (self *BTTitle) GetUIBase() *yamlui.UIBase {

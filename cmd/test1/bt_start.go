@@ -13,13 +13,10 @@ type BTStart struct {
 }
 
 func NewBTStart(lib *yamlui.YAMLUI, model *model) *BTStart {
-	start := &BTStart{
+	return &BTStart{
 		SelBase: yamlui.NewUISelect(lib, 0, 1),
 		model:   model,
 	}
-	start.GetUIBase().SetDrawIF(start)
-	start.GetUIBase().SetDispatchIF(start)
-	return start
 }
 
 func (self *BTStart) GetUIBase() *yamlui.UIBase {

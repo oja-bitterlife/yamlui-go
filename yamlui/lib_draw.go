@@ -28,18 +28,14 @@ type DrawTreeIF interface {
 	DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeContext
 }
 
-func (self *UIBase) SetDrawTreeFilterIF(drawTreeIF DrawTreeIF) {
-	self.drawTreeIF = drawTreeIF
-}
-
 // 通常のDraw
 type DrawIF interface {
 	Draw(lib *YAMLUI, x, y int, clip Area)
 }
 
-func (self *UIBase) SetDrawIF(drawIF DrawIF) {
-	self.drawIF = drawIF
-}
+// 実装確認君
+func (self *UIBase) CheckDrawTreeFilterIF(drawTreeIF DrawTreeIF) {}
+func (self *UIBase) CheckDrawIF(drawIF DrawIF)                   {}
 
 // **********************************************************************
 // 呼び出し口

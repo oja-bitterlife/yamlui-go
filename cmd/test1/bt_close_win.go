@@ -13,12 +13,10 @@ type BTCloseWin struct {
 }
 
 func NewBTCloseWin(lib *yamlui.YAMLUI, model *model) *BTCloseWin {
-	win := &BTCloseWin{
+	return &BTCloseWin{
 		uiBlock: yamlui.NewUIBlock(lib),
 		model:   model,
 	}
-	win.GetUIBase().SetDispatchIF(win)
-	return win
 }
 
 func (self *BTCloseWin) GetUIBase() *yamlui.UIBase {

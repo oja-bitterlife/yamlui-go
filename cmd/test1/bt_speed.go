@@ -13,13 +13,10 @@ type BTSpeed struct {
 }
 
 func NewBTSpeed(lib *yamlui.YAMLUI, model *model) *BTSpeed {
-	speed := &BTSpeed{
+	return &BTSpeed{
 		SelBase: yamlui.NewUISelect(lib, 0, 3),
 		model:   model,
 	}
-	speed.GetUIBase().SetDispatchIF(speed)
-	speed.GetUIBase().SetDrawIF(speed)
-	return speed
 }
 
 func (self *BTSpeed) GetUIBase() *yamlui.UIBase {
