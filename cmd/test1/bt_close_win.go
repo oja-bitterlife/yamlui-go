@@ -35,7 +35,6 @@ func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
 		return err
 	}
 	self.GetUIBase().SetDispatchIF(self)
-	self.GetUIBase().SetDrawIF(self)
 	return nil
 }
 
@@ -43,26 +42,26 @@ func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {
 	if lib.MatchEvent("next:*", event) {
 		self.uiBlock.StartBlockTimer(lib.Frame, 30) // 30フレームのブロック
 	}
-}
 
-func (self *BTCloseWin) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 	if self.uiBlock.IsStarted() == false {
-		return // タイマーが開始していない場合は描画しない
-	}
-
-	win := lib.FindByID("win:title")
-	if win == nil {
-		script.LogErr("BTCloseWin: win:title not found")
-	}
-	// frame
-	script.Log("BTCloseWin: frame=%d", lib.Frame)
-	// タイマーが終了したらウィンドウを閉じる
-	if self.uiBlock.Timer.IsFinish(lib.Frame) {
-		win.Remove = true
+		return // 開始していない場合は何もしない
 	} else {
-		win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(lib.Frame, 100))
+
+		win := lib.FindByID("win:title")
+		if win == nil {
+			script.LogErr("BTCloseWin: win:title not found")
+		}
+		// frame
+		script.Log("BTCloseWin: frame=%d", lib.Frame)
+		// タイマーが終了したらウィンドウを閉じる
+		if self.uiBlock.Timer.IsFinish(lib.Frame) {
+			win.Remove = true
+		} else {
+			win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(lib.Frame, 100))
+		}
 	}
 
 	// bubble tea に更新を通知して再描画させる
-	self.model.BubbleTeaUpdate()
+	self.model.NextCmd = self.model.BubbleTeaUpdate()
+	script.LogErr("dispatch: %p", self.model)
 }

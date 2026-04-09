@@ -31,9 +31,11 @@ type model struct {
 	canvas   [][]Cell
 	startSel *BTSpeed
 	speedSel *BTSpeed
+
+	NextCmd tea.Cmd
 }
 
-func initialModel() model {
+func initialModel() *model {
 	lib := yamlui.NewYAMLUI()
 	lib2 := yamlui.NewYAMLUI()
 	m := model{
@@ -78,27 +80,27 @@ func initialModel() model {
 	if err := m.lib.Start(fileData); err != nil {
 		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
 	}
-	if err := m.lib2.Start(fileData); err != nil {
-		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
-	}
+	// if err := m.lib2.Start(fileData); err != nil {
+	// 	panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
+	// }
 
-	return m
+	return &m
 }
 
-func (m model) Init() tea.Cmd {
+func (m *model) Init() tea.Cmd {
 	return nil
 }
 
 type TickMsg time.Time
 
 // 33ms後にTickMsgを投げるコマンド
-func (m model) BubbleTeaUpdate() tea.Cmd {
+func (m *model) BubbleTeaUpdate() tea.Cmd {
 	return tea.Tick(33*time.Millisecond, func(t time.Time) tea.Msg {
 		return TickMsg(t)
 	})
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.frame++ // フレームを進める
 
 	switch msg := msg.(type) {
@@ -130,16 +132,26 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Enterキーで選択
 		if msg.Type == tea.KeyEnter {
-			m.lib.CallEvent("key:enter")
+			m.lib.DispatchEvent("key:enter")
+			script.LogErr("update: %p", m)
+			panic(m.NextCmd)
 		}
-
 		TraceMemory() // メモリ使用状況をログに出力
+	case TickMsg:
+		m.lib.CallEvent(TEA_UPDATE_EVENT)
+		m.lib2.CallEvent(TEA_UPDATE_EVENT)
+	}
+
+	if m.NextCmd != nil {
+		cmd := m.NextCmd
+		m.NextCmd = nil // コマンドをリセット
+		return m, cmd
 	}
 
 	return m, nil
 }
 
-func (m model) View() string {
+func (m *model) View() string {
 	for y := range m.canvas {
 		for x := range m.canvas[y] {
 			m.canvas[y][x] = Cell{Rune: ' ', Color: "navy"}
