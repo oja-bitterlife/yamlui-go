@@ -30,8 +30,7 @@ func (self *BTCloseWin) GetUIBase() *yamlui.UIBase {
 	return self.uiBlock.GetUIBase()
 }
 
-func (self *BTCloseWin) Setup(type_ string) {
-	self.uiBlock.Setup(type_)
+func (self *BTCloseWin) Setup(lib *yamlui.YAMLUI, type_ string) {
 	self.GetUIBase().SetDispatchIF(self)
 }
 

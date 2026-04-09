@@ -31,9 +31,7 @@ func (self *BTWindow) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTWindow) Setup(type_ string) {
-	self.GetUIBase().Setup(type_)
-
+func (self *BTWindow) Setup(lib *yamlui.YAMLUI, type_ string) {
 	// クローズのアニメーションのために元の高さを保存
 	uiArea := self.GetUIBase().Area()
 	self.orgH = uiArea.H

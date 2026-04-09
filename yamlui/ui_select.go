@@ -38,7 +38,7 @@ func (self *UISelect) Clone() UICloned {
 	}
 }
 
-func (self *UISelect) Setup(type_ string) {}
+func (self *UISelect) Setup(lib *YAMLUI, type_ string) {}
 
 // **********************************************************************
 // 選択の操作

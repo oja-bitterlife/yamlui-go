@@ -25,4 +25,4 @@ func (self *UIEmpty) Clone() UICloned {
 	}
 }
 
-func (self *UIEmpty) Setup(type_ string) {}
+func (self *UIEmpty) Setup(lib *YAMLUI, type_ string) {}

@@ -44,7 +44,7 @@ func (self *UILayout) Clone() UICloned {
 	return &newLayout
 }
 
-func (self *UILayout) Setup(type_ string) {
+func (self *UILayout) Setup(lib *YAMLUI, type_ string) {
 	// DrawTreeIFをセット
 	self.UIBase.SetDrawTreeFilterIF(self)
 

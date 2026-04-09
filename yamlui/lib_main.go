@@ -81,7 +81,7 @@ func (lib *YAMLUI) RegisterVMCmd(name string, cmdFunc script.VMCmdFunc) {
 type UIComponent[T any] interface {
 	GetUIBase() *UIBase
 	Clone() UICloned
-	Setup(type_ string)
+	Setup(lib *YAMLUI, type_ string)
 }
 
 // 簡易アクセス用
@@ -196,7 +196,7 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 		ui.LoadFromValue(value)
 
 		// Setup関数でさらに細かい構築を行う
-		component.Setup(type_)
+		component.Setup(lib, type_)
 
 	} else {
 		// エラー終了せず警告で進めてみる

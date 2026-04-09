@@ -14,7 +14,7 @@ type BTStart struct {
 
 func NewBTStart(lib *yamlui.YAMLUI, model *model) *BTStart {
 	return &BTStart{
-		SelBase: yamlui.NewUISelect(lib, 0, 1), // ItemNumは後でSetupで設定する
+		SelBase: yamlui.NewUISelect(lib, 0, 1),
 		model:   model,
 	}
 }
@@ -31,9 +31,7 @@ func (self *BTStart) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTStart) Setup(type_ string) {
-	self.SelBase.Setup(type_) // super call
-
+func (self *BTStart) Setup(lib *yamlui.YAMLUI, type_ string) {
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
 	for i := range texts {
@@ -43,7 +41,6 @@ func (self *BTStart) Setup(type_ string) {
 
 	// ItemNumをtextsの数に設定
 	self.SelBase.ItemNum = len(texts)
-	self.SelBase.RowsNum = 1
 
 	self.SelBase.UIBase.SetDrawIF(self)
 	self.SelBase.UIBase.SetDispatchIF(self)

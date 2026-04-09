@@ -14,7 +14,7 @@ type BTSpeed struct {
 
 func NewBTSpeed(lib *yamlui.YAMLUI, model *model) *BTSpeed {
 	return &BTSpeed{
-		SelBase: yamlui.NewUISelect(lib, 0, 1), // ItemNumは後でSetupで設定する
+		SelBase: yamlui.NewUISelect(lib, 0, 3),
 		model:   model,
 	}
 }
@@ -31,9 +31,7 @@ func (self *BTSpeed) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTSpeed) Setup(type_ string) {
-	self.SelBase.Setup(type_)
-
+func (self *BTSpeed) Setup(lib *yamlui.YAMLUI, type_ string) {
 	// ,区切りのTextを分解してTrimしてtextsに格納
 	texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
 	for i := range texts {
@@ -43,7 +41,6 @@ func (self *BTSpeed) Setup(type_ string) {
 
 	// ItemNumをtextsの数に設定
 	self.SelBase.ItemNum = len(texts)
-	self.SelBase.RowsNum = len(texts)
 
 	self.SelBase.UIBase.SetDispatchIF(self)
 	self.SelBase.UIBase.SetDrawIF(self)

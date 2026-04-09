@@ -51,4 +51,4 @@ func (self *UIBlock) Clone() UICloned {
 	}
 }
 
-func (self *UIBlock) Setup(type_ string) {}
+func (self *UIBlock) Setup(lib *YAMLUI, type_ string) {}

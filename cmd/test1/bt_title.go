@@ -27,8 +27,7 @@ func (self *BTTitle) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTTitle) Setup(type_ string) {
-	self.UIBase.Setup(type_)
+func (self *BTTitle) Setup(lib *yamlui.YAMLUI, type_ string) {
 	self.UIBase.SetDrawIF(self)
 }
 
