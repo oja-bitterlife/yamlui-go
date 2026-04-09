@@ -60,8 +60,18 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	ui.W = 65536
 	ui.H = 65536
 
-	// ScriptVM
-	ui.script = script.NewVM(id, script.Value{})
+	// ScriptVM.cmdsIDはルートノードのIDを入れる。
+	// ルートノードがないときはidがRootのIDなのでそれを使う
+	var cmdsID string
+	if lib.root != nil {
+		cmdsID = lib.root.ID
+	} else {
+		if !script.HasPrefix(id, "UIBase_Root_") {
+			script.LogErr("UIBaseWithID: Root node not found, and ID does not start with UIBase_Root_: " + id)
+		}
+		cmdsID = id
+	}
+	ui.script = script.NewVM(script.Value{}, cmdsID)
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}

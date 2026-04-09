@@ -18,6 +18,7 @@ func (lib *YAMLUI) scriptAction(vm *script.VM, args []script.Value) (script.Valu
 	if err := script.CheckCmdArgNum("action", 1, args); err != nil {
 		return script.Value{}, err
 	}
+
 	// 引数を評価
 	value, err := vm.Eval(args[0])
 	if err != nil {

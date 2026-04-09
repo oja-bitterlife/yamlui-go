@@ -138,11 +138,11 @@ func (vm *VM) applyCmd(cmd string, args []Value) (Value, error) {
 	}
 
 	// 登録されたコマンドを探して実行
-	fn, ok := cmds[vm.ID].systemCmds[cleanCmd]
+	fn, ok := cmds[vm.cmdsID].systemCmds[cleanCmd]
 	if ok {
 		return fn(vm, args)
 	}
-	fn, ok = cmds[vm.ID].userCmds[cleanCmd]
+	fn, ok = cmds[vm.cmdsID].userCmds[cleanCmd]
 	if ok {
 		return fn(vm, args)
 	}

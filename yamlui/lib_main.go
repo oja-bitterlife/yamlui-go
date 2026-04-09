@@ -39,7 +39,10 @@ func NewYAMLUI() *YAMLUI {
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
 	}
-	lib.root = NewUIBase(lib)
+
+	// ルートノードを作成
+	newID := atomic.AddInt32(&lastID, 1)
+	lib.root = NewUIBaseWithID(lib, "UIBase_Root_"+script.Itoa(int(newID)))
 
 	// ここでYAMLUIのscriptコマンドを登録する
 	lib.SetUIScriptCmds()
@@ -55,6 +58,10 @@ func (lib *YAMLUI) FindByID(id string) *UIBase {
 
 func (lib *YAMLUI) Root() *UIBase {
 	return lib.root
+}
+
+func (lib *YAMLUI) ID() string {
+	return lib.root.ID
 }
 
 func (lib *YAMLUI) RegisterVMCmd(name string, cmdFunc script.VMCmdFunc) {

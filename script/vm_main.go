@@ -13,23 +13,23 @@ const (
 
 // 外部との連携用データ構造体
 type VM struct {
-	ID     string   // ID
 	AST    Value    // コンパイル済みコード
 	Vars   ValueMap // VMのメインメモリ的な
 	Result Value    // 最後の評価結果を保存する場所
+	cmdsID string   // コマンドセットのID
 }
 
 // VMの初期化
-func NewVM(id string, valueAST Value) VM {
+func NewVM(valueAST Value, cmdsID string) VM {
 	// VMの初期化
 	vm := VM{
-		ID:     id,
 		AST:    valueAST,
 		Vars:   make(map[string]Value, VM_VAR_CAPACITY),
 		Result: Value{},
+		cmdsID: cmdsID,
 	}
 
-	InitVMCmds(id) // コマンドの初期化
+	vm.initVMCmds() // コマンドの初期化
 
 	return vm
 }
@@ -60,21 +60,19 @@ var (
 	userMu sync.RWMutex
 )
 
-func InitVMCmds(id string) {
+func (vm *VM) initVMCmds() {
 	userMu.Lock()
 	defer userMu.Unlock()
 
-	// すでに初期化されている場合は上書き警告を出す
-	if _, exists := cmds[id]; exists {
-		LogWarn("VM commands for ID %s are already initialized, overwriting", id)
+	// すでに初期化されている場合は何もしない
+	if _, exists := cmds[vm.cmdsID]; !exists {
+		// コマンドセットの初期化
+		cmds[vm.cmdsID] = VMCmds{
+			systemCmds: make(map[string]VMCmdFunc),
+			userCmds:   make(map[string]VMCmdFunc),
+		}
+		SetBuiltinCmds(cmds[vm.cmdsID].systemCmds) // Builtinの登録
 	}
-
-	// コマンドセットの初期化
-	cmds[id] = VMCmds{
-		systemCmds: make(map[string]VMCmdFunc),
-		userCmds:   make(map[string]VMCmdFunc),
-	}
-	SetBuiltinCmds(cmds[id].systemCmds) // Builtinの登録
 }
 
 func (vm *VM) RegisterVMCmd(cmdName string, fn VMCmdFunc) {
@@ -89,10 +87,10 @@ func (vm *VM) RegisterVMCmd(cmdName string, fn VMCmdFunc) {
 	userMu.Lock()
 	defer userMu.Unlock()
 
-	if _, exists := cmds[vm.ID].userCmds[cmdName]; exists {
+	if _, exists := cmds[vm.cmdsID].userCmds[cmdName]; exists {
 		LogWarn("command %s is already defined", cmdName)
 	}
-	cmds[vm.ID].userCmds[cmdName] = fn
+	cmds[vm.cmdsID].userCmds[cmdName] = fn
 }
 
 // **********************************************************************
