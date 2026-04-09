@@ -66,8 +66,8 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	if lib.root != nil {
 		cmdsID = lib.root.ID
 	} else {
-		if !script.HasPrefix(id, "UIBase_Root_") {
-			script.LogErr("UIBaseWithID: Root node not found, and ID does not start with UIBase_Root_: " + id)
+		if !script.HasPrefix(id, ROOT_NODE_PREFIX) {
+			script.LogErr("ID does not start with %s: %s", ROOT_NODE_PREFIX, id)
 		}
 		cmdsID = id
 	}

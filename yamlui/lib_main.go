@@ -13,6 +13,10 @@ const (
 	UI_USING_MAX    = 32 // 同時に使用するUIの最大数
 )
 
+const (
+	ROOT_NODE_PREFIX = "UIBase_Root_"
+)
+
 type YAMLUI struct {
 	// UIツリー構築用
 	root   *UIBase
@@ -45,7 +49,7 @@ func NewYAMLUI() *YAMLUI {
 
 	// ルートノードを作成
 	newID := atomic.AddInt32(&lastID, 1)
-	lib.root = NewUIBaseWithID(lib, "UIBase_Root_"+script.Itoa(int(newID)))
+	lib.root = NewUIBaseWithID(lib, ROOT_NODE_PREFIX+script.Itoa(int(newID)))
 
 	// ここでYAMLUIのscriptコマンドを登録する
 	lib.SetUIScriptCmds()
