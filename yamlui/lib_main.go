@@ -18,10 +18,13 @@ type YAMLUI struct {
 	root   *UIBase
 	refObj map[string]UIComponent[*UIBase] // Component生成用リファレンスオブジェクト
 
+	// goroutine
+	mtx          sync.RWMutex
+	isLock       atomic.Bool
+	eventChannel chan eventContext
+	isRunning    atomic.Bool
+
 	// Updateの時に使うもの
-	mtx           sync.RWMutex
-	isLock        atomic.Bool
-	eventChannel  chan eventContext
 	dispatchQueue []DispatchQueueItem
 
 	// Drawの時に使うもの
@@ -96,7 +99,10 @@ func (lib *YAMLUI) Start(valueJSON []byte) error {
 	go func() {
 		defer func() {
 			lib.root.GetVM().DeleteVMCmds()
+			lib.isRunning.Store(false)
 		}()
+
+		lib.isRunning.Store(true)
 
 		// channelがCloseされるまでイベントを待ち続ける
 		for event := range lib.eventChannel {
@@ -113,7 +119,13 @@ func (lib *YAMLUI) Start(valueJSON []byte) error {
 }
 
 func (lib *YAMLUI) Stop() {
-	close(lib.eventChannel)
+	if lib.isRunning.Load() {
+		close(lib.eventChannel)
+	} else {
+		// メモリの後始末だけ
+		lib.root.GetVM().DeleteVMCmds()
+		lib.isRunning.Store(false)
+	}
 }
 
 // **********************************************************************

@@ -32,7 +32,8 @@ type model struct {
 	startSel *BTSpeed
 	speedSel *BTSpeed
 
-	NextCmd tea.Cmd
+	NextCmd  tea.Cmd
+	NextCmd2 tea.Cmd
 }
 
 func initialModel() *model {
@@ -113,7 +114,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
 			m.lib.CallEvent("key:up")
-			m.lib2.CallEvent("key:down")
+			m.lib2.SendEvent("key:down")
 		}
 		if msg.Type == tea.KeyDown {
 			m.lib.CallEvent("key:down")
@@ -133,8 +134,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Enterキーで選択
 		if msg.Type == tea.KeyEnter {
 			m.lib.DispatchEvent("key:enter")
-			script.LogErr("update: %p", m)
-			panic(m.NextCmd)
 		}
 		TraceMemory() // メモリ使用状況をログに出力
 	case TickMsg:
@@ -144,7 +143,12 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	if m.NextCmd != nil {
 		cmd := m.NextCmd
-		m.NextCmd = nil // コマンドをリセット
+		m.NextCmd = nil
+		return m, cmd
+	}
+	if m.NextCmd2 != nil {
+		cmd := m.NextCmd2
+		m.NextCmd2 = nil
 		return m, cmd
 	}
 

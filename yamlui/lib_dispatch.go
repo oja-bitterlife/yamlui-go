@@ -155,6 +155,12 @@ type eventContext struct {
 
 // イベント送信
 func (lib *YAMLUI) SendEvent(event string) {
+	// Startしていない
+	if !lib.isRunning.Load() {
+		script.LogErr("YAMLUI is not running. Call Start() before sending events.")
+		return
+	}
+
 	// goroutineでイベントを送る
 	lib.eventChannel <- eventContext{
 		name: event,
@@ -163,20 +169,28 @@ func (lib *YAMLUI) SendEvent(event string) {
 }
 
 // イベントを送信して完了を待つ
-func (lib *YAMLUI) CallEvent(name string) {
+func (lib *YAMLUI) CallEvent(event string) {
+	// Startしていない
+	if !lib.isRunning.Load() {
+		// UIのgoruoutineが走っていないときは直接呼び出す
+		script.LogErr("YAMLUI is not running. Call Start() before calling events. Calling event directly.")
+		lib.DispatchEvent(event)
+		return
+	}
+
 	if lib.isLock.Load() {
 		panic("Updaate/Draw中にイベントを呼び出すことはできません")
 	}
 
 	done := make(chan struct{})
-	lib.eventChannel <- eventContext{name: name, done: done}
+	lib.eventChannel <- eventContext{name: event, done: done}
 	<-done
 }
 
 // そもそもgoroutinを使わない
-func (lib *YAMLUI) DispatchEvent(name string) {
+func (lib *YAMLUI) DispatchEvent(event string) {
 	if lib.isLock.Load() {
 		panic("Updaate/Draw中にイベントを呼び出すことはできません")
 	}
-	lib.dispatch(name)
+	lib.dispatch(event)
 }

@@ -63,5 +63,4 @@ func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {
 
 	// bubble tea に更新を通知して再描画させる
 	self.model.NextCmd = self.model.BubbleTeaUpdate()
-	script.LogErr("dispatch: %p", self.model)
 }
