@@ -93,6 +93,13 @@ func (vm *VM) RegisterVMCmd(cmdName string, fn VMCmdFunc) {
 	cmds[vm.cmdsID].userCmds[cmdName] = fn
 }
 
+func (vm *VM) DeleteVMCmds() {
+	userMu.Lock()
+	defer userMu.Unlock()
+
+	delete(cmds, vm.cmdsID)
+}
+
 // **********************************************************************
 // 実行
 func (vm *VM) Run() error {

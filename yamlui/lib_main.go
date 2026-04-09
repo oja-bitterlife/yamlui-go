@@ -94,6 +94,10 @@ func (lib *YAMLUI) Start(valueJSON []byte) error {
 
 	// ここでYAMLUIのgoruoutineを走らせる
 	go func() {
+		defer func() {
+			lib.root.GetVM().DeleteVMCmds()
+		}()
+
 		// channelがCloseされるまでイベントを待ち続ける
 		for event := range lib.eventChannel {
 			// イベントが来たらUpdateを呼び出す
