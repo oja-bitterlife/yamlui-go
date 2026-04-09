@@ -1,6 +1,8 @@
 package yamlui
 
-import "slices"
+import (
+	"slices"
+)
 
 // **********************************************************************
 // 描画インターフェース
@@ -18,8 +20,8 @@ type DrawQueueItem struct {
 // Drawの引数やZ順を変更したいときに使う
 type DrawTreeContext struct {
 	X, Y       int
-	Clip       Area
 	Z          float64
+	Clip       Area
 	ParentClip Area
 	Parent     *UIBase
 }
@@ -90,37 +92,43 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 // **********************************************************************
 // DrawTreeの再帰実行
 func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawTreeContext) {
+	// Filterがあれば描画コンテキストを変更する
+	if self.drawTreeIF != nil {
+		ctx = self.drawTreeIF.DrawTreeFilter(lib, ctx)
+	}
+	area := self.Area().Offset(ctx.X, ctx.Y)
+
+	// 描画インターフェースがあれば描画キューに入れる
+	if self.drawIF != nil {
+		lib.Log("%s, cx=%d, cy=%d, ax=%d, ay=%d, clipx=%d, clipy=%d",
+			self.PropStr(PROP_TYPE),
+			ctx.X, ctx.Y,
+			area.Y, area.Y,
+			ctx.Clip.X, ctx.Clip.Y,
+		)
+
+		lib.drawQueue = append(lib.drawQueue, DrawQueueItem{
+			drawIF: self.drawIF,
+			z:      ctx.Z,
+			x:      area.X,
+			y:      area.Y,
+			clip:   ctx.Clip,
+		})
+	}
+
 	// 子供の描画
 	for _, child := range self.children {
 		if child.PropBool(PROP_IS_VISIBLE) {
-			// 描画座標やクリップ領域等を計算してコンテキストを作る
-			childArea := child.Area().Offset(ctx.X, ctx.Y)
-			childClip := childArea.Clip(ctx.Clip)
-
-			// 描画インターフェースがあれば描画キューに入れる
-			if child.drawIF != nil {
-				lib.drawQueue = append(lib.drawQueue, DrawQueueItem{
-					drawIF: child.drawIF,
-					z:      ctx.Z,
-					x:      childArea.X,
-					y:      childArea.Y,
-					clip:   childClip,
-				})
-			}
+			childClip := child.Area().Offset(area.X, area.Y).Clip(ctx.Clip)
 
 			// 子供の描画コンテキストを作る。Z順は親よりも大きくする
 			childCtx := DrawTreeContext{
-				X:          childArea.X,
-				Y:          childArea.Y,
-				Clip:       childClip,
+				X:          area.X,
+				Y:          area.Y,
 				Z:          ctx.Z + 1,
+				Clip:       childClip,
 				ParentClip: ctx.Clip,
 				Parent:     self,
-			}
-
-			// Filterがあれば描画コンテキストを変更する
-			if child.drawTreeIF != nil {
-				childCtx = child.drawTreeIF.DrawTreeFilter(lib, childCtx)
 			}
 
 			// 再帰的に子供を描画

@@ -35,7 +35,6 @@ func (self *BTStart) Clone() yamlui.UICloned {
 func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) {
 	switch event {
 	case yamlui.EVENT_UI_ONCREATE:
-		lib.Log(self.GetUIBase().PropStr(yamlui.PROP_TEXT))
 		// ,区切りのTextを分解してTrimしてtextsに格納
 		texts := strings.Split(self.GetUIBase().PropStr(yamlui.PROP_TEXT), ",")
 		for i := range texts {
@@ -55,6 +54,7 @@ func (self *BTStart) Dispatch(lib *yamlui.YAMLUI, event string) {
 
 // Draw
 func (self *BTStart) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
+	// lib.Log("BTStart Draw", x, y, clip)
 	for i := range self.SelBase.ItemNum {
 		// 表示領域の高さ(clip.H)を超えたら描画しない
 		if i >= int(clip.H) {
@@ -62,8 +62,8 @@ func (self *BTStart) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 		}
 
 		// 描画する Y 座標（1行ずつズラしていく）
-		y := clip.Y + i/self.SelBase.RowsNum
-		x := clip.X + (i % self.SelBase.RowsNum)
+		drawX := x + (i % self.SelBase.RowsNum)
+		drawY := y + i/self.SelBase.RowsNum
 
 		// 選択中の行（SelectNo）なら、カーソルを表示
 		line := "   "
@@ -81,7 +81,7 @@ func (self *BTStart) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 			}
 			// Canvas の (x + j, y) に char を書き込む
 			// m.Canvas.Set(x + j, y, char)
-			self.model.canvas[y][x+j] = Cell{Rune: char, Color: "white"}
+			self.model.canvas[drawY][drawX+j] = Cell{Rune: char, Color: "white"}
 		}
 	}
 }

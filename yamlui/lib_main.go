@@ -131,9 +131,16 @@ func (lib *YAMLUI) Stop() {
 	}
 }
 
-// **********************************************************************
+// ==================================================
 // goroutineを使わない場合はこっち
-// lib.DispatchEvent()と組み合わせて使う
+func (lib *YAMLUI) Update(events []string) {
+	for _, event := range events {
+		lib.dispatch(event)
+	}
+}
+
+// **********************************************************************
+// Startの中で呼ばれる.groutineを使わないときは自分で呼ぶ
 func (lib *YAMLUI) Load(valueJson []byte) error {
 	// JSONからValueを経由してUIBaseを再構築する
 	value, err := script.NewFromValueJSON(valueJson)

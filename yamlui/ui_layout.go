@@ -114,17 +114,17 @@ func (self *UILayout) DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeC
 	parentArea.H -= bottom
 
 	// Left/Topマージン分座標をずらす
-	newClip := Area{
-		X: alignX + left,
-		Y: alignY + top,
-		W: selfW,
-		H: selfH,
-	}.Clip(parentArea)
+	// newClip := Area{
+	// 	X: alignX + left,
+	// 	Y: alignY + top,
+	// 	W: selfW,
+	// 	H: selfH,
+	// }.Clip(parentArea)
 
 	// コンテキストの更新
 	ctx.X = alignX + left
 	ctx.Y = alignY + top
-	ctx.Clip = newClip
+	// ctx.ParentClip = newClip
 
 	// 更新したコンテキストを返す
 	return ctx

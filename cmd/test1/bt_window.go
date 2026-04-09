@@ -7,7 +7,6 @@ import (
 type BTWindow struct {
 	UIBase *yamlui.UIBase
 	model  *model
-	orgH   int
 }
 
 func NewBTWindow(lib *yamlui.YAMLUI, m *model) *BTWindow {
@@ -31,25 +30,27 @@ func (self *BTWindow) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
-	drawArea := clip
-	uiArea := self.GetUIBase().Area()
-
+func (self *BTWindow) DrawTreeFilter(lib *yamlui.YAMLUI, ctx yamlui.DrawTreeContext) yamlui.DrawTreeContext {
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {
-		// close_ratioに応じて上から閉じていくようにY座標を計算
-		drawArea.H = uiArea.H * (100 - self.GetUIBase().PropNum("close_ratio")) / 100
+		// area := self.GetUIBase().Area()
+		// ctx.ParentClip = area.Clip(ctx.ParentClip)
+		// ctx.H = 10
 	}
+	return ctx
+}
+func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
+	// lib.Log("BTWindow Draw", x, y, clip)
+	drawArea := self.GetUIBase().Area().Offset(x, y)
 
-	// 3. 描画ループ
 	for dy := int(drawArea.Top()); dy < int(drawArea.Bottom()); dy++ {
 		for dx := int(drawArea.Left()); dx < int(drawArea.Right()); dx++ {
 
 			// dx, dy が本来の自分の領域のどこに当たるかで文字を決める
 			isLeft := (dx == x)
-			isRight := (dx == x+uiArea.W-1)
+			isRight := (dx == drawArea.Right()-1)
 			isTop := (dy == y)
-			isBottom := (dy == y+self.orgH-1)
+			isBottom := (dy == drawArea.Bottom()-1)
 
 			var r rune
 			if isLeft && isTop {
@@ -76,7 +77,7 @@ func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {
 
 			// キャンバスの物理境界チェックをして書き込み
 			if dy >= 0 && dy < len(self.model.canvas) && dx >= 0 && dx < len(self.model.canvas[dy]) {
-				if drawArea.Contains(dx, dy) {
+				if clip.Contains(dx, dy) {
 					if r != ' ' {
 						self.model.canvas[dy][dx] = Cell{Rune: r, Color: "white"}
 					}
