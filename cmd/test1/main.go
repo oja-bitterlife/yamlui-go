@@ -32,8 +32,7 @@ type model struct {
 	startSel *BTSpeed
 	speedSel *BTSpeed
 
-	NextCmd  tea.Cmd
-	NextCmd2 tea.Cmd
+	ForceUpdate bool
 }
 
 func initialModel() *model {
@@ -81,9 +80,9 @@ func initialModel() *model {
 	if err := m.lib.Start(fileData); err != nil {
 		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
 	}
-	// if err := m.lib2.Start(fileData); err != nil {
-	// 	panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
-	// }
+	if err := m.lib2.Start(fileData); err != nil {
+		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
+	}
 
 	return &m
 }
@@ -114,7 +113,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
 			m.lib.CallEvent("key:up")
-			m.lib2.SendEvent("key:down")
+			m.lib2.CallEvent("key:down")
 		}
 		if msg.Type == tea.KeyDown {
 			m.lib.CallEvent("key:down")
@@ -133,7 +132,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		// Enterキーで選択
 		if msg.Type == tea.KeyEnter {
-			m.lib.DispatchEvent("key:enter")
+			m.lib.CallEvent("key:enter")
+			m.lib2.CallEvent("key:enter")
+			m.ForceUpdate = true
 		}
 		TraceMemory() // メモリ使用状況をログに出力
 	case TickMsg:
@@ -141,15 +142,9 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.lib2.CallEvent(TEA_UPDATE_EVENT)
 	}
 
-	if m.NextCmd != nil {
-		cmd := m.NextCmd
-		m.NextCmd = nil
-		return m, cmd
-	}
-	if m.NextCmd2 != nil {
-		cmd := m.NextCmd2
-		m.NextCmd2 = nil
-		return m, cmd
+	if m.ForceUpdate {
+		m.ForceUpdate = false
+		return m, m.BubbleTeaUpdate() // 更新コマンドをセット
 	}
 
 	return m, nil
