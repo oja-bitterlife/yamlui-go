@@ -40,7 +40,7 @@ func (self *UIBase) LoadFromValue(value script.Value) {
 	for k, v := range value.Map {
 		switch k {
 		case "ID":
-			self.ID = v.Str
+			self.ID = v.Str // Varsに入れず、不変に
 
 		case "script":
 			self.script.AST = v
@@ -61,11 +61,11 @@ func (self *UIBase) LoadFromValue(value script.Value) {
 			}
 			self.Events = events
 
+		// 処理しないもの
 		case "children":
-			// 処理しないもの
 
+		// その他のPropertyは@をつけてVMのVarsに流し込む
 		default:
-			// その他のPropertyは@をつけてVMのVarsに流し込む
 			self.script.Vars["@"+k] = v
 		}
 	}

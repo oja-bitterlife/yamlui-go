@@ -103,7 +103,7 @@ func (self *UIBase) Clone() *UIBase {
 // 参照用で送る
 func (self *UIBase) storeToVM(frame int, event string) {
 	self.script.Vars["@ID"] = script.NewString(self.ID)
-	self.script.Vars["@Event"] = script.NewString(event)
+	self.script.Vars["@Event"] = script.NewString(event) // 発生したイベント
 	self.script.Vars["@Frame"] = script.NewNumber(frame)
 }
 

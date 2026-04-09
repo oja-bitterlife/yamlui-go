@@ -21,15 +21,15 @@ func NewBTCloseWin(lib *yamlui.YAMLUI, model *model) *BTCloseWin {
 	return win
 }
 
+func (self *BTCloseWin) GetUIBase() *yamlui.UIBase {
+	return self.uiBlock.GetUIBase()
+}
+
 func (self *BTCloseWin) Clone() yamlui.UICloned {
 	return &BTCloseWin{
 		uiBlock: self.uiBlock.Clone().(*yamlui.UIBlock),
 		model:   self.model,
 	}
-}
-
-func (self *BTCloseWin) GetUIBase() *yamlui.UIBase {
-	return self.uiBlock.GetUIBase()
 }
 
 func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {

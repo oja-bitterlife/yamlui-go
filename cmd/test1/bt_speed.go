@@ -36,7 +36,6 @@ func (self *BTSpeed) Clone() yamlui.UICloned {
 
 // Dispatch
 func (self *BTSpeed) Dispatch(lib *yamlui.YAMLUI, event string) {
-	lib.Log("%s", event)
 	switch event {
 	case yamlui.EVENT_UI_ONCREATE:
 		// ,区切りのTextを分解してTrimしてtextsに格納
