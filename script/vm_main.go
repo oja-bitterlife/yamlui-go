@@ -6,7 +6,7 @@ import "sync"
 // 評価器(VM)の実装
 // ==================================================
 const (
-	VM_VAR_CAPACITY  = 32 // varsの初期容量
+	VM_VAR_CAPACITY  = 64 // varsの初期容量
 	VM_RECURSION_MAX = 16 // 再帰の最大深さ
 	VM_REPEAT_MAX    = 16 // repeatの最大回数
 )

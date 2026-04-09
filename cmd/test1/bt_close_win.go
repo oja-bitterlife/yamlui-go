@@ -30,12 +30,9 @@ func (self *BTCloseWin) GetUIBase() *yamlui.UIBase {
 	return self.uiBlock.GetUIBase()
 }
 
-func (self *BTCloseWin) Setup(type_ string, data script.ValueMap) error {
-	if err := self.uiBlock.Setup(type_, data); err != nil { // super call
-		return err
-	}
+func (self *BTCloseWin) Setup(type_ string) {
+	self.uiBlock.Setup(type_)
 	self.GetUIBase().SetDispatchIF(self)
-	return nil
 }
 
 func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {

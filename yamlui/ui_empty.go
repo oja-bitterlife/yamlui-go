@@ -1,7 +1,5 @@
 package yamlui
 
-import "github.com/oja-bitterlife/yamlui-go/script"
-
 // 何もしないUI
 // 仮構築用
 
@@ -27,6 +25,4 @@ func (self *UIEmpty) Clone() UICloned {
 	}
 }
 
-func (self *UIEmpty) Setup(type_ string, data script.ValueMap) error {
-	return self.UIBase.Setup(type_, data) // super call
-}
+func (self *UIEmpty) Setup(type_ string) {}

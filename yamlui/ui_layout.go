@@ -1,9 +1,5 @@
 package yamlui
 
-import (
-	"github.com/oja-bitterlife/yamlui-go/script"
-)
-
 type UILayout struct {
 	UIBase *UIBase
 
@@ -48,34 +44,28 @@ func (self *UILayout) Clone() UICloned {
 	return &newLayout
 }
 
-func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
-	if err := self.UIBase.Setup(type_, data); err != nil { // super call
-		return err
-	}
-
+func (self *UILayout) Setup(type_ string) {
 	// DrawTreeIFをセット
 	self.UIBase.SetDrawTreeFilterIF(self)
 
 	// デフォルトはMargin=0
-	self.Margin = data.GetNum("Margin", 0)
-	self.MarginTop = data.GetNum("MarginTop", 0)
-	self.MarginBottom = data.GetNum("MarginBottom", 0)
-	self.MarginLeft = data.GetNum("MarginLeft", 0)
-	self.MarginRight = data.GetNum("MarginRight", 0)
-	self.MarginX = data.GetNum("MarginX", 0)
-	self.MarginY = data.GetNum("MarginY", 0)
+	self.Margin = self.UIBase.PropNum("Margin")
+	self.MarginTop = self.UIBase.PropNum("MarginTop")
+	self.MarginBottom = self.UIBase.PropNum("MarginBottom")
+	self.MarginLeft = self.UIBase.PropNum("MarginLeft")
+	self.MarginRight = self.UIBase.PropNum("MarginRight")
+	self.MarginX = self.UIBase.PropNum("MarginX")
+	self.MarginY = self.UIBase.PropNum("MarginY")
 
 	// Align系のプロパティはデフォルトはfalse
-	self.AlignCenter = data.GetBool("AlignCenter", false)
-	self.AlignCenterX = data.GetBool("AlignCenterX", false)
-	self.AlignCenterY = data.GetBool("AlignCenterY", false)
-	self.AlignRight = data.GetBool("AlignRight", false)
-	self.AlignBottom = data.GetBool("AlignBottom", false)
+	self.AlignCenter = self.UIBase.PropBool("AlignCenter")
+	self.AlignCenterX = self.UIBase.PropBool("AlignCenterX")
+	self.AlignCenterY = self.UIBase.PropBool("AlignCenterY")
+	self.AlignRight = self.UIBase.PropBool("AlignRight")
+	self.AlignBottom = self.UIBase.PropBool("AlignBottom")
 
 	// IsAbsのデフォルトはfalse
-	self.IsAbs = data.GetBool("IsAbs", false)
-
-	return nil
+	self.IsAbs = self.UIBase.PropBool("IsAbs")
 }
 
 // **********************************************************************

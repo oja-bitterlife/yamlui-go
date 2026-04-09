@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
 
@@ -28,13 +27,8 @@ func (self *BTLabel) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTLabel) Setup(type_ string, data script.ValueMap) error {
-	if err := self.UIBase.Setup(type_, data); err != nil { // super call
-		return err
-	}
-
+func (self *BTLabel) Setup(type_ string) {
 	self.UIBase.SetDrawIF(self)
-	return nil
 }
 
 func (self *BTLabel) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {

@@ -1,7 +1,5 @@
 package yamlui
 
-import "github.com/oja-bitterlife/yamlui-go/script"
-
 // **********************************************************************
 // 選択UI
 type UISelect struct {
@@ -40,14 +38,7 @@ func (self *UISelect) Clone() UICloned {
 	}
 }
 
-func (self *UISelect) Setup(type_ string, data script.ValueMap) error {
-	err := self.UIBase.Setup(type_, data) // super call
-	if err != nil {
-		return err
-	}
-	self.GetUIBase().SetPropNum(PROP_SELECT_NO, 0) // 選択番号を初期化
-	return nil
-}
+func (self *UISelect) Setup(type_ string) {}
 
 // **********************************************************************
 // 選択の操作

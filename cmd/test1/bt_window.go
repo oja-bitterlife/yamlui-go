@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
 
@@ -32,17 +31,14 @@ func (self *BTWindow) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTWindow) Setup(type_ string, data script.ValueMap) error {
-	if err := self.GetUIBase().Setup(type_, data); err != nil { // super call
-		return err
-	}
+func (self *BTWindow) Setup(type_ string) {
+	self.GetUIBase().Setup(type_)
 
 	// クローズのアニメーションのために元の高さを保存
 	uiArea := self.GetUIBase().Area()
 	self.orgH = uiArea.H
 
 	self.GetUIBase().SetDrawIF(self)
-	return nil
 }
 
 func (self *BTWindow) Draw(lib *yamlui.YAMLUI, x, y int, clip yamlui.Area) {

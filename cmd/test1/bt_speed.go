@@ -3,7 +3,6 @@ package main
 import (
 	"strings"
 
-	"github.com/oja-bitterlife/yamlui-go/script"
 	"github.com/oja-bitterlife/yamlui-go/yamlui"
 )
 
@@ -32,13 +31,11 @@ func (self *BTSpeed) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTSpeed) Setup(type_ string, data script.ValueMap) error {
-	if err := self.SelBase.Setup(type_, data); err != nil { // super call
-		return err
-	}
+func (self *BTSpeed) Setup(type_ string) {
+	self.SelBase.Setup(type_)
 
 	// ,区切りのTextを分解してTrimしてtextsに格納
-	texts := strings.Split(data["Text"].Str, ",")
+	texts := strings.Split(self.GetUIBase().PropStr("Text"), ",")
 	for i := range texts {
 		texts[i] = strings.TrimSpace(texts[i])
 	}
@@ -46,12 +43,10 @@ func (self *BTSpeed) Setup(type_ string, data script.ValueMap) error {
 
 	// ItemNumをtextsの数に設定
 	self.SelBase.ItemNum = len(texts)
-	self.SelBase.RowsNum = max(int(data["RowsNum"].Num), 1) // RowsNumは1以上にする
+	self.SelBase.RowsNum = len(texts)
 
 	self.SelBase.UIBase.SetDispatchIF(self)
 	self.SelBase.UIBase.SetDrawIF(self)
-
-	return nil
 }
 
 // Dispatch

@@ -36,13 +36,8 @@ func (self *UIBase) ToValue() script.Value {
 
 // ==================================================
 // ValueからUIBaseに流し込む関数
-func (self *UIBase) LoadFromValue(value script.Value) error {
-	if value.Type != script.TypeLitMap {
-		return script.LogErr("Expected Value to be MapType: " + value.Type.String())
-	}
-	m := value.Map
-
-	for k, v := range m {
+func (self *UIBase) LoadFromValue(value script.Value) {
+	for k, v := range value.Map {
 		switch k {
 		case "ID":
 			self.ID = v.Str
@@ -52,13 +47,15 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 
 		case "Events":
 			if v.Type != script.TypeLitList {
-				return script.LogErr("Expected Events to be ListType: " + v.Type.String())
+				script.LogErr("Expected Events to be ListType: " + v.Type.String())
+				continue
 			}
 
 			events := make([]string, len(v.List))
 			for i, eventVal := range v.List {
 				if eventVal.Type != script.TypeString {
-					return script.LogErr("Expected Events to be List of String: " + eventVal.Type.String())
+					script.LogErr("Expected Events to be List of String: " + eventVal.Type.String())
+					continue
 				}
 				events[i] = eventVal.Str
 			}
@@ -72,8 +69,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 			self.script.Vars["@"+k] = v
 		}
 	}
-
-	return nil
 }
 
 // **********************************************************************
@@ -108,6 +103,18 @@ func (self *UIBase) PropNum(key string) int {
 
 func (self *UIBase) PropBool(key string) bool {
 	return self.script.Vars.GetBool(key, false)
+}
+
+func (self *UIBase) PropStrDef(key string, def string) string {
+	return self.script.Vars.GetStr(key, def)
+}
+
+func (self *UIBase) PropNumDef(key string, def int) int {
+	return self.script.Vars.GetNum(key, def)
+}
+
+func (self *UIBase) PropBoolDef(key string, def bool) bool {
+	return self.script.Vars.GetBool(key, def)
 }
 
 // ==================================================

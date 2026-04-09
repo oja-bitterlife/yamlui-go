@@ -1,9 +1,5 @@
 package yamlui
 
-import (
-	"github.com/oja-bitterlife/yamlui-go/script"
-)
-
 type UIBlock struct {
 	UIBase    *UIBase
 	Timer     Timer
@@ -55,9 +51,4 @@ func (self *UIBlock) Clone() UICloned {
 	}
 }
 
-func (self *UIBlock) Setup(type_ string, data script.ValueMap) error {
-	if err := self.GetUIBase().Setup(type_, data); err != nil { // super call
-		return err
-	}
-	return nil
-}
+func (self *UIBlock) Setup(type_ string) {}

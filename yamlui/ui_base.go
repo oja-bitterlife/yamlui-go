@@ -98,10 +98,8 @@ func (self *UIBase) Clone() *UIBase {
 	return &clone
 }
 
-func (self *UIBase) Setup(type_ string, data script.ValueMap) error {
-	// 基本的にはUIBaseは何もしない。今後のための予約
-	return nil
-}
+// 基本的にはUIBaseは何もしない.super call対応
+func (self *UIBase) Setup(type_ string) {}
 
 // **********************************************************************
 // ScriptVMとの連携
