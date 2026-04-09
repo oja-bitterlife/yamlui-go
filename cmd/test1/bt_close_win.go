@@ -51,8 +51,7 @@ func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {
 		if win == nil {
 			script.LogErr("BTCloseWin: win:title not found")
 		}
-		// frame
-		script.Log("BTCloseWin: frame=%d", lib.Frame)
+
 		// タイマーが終了したらウィンドウを閉じる
 		if self.uiBlock.Timer.IsFinish(lib.Frame) {
 			win.Remove = true

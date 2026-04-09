@@ -55,21 +55,21 @@ func initialModel() *model {
 	}
 
 	// UI構築の登録
-	m.lib.UIBuild("window", NewBTWindow(lib, &m))
-	m.lib.UIBuild("title", NewBTTitle(lib, &m))
-	m.lib.UIBuild("area", yamlui.NewUILayout(lib))
-	m.lib.UIBuild("start", NewBTStart(lib, &m))
-	m.lib.UIBuild("label", NewBTLabel(lib, &m))
-	m.lib.UIBuild("speed", NewBTSpeed(lib, &m))
-	m.lib.UIBuild("close_win", NewBTCloseWin(lib, &m))
+	lib.UIBuild("window", NewBTWindow(lib, &m))
+	lib.UIBuild("title", NewBTTitle(lib, &m))
+	lib.UIBuild("area", yamlui.NewUILayout(lib))
+	lib.UIBuild("start", NewBTStart(lib, &m))
+	lib.UIBuild("label", NewBTLabel(lib, &m))
+	lib.UIBuild("speed", NewBTSpeed(lib, &m))
+	lib.UIBuild("close_win", NewBTCloseWin(lib, &m))
 
-	m.lib2.UIBuild("window", NewBTWindow(lib2, &m))
-	m.lib2.UIBuild("title", NewBTTitle(lib2, &m))
-	m.lib2.UIBuild("area", yamlui.NewUILayout(lib2))
-	m.lib2.UIBuild("start", NewBTStart(lib2, &m))
-	m.lib2.UIBuild("label", NewBTLabel(lib2, &m))
-	m.lib2.UIBuild("speed", NewBTSpeed(lib2, &m))
-	m.lib2.UIBuild("close_win", NewBTCloseWin(lib2, &m))
+	lib2.UIBuild("window", NewBTWindow(lib2, &m))
+	lib2.UIBuild("title", NewBTTitle(lib2, &m))
+	lib2.UIBuild("area", yamlui.NewUILayout(lib2))
+	lib2.UIBuild("start", NewBTStart(lib2, &m))
+	lib2.UIBuild("label", NewBTLabel(lib2, &m))
+	lib2.UIBuild("speed", NewBTSpeed(lib2, &m))
+	lib2.UIBuild("close_win", NewBTCloseWin(lib2, &m))
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")
@@ -133,7 +133,6 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// Enterキーで選択
 		if msg.Type == tea.KeyEnter {
 			m.lib.CallEvent("key:enter")
-			m.lib2.CallEvent("key:enter")
 			m.ForceUpdate = true
 		}
 		TraceMemory() // メモリ使用状況をログに出力
