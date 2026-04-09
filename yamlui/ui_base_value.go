@@ -79,6 +79,9 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 			self.H = v.Num
 		case "script":
 			self.script.AST = v
+
+		case "Type", "children":
+			// 処理しないもの
 		default:
 			// その他のPropertyは@をつけてVMのVarsに流し込む
 			self.script.Vars["@"+k] = v

@@ -80,9 +80,9 @@ func initialModel() *model {
 	if err := m.lib.Start(fileData); err != nil {
 		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
 	}
-	if err := m.lib2.Start(fileData); err != nil {
-		panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
-	}
+	// if err := m.lib2.Start(fileData); err != nil {
+	// 	panic(fmt.Sprintf("Failed to start YAMLUI: %v", err))
+	// }
 
 	return &m
 }

@@ -162,7 +162,7 @@ func (lib *YAMLUI) Load(valueJson []byte) error {
 			return err
 		}
 	default:
-		return script.LogErr("Expected top-level Value to be List or Map, got " + value.Type.String())
+		return lib.LogErr("Expected top-level Value to be List or Map, got " + value.Type.String())
 	}
 
 	return nil
@@ -178,7 +178,7 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 	for pattern, refObj := range lib.refObj {
 		matched, err := path.Match(pattern, type_)
 		if err != nil {
-			return script.LogErr("Invalid pattern in UIBuild: " + pattern + ": " + err.Error())
+			return lib.LogErr("Invalid pattern in UIBuild: " + pattern + ": " + err.Error())
 		}
 		if matched {
 			matchObj = refObj
@@ -203,7 +203,7 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 		}
 	} else {
 		// エラー終了せず警告で進めてみる
-		script.LogWarn("Unregister Type: " + type_)
+		lib.LogWarn("Unregister Type: " + type_)
 
 		// 登録されたUICloneableがない場合は、基本的なUIを構築
 		ui = NewUIBase(lib)

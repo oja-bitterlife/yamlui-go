@@ -20,10 +20,10 @@ type VM struct {
 }
 
 // VMの初期化
-func NewVM(valueAST Value, cmdsID string) VM {
+func NewVM(cmdsID string) VM {
 	// VMの初期化
 	vm := VM{
-		AST:    valueAST,
+		AST:    Value{},
 		Vars:   make(map[string]Value, VM_VAR_CAPACITY),
 		Result: Value{},
 		cmdsID: cmdsID,

@@ -3,8 +3,6 @@ package yamlui
 import (
 	"path"
 	"slices"
-
-	"github.com/oja-bitterlife/yamlui-go/script"
 )
 
 // **********************************************************************
@@ -121,7 +119,7 @@ func (self *UIBase) recRemove() {
 func (lib *YAMLUI) MatchEvent(wildStr string, event string) bool {
 	match, err := path.Match(wildStr, event)
 	if err != nil {
-		script.LogErr("Invalid event pattern: %s", wildStr)
+		lib.LogErr("Invalid event pattern: %s", wildStr)
 	}
 	return match
 }
@@ -157,7 +155,7 @@ type eventContext struct {
 func (lib *YAMLUI) SendEvent(event string) {
 	// Startしていない
 	if !lib.isRunning.Load() {
-		script.LogErr("YAMLUI is not running. Call Start() before sending events.")
+		lib.LogErr("YAMLUI is not running. Call Start() before sending events.")
 		return
 	}
 
@@ -173,7 +171,7 @@ func (lib *YAMLUI) CallEvent(event string) {
 	// Startしていない
 	if !lib.isRunning.Load() {
 		// UIのgoruoutineが走っていないときは直接呼び出す
-		script.LogErr("YAMLUI is not running. Call Start() before calling events. Calling event directly.")
+		lib.LogErr("YAMLUI is not running. Call Start() before calling events. Calling event directly.")
 		lib.DispatchEvent(event)
 		return
 	}

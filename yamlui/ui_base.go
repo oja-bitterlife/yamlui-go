@@ -49,12 +49,6 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	ui := &UIBase{}
 	ui.ID = id
 
-	ui.IsEnable = true
-
-	// とりあえず大きな値を入れておく
-	ui.W = 65536
-	ui.H = 65536
-
 	// ScriptVM.cmdsIDはルートノードのIDを入れる。
 	// ルートノードがないときはidがRootのIDなのでそれを使う
 	var cmdsID string
@@ -62,15 +56,27 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 		cmdsID = lib.root.ID
 	} else {
 		if !script.HasPrefix(id, ROOT_NODE_PREFIX) {
-			script.LogErr("ID does not start with %s: %s", ROOT_NODE_PREFIX, id)
+			lib.LogErr("ID does not start with %s: %s", ROOT_NODE_PREFIX, id)
 		}
 		cmdsID = id
 	}
-	ui.script = script.NewVM(script.Value{}, cmdsID)
+	ui.script = script.NewVM(cmdsID)
+
+	// 0以外の初期値は入れておく
+	// ----------------------------------------
+	ui.IsEnable = true
+
+	// とりあえず大きな値を入れておく
+	ui.W = 65536
+	ui.H = 65536
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
 	ui.children = []*UIBase{}
+
+	// Varsにデフォルトのプロパティを入れておく
+	// ----------------------------------------
+	ui.SetPropBool("@IsVisible", true) // デフォルトは表示する
 
 	return ui
 }

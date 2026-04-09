@@ -27,7 +27,7 @@ func (lib *YAMLUI) scriptAction(vm *script.VM, args []script.Value) (script.Valu
 
 	// 文字列のはずなのでチェック
 	if value.Type != script.TypeString {
-		return script.Value{}, script.LogErr("action command expects a string argument, but got " + value.Type.String())
+		return script.Value{}, lib.LogErr("action command expects a string argument, but got " + value.Type.String())
 	}
 
 	lib.SendEvent(value.Str) // イベントを追加
