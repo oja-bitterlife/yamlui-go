@@ -13,22 +13,23 @@ const (
 
 // 外部との連携用データ構造体
 type VM struct {
+	ID     string   // ID
 	AST    Value    // コンパイル済みコード
 	Vars   ValueMap // VMのメインメモリ的な
 	Result Value    // 最後の評価結果を保存する場所
 }
 
 // VMの初期化
-func NewVM(valueAST Value) VM {
+func NewVM(id string, valueAST Value) VM {
 	// VMの初期化
 	vm := VM{
+		ID:     id,
 		AST:    valueAST,
 		Vars:   make(map[string]Value, VM_VAR_CAPACITY),
 		Result: Value{},
 	}
 
-	// Builtinコマンドの登録
-	RegisterVMCmd("", nil)
+	InitVMCmds(id) // コマンドの初期化
 
 	return vm
 }
@@ -49,23 +50,37 @@ func (vm *VM) Clone() VM {
 // コマンド管理
 type VMCmdFunc func(vm *VM, args []Value) (Value, error)
 
-var (
+type VMCmds struct {
 	systemCmds map[string]VMCmdFunc
 	userCmds   map[string]VMCmdFunc
-	userMu     sync.RWMutex
-	initOnce   sync.Once
+}
+
+var (
+	cmds   map[string]VMCmds = make(map[string]VMCmds) // VM IDごとのコマンドセット
+	userMu sync.RWMutex
 )
 
-func RegisterVMCmd(cmdName string, fn VMCmdFunc) {
-	// 最初の1回だけsystemCmds とuserCmds を生成
-	initOnce.Do(func() {
-		systemCmds = make(map[string]VMCmdFunc)
-		SetBuiltinCmds(systemCmds) // Builtinの登録
-		userCmds = make(map[string]VMCmdFunc)
-	})
+func InitVMCmds(id string) {
+	userMu.Lock()
+	defer userMu.Unlock()
 
+	// すでに初期化されている場合は上書き警告を出す
+	if _, exists := cmds[id]; exists {
+		LogWarn("VM commands for ID %s are already initialized, overwriting", id)
+	}
+
+	// コマンドセットの初期化
+	cmds[id] = VMCmds{
+		systemCmds: make(map[string]VMCmdFunc),
+		userCmds:   make(map[string]VMCmdFunc),
+	}
+	SetBuiltinCmds(cmds[id].systemCmds) // Builtinの登録
+}
+
+func (vm *VM) RegisterVMCmd(cmdName string, fn VMCmdFunc) {
 	// 何もしない
 	if cmdName == "" || fn == nil {
+		LogWarn("invalid command name or function for command registration: name=%s, fn=%v", cmdName, fn)
 		return
 	}
 
@@ -74,10 +89,10 @@ func RegisterVMCmd(cmdName string, fn VMCmdFunc) {
 	userMu.Lock()
 	defer userMu.Unlock()
 
-	if _, exists := userCmds[cmdName]; exists {
+	if _, exists := cmds[vm.ID].userCmds[cmdName]; exists {
 		LogWarn("command %s is already defined", cmdName)
 	}
-	userCmds[cmdName] = fn
+	cmds[vm.ID].userCmds[cmdName] = fn
 }
 
 // **********************************************************************

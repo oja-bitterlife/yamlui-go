@@ -13,9 +13,9 @@ type BTSpeed struct {
 	texts   []string
 }
 
-func NewBTSpeed(model *model) *BTSpeed {
+func NewBTSpeed(lib *yamlui.YAMLUI, model *model) *BTSpeed {
 	return &BTSpeed{
-		SelBase: yamlui.NewUISelect(0, 1), // ItemNumは後でSetupで設定する
+		SelBase: yamlui.NewUISelect(lib, 0, 1), // ItemNumは後でSetupで設定する
 		model:   model,
 	}
 }

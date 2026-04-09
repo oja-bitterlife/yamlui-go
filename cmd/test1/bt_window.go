@@ -11,9 +11,9 @@ type BTWindow struct {
 	orgH   int
 }
 
-func NewBTWindow(m *model) *BTWindow {
+func NewBTWindow(lib *yamlui.YAMLUI, m *model) *BTWindow {
 	return &BTWindow{
-		UIBase: yamlui.NewUIBase(),
+		UIBase: yamlui.NewUIBase(lib),
 		model:  m,
 	}
 }

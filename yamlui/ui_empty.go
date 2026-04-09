@@ -9,9 +9,9 @@ type UIEmpty struct {
 	UIBase *UIBase
 }
 
-func NewUIEmpty() *UIEmpty {
+func NewUIEmpty(lib *YAMLUI) *UIEmpty {
 	return &UIEmpty{
-		UIBase: NewUIBase(),
+		UIBase: NewUIBase(lib),
 	}
 }
 

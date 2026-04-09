@@ -12,6 +12,8 @@ import (
 var lastID int32
 
 type UIBase struct {
+	lib *YAMLUI
+
 	// ==================================================
 	// Scriptで更新させないもの
 	ID string
@@ -48,10 +50,11 @@ type UIBase struct {
 	drawTreeIF DrawTreeIF // z順を変更したいときに使う
 }
 
-func NewUIBase() *UIBase {
+// IDが決まっているときはこっち
+func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	ui := &UIBase{}
-	newID := atomic.AddInt32(&lastID, 1)
-	ui.ID = "UIBase_" + script.Itoa(int(newID))
+	ui.lib = lib
+	ui.ID = id
 
 	ui.IsEnable = true
 	ui.IsVisible = true
@@ -61,13 +64,19 @@ func NewUIBase() *UIBase {
 	ui.H = 65536
 
 	// ScriptVM
-	ui.script = script.NewVM(script.Value{})
+	ui.script = script.NewVM(id, script.Value{})
 
 	// map/sliceを初期化しておく
 	ui.Events = []string{}
 	ui.children = []*UIBase{}
 
 	return ui
+}
+
+// 匿名板。だいたいこっちでOK
+func NewUIBase(lib *YAMLUI) *UIBase {
+	newID := atomic.AddInt32(&lastID, 1)
+	return NewUIBaseWithID(lib, "UIBase_"+script.Itoa(int(newID)))
 }
 
 // **********************************************************************

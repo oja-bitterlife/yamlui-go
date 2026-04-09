@@ -10,9 +10,9 @@ type BTLabel struct {
 	model  *model
 }
 
-func NewBTLabel(m *model) *BTLabel {
+func NewBTLabel(lib *yamlui.YAMLUI, m *model) *BTLabel {
 	return &BTLabel{
-		UIBase: yamlui.NewUIBase(),
+		UIBase: yamlui.NewUIBase(lib),
 		model:  m,
 	}
 }

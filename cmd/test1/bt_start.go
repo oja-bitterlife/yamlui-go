@@ -13,9 +13,9 @@ type BTStart struct {
 	texts   []string
 }
 
-func NewBTStart(model *model) *BTStart {
+func NewBTStart(lib *yamlui.YAMLUI, model *model) *BTStart {
 	return &BTStart{
-		SelBase: yamlui.NewUISelect(0, 1), // ItemNumは後でSetupで設定する
+		SelBase: yamlui.NewUISelect(lib, 0, 1), // ItemNumは後でSetupで設定する
 		model:   model,
 	}
 }

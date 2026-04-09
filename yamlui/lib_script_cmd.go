@@ -8,7 +8,7 @@ import (
 // scriptコマンドを登録する
 func (lib *YAMLUI) SetUIScriptCmds() {
 	// UIBaseのscriptコマンドを登録する
-	script.RegisterVMCmd("action", lib.scriptAction)
+	lib.RegisterVMCmd("action", lib.scriptAction)
 }
 
 // ==================================================

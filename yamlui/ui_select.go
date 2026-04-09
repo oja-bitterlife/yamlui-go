@@ -15,9 +15,9 @@ type UISelect struct {
 	RowsNum int
 }
 
-func NewUISelect(itemNum, rowsNum int) *UISelect {
+func NewUISelect(lib *YAMLUI, itemNum, rowsNum int) *UISelect {
 	return &UISelect{
-		UIBase:  NewUIBase(),
+		UIBase:  NewUIBase(lib),
 		ItemNum: itemNum,
 		RowsNum: rowsNum,
 	}

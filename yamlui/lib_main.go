@@ -32,7 +32,6 @@ type YAMLUI struct {
 
 func NewYAMLUI() *YAMLUI {
 	lib := &YAMLUI{
-		root:   NewUIBase(),
 		refObj: make(map[string]UIComponent[*UIBase]),
 
 		eventChannel:  make(chan eventContext, EVENT_USING_MAX),
@@ -40,6 +39,7 @@ func NewYAMLUI() *YAMLUI {
 
 		drawQueue: make([]DrawQueueItem, 0, UI_USING_MAX),
 	}
+	lib.root = NewUIBase(lib)
 
 	// ここでYAMLUIのscriptコマンドを登録する
 	lib.SetUIScriptCmds()
@@ -55,6 +55,10 @@ func (lib *YAMLUI) FindByID(id string) *UIBase {
 
 func (lib *YAMLUI) Root() *UIBase {
 	return lib.root
+}
+
+func (lib *YAMLUI) RegisterVMCmd(name string, cmdFunc script.VMCmdFunc) {
+	lib.root.script.RegisterVMCmd("action", lib.scriptAction)
 }
 
 // **********************************************************************
@@ -175,7 +179,7 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 		script.LogWarn("Unregister Type: " + type_)
 
 		// 登録されたUICloneableがない場合は、基本的なUIを構築
-		ui = NewUIBase()
+		ui = NewUIBase(lib)
 		ui.LoadFromValue(value) // プロパティを流し込む
 	}
 

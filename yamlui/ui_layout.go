@@ -30,9 +30,9 @@ type UILayout struct {
 	IsAbs bool
 }
 
-func NewUILayout() *UILayout {
+func NewUILayout(lib *YAMLUI) *UILayout {
 	return &UILayout{
-		UIBase: NewUIBase(),
+		UIBase: NewUIBase(lib),
 	}
 }
 

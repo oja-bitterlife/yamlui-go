@@ -34,9 +34,11 @@ type model struct {
 }
 
 func initialModel() model {
+	lib := yamlui.NewYAMLUI()
+	lib2 := yamlui.NewYAMLUI()
 	m := model{
-		lib:    yamlui.NewYAMLUI(),
-		lib2:   yamlui.NewYAMLUI(),
+		lib:    lib,
+		lib2:   lib2,
 		width:  68,
 		height: 26,
 	}
@@ -51,21 +53,21 @@ func initialModel() model {
 	}
 
 	// UI構築の登録
-	m.lib.UIBuild("window", NewBTWindow(&m))
-	m.lib.UIBuild("title", NewBTTitle(&m))
-	m.lib.UIBuild("area", yamlui.NewUILayout())
-	m.lib.UIBuild("start", NewBTStart(&m))
-	m.lib.UIBuild("label", NewBTLabel(&m))
-	m.lib.UIBuild("speed", NewBTSpeed(&m))
-	m.lib.UIBuild("close_win", NewBTCloseWin(&m))
+	m.lib.UIBuild("window", NewBTWindow(lib, &m))
+	m.lib.UIBuild("title", NewBTTitle(lib, &m))
+	m.lib.UIBuild("area", yamlui.NewUILayout(lib))
+	m.lib.UIBuild("start", NewBTStart(lib, &m))
+	m.lib.UIBuild("label", NewBTLabel(lib, &m))
+	m.lib.UIBuild("speed", NewBTSpeed(lib, &m))
+	m.lib.UIBuild("close_win", NewBTCloseWin(lib, &m))
 
-	m.lib2.UIBuild("window", NewBTWindow(&m))
-	m.lib2.UIBuild("title", NewBTTitle(&m))
-	m.lib2.UIBuild("area", yamlui.NewUILayout())
-	m.lib2.UIBuild("start", NewBTStart(&m))
-	m.lib2.UIBuild("label", NewBTLabel(&m))
-	m.lib2.UIBuild("speed", NewBTSpeed(&m))
-	m.lib2.UIBuild("close_win", NewBTCloseWin(&m))
+	m.lib2.UIBuild("window", NewBTWindow(lib2, &m))
+	m.lib2.UIBuild("title", NewBTTitle(lib2, &m))
+	m.lib2.UIBuild("area", yamlui.NewUILayout(lib2))
+	m.lib2.UIBuild("start", NewBTStart(lib2, &m))
+	m.lib2.UIBuild("label", NewBTLabel(lib2, &m))
+	m.lib2.UIBuild("speed", NewBTSpeed(lib2, &m))
+	m.lib2.UIBuild("close_win", NewBTCloseWin(lib2, &m))
 
 	// JSON を読み込んで UI を構築する
 	fileData, err := os.ReadFile("bin/ui.json")

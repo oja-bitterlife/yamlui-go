@@ -10,9 +10,9 @@ type UIBlock struct {
 	isStarted bool
 }
 
-func NewUIBlock() *UIBlock {
+func NewUIBlock(lib *YAMLUI) *UIBlock {
 	return &UIBlock{
-		UIBase: NewUIBase(),
+		UIBase: NewUIBase(lib),
 	}
 }
 

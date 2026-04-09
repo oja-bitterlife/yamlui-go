@@ -10,9 +10,9 @@ type BTTitle struct {
 	model  *model
 }
 
-func NewBTTitle(model *model) *BTTitle {
+func NewBTTitle(lib *yamlui.YAMLUI, model *model) *BTTitle {
 	return &BTTitle{
-		UIBase: yamlui.NewUIBase(),
+		UIBase: yamlui.NewUIBase(lib),
 		model:  model,
 	}
 }

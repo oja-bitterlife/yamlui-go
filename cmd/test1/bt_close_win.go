@@ -12,9 +12,9 @@ type BTCloseWin struct {
 	model   *model
 }
 
-func NewBTCloseWin(model *model) *BTCloseWin {
+func NewBTCloseWin(lib *yamlui.YAMLUI, model *model) *BTCloseWin {
 	return &BTCloseWin{
-		uiBlock: yamlui.NewUIBlock(),
+		uiBlock: yamlui.NewUIBlock(lib),
 		model:   model,
 	}
 }
