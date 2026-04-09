@@ -54,7 +54,7 @@ func (self *BTCloseWin) Dispatch(lib *yamlui.YAMLUI, event string) {
 
 		// タイマーが終了したらウィンドウを閉じる
 		if self.uiBlock.Timer.IsFinish(lib.Frame) {
-			win.Remove = true
+			win.SetPropBool(yamlui.PROP_REMOVE, true)
 		} else {
 			win.SetPropNum("close_ratio", self.uiBlock.Timer.Progress(lib.Frame, 100))
 		}

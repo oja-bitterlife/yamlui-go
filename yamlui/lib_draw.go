@@ -96,7 +96,7 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawTreeContext) {
 	// 子供の描画
 	for _, child := range self.children {
-		if child.PropBool("@IsVisible") {
+		if child.PropBool(PROP_IS_VISIBLE) {
 			// 描画座標やクリップ領域等を計算してコンテキストを作る
 			childArea := child.Area().Offset(ctx.X, ctx.Y)
 			childClip := childArea.Clip(ctx.Clip)

@@ -17,15 +17,13 @@ func (self *UIBase) ToValue() script.Value {
 
 	// UIBaseの基本的なプロパティをValueMapに入れる
 	data := script.ValueMap{
-		"ID":       script.NewString(self.ID),
-		"Events":   script.NewLitList(events),
-		"IsEnable": script.NewBool(self.IsEnable),
-		"Remove":   script.NewBool(self.Remove),
-		"X":        script.NewNumber(self.X),
-		"Y":        script.NewNumber(self.Y),
-		"W":        script.NewNumber(self.W),
-		"H":        script.NewNumber(self.H),
-		"script":   self.script.AST,
+		"ID":     script.NewString(self.ID),
+		"Events": script.NewLitList(events),
+		"X":      script.NewNumber(self.X),
+		"Y":      script.NewNumber(self.Y),
+		"W":      script.NewNumber(self.W),
+		"H":      script.NewNumber(self.H),
+		"script": self.script.AST,
 	}
 
 	// Propertyは@付きの名前でVarsに入っているものをValueMapに入れる
@@ -65,10 +63,6 @@ func (self *UIBase) LoadFromValue(value script.Value) error {
 				events[i] = eventVal.Str
 			}
 			self.Events = events
-		case "IsEnable":
-			self.IsEnable = v.Bool()
-		case "Remove":
-			self.Remove = v.Bool()
 		case "X":
 			self.X = v.Num
 		case "Y":

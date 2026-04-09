@@ -21,9 +21,6 @@ type UIBase struct {
 
 	// ==================================================
 	// スクリプトで更新できるプロパティ
-	IsEnable bool
-	Remove   bool // UIツリーから削除するかどうか。UPDATEの最後にまとめて削除するためのフラグ
-
 	// 座標
 	X int
 	Y int
@@ -64,7 +61,6 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 
 	// 0以外の初期値は入れておく
 	// ----------------------------------------
-	ui.IsEnable = true
 
 	// とりあえず大きな値を入れておく
 	ui.W = 65536
@@ -76,7 +72,8 @@ func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 
 	// Varsにデフォルトのプロパティを入れておく
 	// ----------------------------------------
-	ui.SetPropBool("@IsVisible", true) // デフォルトは表示する
+	ui.SetPropBool(PROP_IS_ENABLE, true)
+	ui.SetPropBool(PROP_IS_VISIBLE, true)
 
 	return ui
 }
@@ -129,8 +126,6 @@ func (self *UIBase) storeToVM(frame int, event string) {
 	self.script.Vars["@Frame"] = script.NewNumber(frame)
 
 	// プロパティの送信
-	self.script.Vars["@IsEnable"] = script.NewBool(self.IsEnable)
-	self.script.Vars["@Remove"] = script.NewBool(self.Remove)
 	self.script.Vars["@X"] = script.NewNumber(self.X)
 	self.script.Vars["@Y"] = script.NewNumber(self.Y)
 	self.script.Vars["@Width"] = script.NewNumber(self.W)
@@ -142,10 +137,6 @@ func (self *UIBase) loadFromVM() {
 	for k, v := range self.script.Vars {
 		switch k {
 
-		case "@IsEnable":
-			self.IsEnable = v.Bool()
-		case "@Remove":
-			self.Remove = v.Bool()
 		case "@X":
 			self.X = v.Num
 		case "@Y":

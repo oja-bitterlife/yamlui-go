@@ -85,7 +85,7 @@ func (lib *YAMLUI) dispatch(event string) {
 func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) {
 	// 子供の更新
 	for _, child := range self.children {
-		if child.IsEnable {
+		if child.PropBool(PROP_IS_ENABLE) {
 			// 更新インターフェースがあれば更新キューに入れる
 			if child.dispatchIF != nil {
 				lib.dispatchQueue = append(lib.dispatchQueue, DispatchQueueItem{
@@ -104,7 +104,7 @@ func (self *UIBase) recDispatchTree(lib *YAMLUI, z int) {
 // Removeの再帰
 func (self *UIBase) recRemove() {
 	for _, child := range self.children {
-		if child.Remove {
+		if child.PropBool(PROP_REMOVE) {
 			// Removeがtrueの要素は子供もろとも削除する
 			self.RemoveChild(child)
 		} else {

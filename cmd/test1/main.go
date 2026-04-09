@@ -113,21 +113,21 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		// 縦方向の移動 (NextGridY)
 		if msg.Type == tea.KeyUp {
 			m.lib.CallEvent("key:up")
-			m.lib2.CallEvent("key:down")
+			// m.lib2.CallEvent("key:down")
 		}
 		if msg.Type == tea.KeyDown {
 			m.lib.CallEvent("key:down")
-			m.lib2.CallEvent("key:up")
+			// m.lib2.CallEvent("key:up")
 		}
 
 		// // 横方向の移動 (NextGridX)
 		if msg.Type == tea.KeyLeft {
 			m.lib.CallEvent("key:left")
-			m.lib2.CallEvent("key:right")
+			// m.lib2.CallEvent("key:right")
 		}
 		if msg.Type == tea.KeyRight {
 			m.lib.CallEvent("key:right")
-			m.lib2.CallEvent("key:left")
+			// m.lib2.CallEvent("key:left")
 		}
 
 		// Enterキーで選択
@@ -138,7 +138,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		TraceMemory() // メモリ使用状況をログに出力
 	case TickMsg:
 		m.lib.CallEvent(TEA_UPDATE_EVENT)
-		m.lib2.CallEvent(TEA_UPDATE_EVENT)
+		// m.lib2.CallEvent(TEA_UPDATE_EVENT)
 	}
 
 	if m.ForceUpdate {
@@ -157,7 +157,7 @@ func (m *model) View() string {
 	}
 
 	m.lib.Draw(0, 0, m.width, m.height)
-	m.lib2.Draw(8, 3, m.width, m.height)
+	// m.lib2.Draw(8, 3, m.width, m.height)
 
 	// 色の設定
 	bgStyle := lipgloss.NewStyle().
