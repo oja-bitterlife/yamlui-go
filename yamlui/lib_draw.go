@@ -28,7 +28,7 @@ type DrawTreeIF interface {
 	DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeContext
 }
 
-func (self *UIBase) SetDrawTreeIF(drawTreeIF DrawTreeIF) {
+func (self *UIBase) SetDrawTreeFilterIF(drawTreeIF DrawTreeIF) {
 	self.drawTreeIF = drawTreeIF
 }
 

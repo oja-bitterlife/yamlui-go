@@ -12,8 +12,6 @@ import (
 var lastID int32
 
 type UIBase struct {
-	lib *YAMLUI
-
 	// ==================================================
 	// Scriptで更新させないもの
 	ID string
@@ -53,7 +51,6 @@ type UIBase struct {
 // IDが決まっているときはこっち
 func NewUIBaseWithID(lib *YAMLUI, id string) *UIBase {
 	ui := &UIBase{}
-	ui.lib = lib
 	ui.ID = id
 
 	ui.IsEnable = true

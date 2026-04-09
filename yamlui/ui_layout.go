@@ -54,7 +54,7 @@ func (self *UILayout) Setup(type_ string, data script.ValueMap) error {
 	}
 
 	// DrawTreeIFをセット
-	self.UIBase.SetDrawTreeIF(self)
+	self.UIBase.SetDrawTreeFilterIF(self)
 
 	// デフォルトはMargin=0
 	self.Margin = data.GetNum("Margin", 0)
