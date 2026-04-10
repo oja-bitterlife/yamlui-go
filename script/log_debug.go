@@ -73,9 +73,17 @@ var logger = slog.New(&PrettyHandler{out: os.Stderr})
 
 // **********************************************************************
 // ログ出力
+type LogLevel int
+
+const (
+	LogLevelInfo  LogLevel = LogLevel(slog.LevelInfo)
+	LogLevelWarn  LogLevel = LogLevel(slog.LevelWarn)
+	LogLevelError LogLevel = LogLevel(slog.LevelError)
+)
+
 // ==================================================
 // 共通出力関数
-func PrintLogCommon(level slog.Level, caller int, msg string, args ...any) string {
+func PrintLogCommon(level LogLevel, caller int, msg string, args ...any) string {
 	fmtMsg := fmt.Sprintf(msg, args...)
 
 	// 1. 呼び出し元のPCを取得
@@ -87,7 +95,7 @@ func PrintLogCommon(level slog.Level, caller int, msg string, args ...any) strin
 	runtime.Callers(caller, pcs[:])
 	pc = pcs[0]
 
-	r := slog.NewRecord(time.Now(), level, fmtMsg, pc)
+	r := slog.NewRecord(time.Now(), slog.Level(level), fmtMsg, pc)
 	_ = logger.Handler().Handle(context.Background(), r)
 	return fmtMsg
 }
@@ -95,19 +103,19 @@ func PrintLogCommon(level slog.Level, caller int, msg string, args ...any) strin
 // ==================================================
 // 各ログレベルの出力
 func Log(msg string, args ...any) {
-	PrintLogCommon(slog.LevelInfo, 3, msg, args...)
+	PrintLogCommon(LogLevelInfo, 3, msg, args...)
 }
 
 func LogWarn(msg string, args ...any) {
-	PrintLogCommon(slog.LevelWarn, 3, msg, args...)
+	PrintLogCommon(LogLevelWarn, 3, msg, args...)
 }
 
 func LogErr(msg string, args ...any) error {
-	fmtMsg := PrintLogCommon(slog.LevelError, 3, msg, args...)
+	fmtMsg := PrintLogCommon(LogLevelError, 3, msg, args...)
 	return errors.New(fmtMsg)
 }
 
 func LogFatal(msg string, args ...any) {
-	fmtMsg := PrintLogCommon(slog.LevelError, 3, msg, args...)
+	fmtMsg := PrintLogCommon(LogLevelError, 3, msg, args...)
 	panic(fmtMsg)
 }

@@ -5,13 +5,21 @@ package script
 import (
 	"errors"
 	"io"
-	"log/slog"
 )
 
 // 完全に消えることを期待
 // ==================================================
-func SetLogWriter(w io.Writer)                                                       {}
-func PrintLogCommon(level slog.Level, callDepth int, msg string, args ...any) string { return "" }
+type LogLevel int
+
+const (
+	// slogに合わせておく
+	LogLevelInfo  LogLevel = 0
+	LogLevelWarn  LogLevel = 4
+	LogLevelError LogLevel = 8
+)
+
+func SetLogWriter(w io.Writer)                                                     {}
+func PrintLogCommon(level LogLevel, callDepth int, msg string, args ...any) string { return "" }
 
 // ----------------------------------------
 func Log(msg string, args ...any)     {}
