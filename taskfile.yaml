@@ -44,8 +44,8 @@ tasks:
       - "{{.BIN_DIR}}/tiny"
     cmds:
       - mkdir -p {{.BIN_DIR}}
-      - tinygo build -o {{.BIN_DIR}}/tiny -opt=z ./cmd/tinygo
-      - tinygo build -o {{.BIN_DIR}}/tiny.wasm -target=wasm -opt=z ./cmd/tinygo
+      - tinygo build -o {{.BIN_DIR}}/tiny -gc=leaking -opt=z ./cmd/tinygo
+      - tinygo build -o {{.BIN_DIR}}/tiny.wasm -gc=leaking -target=wasm -opt=z ./cmd/tinygo
 
   check_tiny:
     desc: "Check TinyGo"
