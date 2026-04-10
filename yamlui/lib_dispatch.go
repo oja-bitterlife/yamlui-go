@@ -35,16 +35,14 @@ func (lib *YAMLUI) dispatch(event string) {
 		lib.isLock.Store(false)
 	}()
 
-	// queueをクリア
-	lib.dispatchQueue = lib.dispatchQueue[:0]
-
-	// 更新コンテキストを作成してDispatchTreeを呼び出す
+	// DispatchTreeを呼び出してDispatchQueueに入れる
 	// ----------------------------------------
+	lib.dispatchQueue = lib.dispatchQueue[:0] // queueをクリア
 	lib.root.recDispatchTree(lib, 0)
 
 	// queueに溜まったDispatchを実行する
 	// ----------------------------------------
-	// Z順でソートする
+	// Z順でソートする.兄弟が先に呼ばれるようになる
 	slices.SortStableFunc(lib.dispatchQueue, func(a, b DispatchQueueItem) int {
 		return a.z - b.z
 	})
