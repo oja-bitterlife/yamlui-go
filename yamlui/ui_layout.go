@@ -107,11 +107,6 @@ func (self *UILayout) DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeC
 	rMgn := self.MarginRight + self.MarginX + self.Margin
 	bMgn := self.MarginBottom + self.MarginY + self.Margin
 
-	// Right/Bottomマージン分親のエリアから引いておく
-	//	parentArea := ctx.ParentClip
-	//	parentArea.W -= rMgn
-	//	parentArea.H -= bMgn
-
 	// マージン分座標をずらす
 	newClip := Area{
 		X: alignX + lMgn,

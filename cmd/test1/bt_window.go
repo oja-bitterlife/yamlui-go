@@ -33,9 +33,9 @@ func (self *BTWindow) Clone() yamlui.UICloned {
 func (self *BTWindow) DrawTreeFilter(lib *yamlui.YAMLUI, ctx yamlui.DrawTreeContext) yamlui.DrawTreeContext {
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {
-		// area := self.GetUIBase().Area()
-		// ctx.ParentClip = area.Clip(ctx.ParentClip)
-		// ctx.H = 10
+		ratio := self.GetUIBase().PropNum("close_ratio")
+		area := self.GetUIBase().Area()
+		ctx.Clip.H = area.H * (100 - ratio) / 100
 	}
 	return ctx
 }
