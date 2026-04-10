@@ -19,11 +19,11 @@ type DrawQueueItem struct {
 // DrawTreeIF
 // Drawの引数やZ順を変更したいときに使う
 type DrawContext struct {
-	X, Y       int
-	Z          float64
-	Clip       Area
-	ParentClip Area
 	Parent     *UIBase
+	ParentClip Area
+	Z          float64
+	X, Y       int
+	Clip       Area
 }
 
 type DrawContextIF interface {
@@ -59,12 +59,12 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
 	ctx := DrawContext{
+		Parent:     nil,
+		ParentClip: lib.Screen,
+		Z:          0,
 		X:          sx,
 		Y:          sy,
 		Clip:       lib.Screen,
-		Z:          0,
-		ParentClip: lib.Screen,
-		Parent:     nil,
 	}
 	lib.root.recDrawTree(lib, ctx)
 
@@ -116,12 +116,12 @@ func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawContext) {
 
 			// 子供の描画コンテキストを作る。Z順は親よりも大きくする
 			childCtx := DrawContext{
+				Parent:     self,
+				ParentClip: ctx.Clip,
+				Z:          ctx.Z + 1,
 				X:          childArea.X,
 				Y:          childArea.Y,
-				Z:          ctx.Z + 1,
 				Clip:       childClip,
-				ParentClip: ctx.Clip,
-				Parent:     self,
 			}
 
 			// 再帰的に子供を描画
