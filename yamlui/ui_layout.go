@@ -73,58 +73,57 @@ func (self *UILayout) Dispatch(lib *YAMLUI, event string) {
 // **********************************************************************
 // DrawTreeのOverride
 func (self *UILayout) DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeContext {
-	// 面倒なので先にintにしておく
-	parentW, parentH := ctx.ParentClip.WH()
-	selfW, selfH := self.GetUIBase().Area().WH()
+	area := self.GetUIBase().Area()
+	parentW, parentH := ctx.ParentClip.W, ctx.ParentClip.H
 
 	// 絶対座標対応
 	if self.IsAbs {
-		ctx.X = lib.Screen.X
-		ctx.Y = lib.Screen.Y
+		ctx.X = lib.Screen.X + area.X
+		ctx.Y = lib.Screen.Y + area.Y
 	}
 
 	// Align系のプロパティを考慮して、子の描画領域を計算する
 	offsetX := 0
 	offsetY := 0
 	if self.AlignRight {
-		offsetX = parentW - selfW
+		offsetX = parentW - area.W
 	}
 	if self.AlignBottom {
-		offsetY = parentH - selfH
+		offsetY = parentH - area.H
 	}
 	if self.AlignCenter || self.AlignCenterX {
-		offsetX = (parentW - selfW) / 2
+		offsetX = (parentW - area.W) / 2
 	}
 	if self.AlignCenter || self.AlignCenterY {
-		offsetY = (parentH - selfH) / 2
+		offsetY = (parentH - area.H) / 2
 	}
 	// alignされた座標
 	alignX := ctx.X + offsetX
 	alignY := ctx.Y + offsetY
 
-	// マージンを考慮して、子の描画領域を計算する
-	left := self.MarginLeft + self.MarginX + self.Margin
-	top := self.MarginTop + self.MarginY + self.Margin
-	right := self.MarginRight + self.MarginX + self.Margin
-	bottom := self.MarginBottom + self.MarginY + self.Margin
+	// マージン
+	lMgn := self.MarginLeft + self.MarginX + self.Margin
+	tMgn := self.MarginTop + self.MarginY + self.Margin
+	rMgn := self.MarginRight + self.MarginX + self.Margin
+	bMgn := self.MarginBottom + self.MarginY + self.Margin
 
 	// Right/Bottomマージン分親のエリアから引いておく
-	parentArea := ctx.ParentClip
-	parentArea.W -= right
-	parentArea.H -= bottom
+	//	parentArea := ctx.ParentClip
+	//	parentArea.W -= rMgn
+	//	parentArea.H -= bMgn
 
-	// Left/Topマージン分座標をずらす
-	// newClip := Area{
-	// 	X: alignX + left,
-	// 	Y: alignY + top,
-	// 	W: selfW,
-	// 	H: selfH,
-	// }.Clip(parentArea)
+	// マージン分座標をずらす
+	newClip := Area{
+		X: alignX + lMgn,
+		Y: alignY + tMgn,
+		W: area.W - lMgn - rMgn,
+		H: area.H - tMgn - bMgn,
+	}.Clip(ctx.ParentClip)
 
 	// コンテキストの更新
-	ctx.X = alignX + left
-	ctx.Y = alignY + top
-	// ctx.ParentClip = newClip
+	ctx.X = alignX + lMgn
+	ctx.Y = alignY + tMgn
+	ctx.Clip = newClip
 
 	// 更新したコンテキストを返す
 	return ctx

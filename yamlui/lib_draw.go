@@ -96,22 +96,14 @@ func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawTreeContext) {
 	if self.drawTreeIF != nil {
 		ctx = self.drawTreeIF.DrawTreeFilter(lib, ctx)
 	}
-	area := self.Area().Offset(ctx.X, ctx.Y)
 
 	// 描画インターフェースがあれば描画キューに入れる
 	if self.drawIF != nil {
-		lib.Log("%s, cx=%d, cy=%d, ax=%d, ay=%d, clipx=%d, clipy=%d",
-			self.PropStr(PROP_TYPE),
-			ctx.X, ctx.Y,
-			area.Y, area.Y,
-			ctx.Clip.X, ctx.Clip.Y,
-		)
-
 		lib.drawQueue = append(lib.drawQueue, DrawQueueItem{
 			drawIF: self.drawIF,
 			z:      ctx.Z,
-			x:      area.X,
-			y:      area.Y,
+			x:      ctx.X,
+			y:      ctx.Y,
 			clip:   ctx.Clip,
 		})
 	}
@@ -119,12 +111,13 @@ func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawTreeContext) {
 	// 子供の描画
 	for _, child := range self.children {
 		if child.PropBool(PROP_IS_VISIBLE) {
-			childClip := child.Area().Offset(area.X, area.Y).Clip(ctx.Clip)
+			childArea := child.Area().Offset(ctx.X, ctx.Y)
+			childClip := childArea.Clip(ctx.Clip)
 
 			// 子供の描画コンテキストを作る。Z順は親よりも大きくする
 			childCtx := DrawTreeContext{
-				X:          area.X,
-				Y:          area.Y,
+				X:          childArea.X,
+				Y:          childArea.Y,
 				Z:          ctx.Z + 1,
 				Clip:       childClip,
 				ParentClip: ctx.Clip,
