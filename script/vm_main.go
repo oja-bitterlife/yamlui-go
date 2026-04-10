@@ -105,6 +105,15 @@ func (vm *VM) DeleteVMCmds() {
 // **********************************************************************
 // 実行
 func (vm *VM) Run() error {
+	// コンパイルされてなかったらここでやる.動的なコード生成対応
+	if vm.AST.Type == TypeString {
+		if ast, err := Compile(vm.AST.Str); err != nil {
+			return err
+		} else {
+			vm.AST = ast
+		}
+	}
+
 	// resultを受け取る準備
 	if len(vm.AST.List) <= 1 {
 		vm.Result = NewNil() // 結果を一つ返す
