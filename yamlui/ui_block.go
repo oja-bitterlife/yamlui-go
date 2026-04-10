@@ -1,14 +1,14 @@
 package yamlui
 
 type UIBlock struct {
-	UIBase    *UIBase
+	uiBase    *UIBase
 	Timer     Timer
 	isStarted bool
 }
 
 func NewUIBlock(lib *YAMLUI) *UIBlock {
 	return &UIBlock{
-		UIBase: NewUIBase(lib),
+		uiBase: NewUIBase(lib),
 	}
 }
 
@@ -42,11 +42,11 @@ func (self *UIBlock) IsStarted() bool {
 // **********************************************************************
 // UIComponentIFの実装
 func (self *UIBlock) GetUIBase() *UIBase {
-	return self.UIBase
+	return self.uiBase
 }
 
 func (self *UIBlock) Clone() UICloned {
 	return &UIBlock{
-		UIBase: self.GetUIBase().Clone(),
+		uiBase: self.GetUIBase().Clone(),
 	}
 }

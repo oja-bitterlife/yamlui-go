@@ -3,14 +3,14 @@ package yamlui
 // **********************************************************************
 // 選択UI
 type UISelect struct {
-	UIBase  *UIBase
+	uiBase  *UIBase
 	ItemNum int
 	RowsNum int
 }
 
 func NewUISelect(lib *YAMLUI, itemNum, rowsNum int) *UISelect {
 	return &UISelect{
-		UIBase:  NewUIBase(lib),
+		uiBase:  NewUIBase(lib),
 		ItemNum: itemNum,
 		RowsNum: rowsNum,
 	}
@@ -27,12 +27,12 @@ func (self *UISelect) SetSelectNo(selectNo int) {
 // **********************************************************************
 // UIComponentIFの実装
 func (self *UISelect) GetUIBase() *UIBase {
-	return self.UIBase
+	return self.uiBase
 }
 
 func (self *UISelect) Clone() UICloned {
 	return &UISelect{
-		UIBase:  self.UIBase.Clone(),
+		uiBase:  self.uiBase.Clone(),
 		ItemNum: self.ItemNum,
 		RowsNum: self.RowsNum,
 	}

@@ -20,7 +20,7 @@ func NewBTSpeed(lib *yamlui.YAMLUI, model *model) *BTSpeed {
 }
 
 func (self *BTSpeed) GetUIBase() *yamlui.UIBase {
-	return self.SelBase.UIBase
+	return self.SelBase.GetUIBase()
 }
 
 func (self *BTSpeed) Clone() yamlui.UICloned {

@@ -15,30 +15,6 @@ type DrawQueueItem struct {
 	clip   Area
 }
 
-// ==================================================
-// DrawTreeIF
-// Drawの引数やZ順を変更したいときに使う
-type DrawContext struct {
-	Parent     *UIBase
-	ParentClip Area
-	Z          float64
-	X, Y       int
-	Clip       Area
-}
-
-type DrawContextIF interface {
-	DrawContextFilter(lib *YAMLUI, ctx DrawContext) DrawContext
-}
-
-// 通常のDraw
-type DrawIF interface {
-	Draw(lib *YAMLUI, x, y int, clip Area)
-}
-
-// 実装確認君
-func (self *UIBase) CheckDrawContextIF(drawContextIF DrawContextIF) {}
-func (self *UIBase) CheckDrawIF(drawIF DrawIF)                      {}
-
 // **********************************************************************
 // 呼び出し口
 func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {

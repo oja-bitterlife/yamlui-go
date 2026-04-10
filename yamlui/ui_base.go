@@ -102,9 +102,9 @@ func (self *UIBase) Clone() *UIBase {
 // ScriptVMとの連携
 // 参照用で送る
 func (self *UIBase) storeToVM(frame int, event string) {
-	self.script.Vars["@ID"] = script.NewString(self.ID)
-	self.script.Vars["@Event"] = script.NewString(event) // 発生したイベント
-	self.script.Vars["@Frame"] = script.NewNumber(frame)
+	self.script.Vars[PROP_ID] = script.NewString(self.ID)
+	self.script.Vars[PROP_EVENT] = script.NewString(event) // 発生したイベント
+	self.script.Vars[PROP_FRAME] = script.NewNumber(frame)
 }
 
 // ==================================================

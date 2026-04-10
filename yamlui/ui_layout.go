@@ -1,7 +1,7 @@
 package yamlui
 
 type UILayout struct {
-	UIBase *UIBase
+	uiBase *UIBase
 
 	// Layout用のプロパティ.ここに置くとprivate扱いになる
 	// publicにしたい場合はGetUIBase().SetPropで保存する
@@ -28,7 +28,7 @@ type UILayout struct {
 
 func NewUILayout(lib *YAMLUI) *UILayout {
 	layout := &UILayout{
-		UIBase: NewUIBase(lib),
+		uiBase: NewUIBase(lib),
 	}
 	return layout
 }
@@ -36,12 +36,12 @@ func NewUILayout(lib *YAMLUI) *UILayout {
 // **********************************************************************
 // UIComponentIFの実装
 func (self *UILayout) GetUIBase() *UIBase {
-	return self.UIBase
+	return self.uiBase
 }
 
 func (self *UILayout) Clone() UICloned {
 	newLayout := *self
-	newLayout.UIBase = self.UIBase.Clone()
+	newLayout.uiBase = self.uiBase.Clone()
 	return &newLayout
 }
 
@@ -51,23 +51,23 @@ func (self *UILayout) Dispatch(lib *YAMLUI, event string) {
 	}
 
 	// デフォルトはMargin=0
-	self.Margin = self.UIBase.PropNum("@Margin")
-	self.MarginTop = self.UIBase.PropNum("@MarginTop")
-	self.MarginBottom = self.UIBase.PropNum("@MarginBottom")
-	self.MarginLeft = self.UIBase.PropNum("@MarginLeft")
-	self.MarginRight = self.UIBase.PropNum("@MarginRight")
-	self.MarginX = self.UIBase.PropNum("@MarginX")
-	self.MarginY = self.UIBase.PropNum("@MarginY")
+	self.Margin = self.uiBase.PropNum("@Margin")
+	self.MarginTop = self.uiBase.PropNum("@MarginTop")
+	self.MarginBottom = self.uiBase.PropNum("@MarginBottom")
+	self.MarginLeft = self.uiBase.PropNum("@MarginLeft")
+	self.MarginRight = self.uiBase.PropNum("@MarginRight")
+	self.MarginX = self.uiBase.PropNum("@MarginX")
+	self.MarginY = self.uiBase.PropNum("@MarginY")
 
 	// Align系のプロパティはデフォルトはfalse
-	self.AlignCenter = self.UIBase.PropBool("@AlignCenter")
-	self.AlignCenterX = self.UIBase.PropBool("@AlignCenterX")
-	self.AlignCenterY = self.UIBase.PropBool("@AlignCenterY")
-	self.AlignRight = self.UIBase.PropBool("@AlignRight")
-	self.AlignBottom = self.UIBase.PropBool("@AlignBottom")
+	self.AlignCenter = self.uiBase.PropBool("@AlignCenter")
+	self.AlignCenterX = self.uiBase.PropBool("@AlignCenterX")
+	self.AlignCenterY = self.uiBase.PropBool("@AlignCenterY")
+	self.AlignRight = self.uiBase.PropBool("@AlignRight")
+	self.AlignBottom = self.uiBase.PropBool("@AlignBottom")
 
 	// IsAbsのデフォルトはfalse
-	self.IsAbs = self.UIBase.PropBool("@IsAbs")
+	self.IsAbs = self.uiBase.PropBool("@IsAbs")
 }
 
 // **********************************************************************

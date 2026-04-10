@@ -20,7 +20,7 @@ func NewBTStart(lib *yamlui.YAMLUI, model *model) *BTStart {
 }
 
 func (self *BTStart) GetUIBase() *yamlui.UIBase {
-	return self.SelBase.UIBase
+	return self.SelBase.GetUIBase()
 }
 
 func (self *BTStart) Clone() yamlui.UICloned {

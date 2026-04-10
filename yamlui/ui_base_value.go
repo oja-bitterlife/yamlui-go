@@ -17,7 +17,7 @@ func (self *UIBase) ToValue() script.Value {
 
 	// UIBaseの基本的なプロパティをValueMapに入れる
 	data := script.ValueMap{
-		"ID":     script.NewString(self.ID),
+		PROP_ID:  script.NewString(self.ID),
 		"Events": script.NewLitList(events),
 		"script": self.script.AST,
 	}

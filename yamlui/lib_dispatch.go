@@ -15,15 +15,6 @@ type DispatchQueueItem struct {
 	uiBase     *UIBase
 }
 
-// ==================================================
-// Update
-type DispatchIF interface {
-	Dispatch(lib *YAMLUI, event string)
-}
-
-// 実装確認君
-func (self *UIBase) CheckDispatchIF(dispatchIF DispatchIF) {}
-
 // **********************************************************************
 // 呼び出し口
 func (lib *YAMLUI) dispatch(event string) {
