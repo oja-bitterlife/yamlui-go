@@ -206,7 +206,7 @@ func (lib *YAMLUI) load(parent *UIBase, value script.Value) error {
 		if if_, ok := component.(DrawIF); ok {
 			ui.drawIF = if_
 		}
-		if if_, ok := component.(DrawTreeIF); ok {
+		if if_, ok := component.(DrawContextIF); ok {
 			ui.drawTreeIF = if_
 		}
 

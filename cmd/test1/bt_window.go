@@ -30,7 +30,7 @@ func (self *BTWindow) Clone() yamlui.UICloned {
 	}
 }
 
-func (self *BTWindow) DrawTreeFilter(lib *yamlui.YAMLUI, ctx yamlui.DrawTreeContext) yamlui.DrawTreeContext {
+func (self *BTWindow) DrawContextFilter(lib *yamlui.YAMLUI, ctx yamlui.DrawContext) yamlui.DrawContext {
 	// closing中
 	if self.GetUIBase().HasProp("close_ratio") {
 		ratio := self.GetUIBase().PropNum("close_ratio")

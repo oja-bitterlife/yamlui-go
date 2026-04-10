@@ -30,7 +30,7 @@ type UIBase struct {
 	// ----------------------------------------
 	dispatchIF DispatchIF
 	drawIF     DrawIF
-	drawTreeIF DrawTreeIF // z順を変更したいときに使う
+	drawTreeIF DrawContextIF // z順を変更したいときに使う
 }
 
 // IDが決まっているときはこっち

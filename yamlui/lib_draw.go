@@ -18,7 +18,7 @@ type DrawQueueItem struct {
 // ==================================================
 // DrawTreeIF
 // Drawの引数やZ順を変更したいときに使う
-type DrawTreeContext struct {
+type DrawContext struct {
 	X, Y       int
 	Z          float64
 	Clip       Area
@@ -26,8 +26,8 @@ type DrawTreeContext struct {
 	Parent     *UIBase
 }
 
-type DrawTreeIF interface {
-	DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeContext
+type DrawContextIF interface {
+	DrawContextFilter(lib *YAMLUI, ctx DrawContext) DrawContext
 }
 
 // 通常のDraw
@@ -36,8 +36,8 @@ type DrawIF interface {
 }
 
 // 実装確認君
-func (self *UIBase) CheckDrawTreeFilterIF(drawTreeIF DrawTreeIF) {}
-func (self *UIBase) CheckDrawIF(drawIF DrawIF)                   {}
+func (self *UIBase) CheckDrawContextIF(drawContextIF DrawContextIF) {}
+func (self *UIBase) CheckDrawIF(drawIF DrawIF)                      {}
 
 // **********************************************************************
 // 呼び出し口
@@ -58,7 +58,7 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 
 	// 描画コンテキストを作成してDrawTreeを呼び出す
 	// ----------------------------------------
-	ctx := DrawTreeContext{
+	ctx := DrawContext{
 		X:          sx,
 		Y:          sy,
 		Clip:       lib.Screen,
@@ -91,10 +91,10 @@ func (lib *YAMLUI) Draw(sx, sy, sw, sh int) {
 
 // **********************************************************************
 // DrawTreeの再帰実行
-func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawTreeContext) {
+func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawContext) {
 	// Filterがあれば描画コンテキストを変更する
 	if self.drawTreeIF != nil {
-		ctx = self.drawTreeIF.DrawTreeFilter(lib, ctx)
+		ctx = self.drawTreeIF.DrawContextFilter(lib, ctx)
 	}
 
 	// 描画インターフェースがあれば描画キューに入れる
@@ -115,7 +115,7 @@ func (self *UIBase) recDrawTree(lib *YAMLUI, ctx DrawTreeContext) {
 			childClip := childArea.Clip(ctx.Clip)
 
 			// 子供の描画コンテキストを作る。Z順は親よりも大きくする
-			childCtx := DrawTreeContext{
+			childCtx := DrawContext{
 				X:          childArea.X,
 				Y:          childArea.Y,
 				Z:          ctx.Z + 1,

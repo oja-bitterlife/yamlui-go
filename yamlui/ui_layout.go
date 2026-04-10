@@ -72,7 +72,7 @@ func (self *UILayout) Dispatch(lib *YAMLUI, event string) {
 
 // **********************************************************************
 // DrawTreeのOverride
-func (self *UILayout) DrawTreeFilter(lib *YAMLUI, ctx DrawTreeContext) DrawTreeContext {
+func (self *UILayout) DrawContextFilter(lib *YAMLUI, ctx DrawContext) DrawContext {
 	area := self.GetUIBase().Area()
 	parentW, parentH := ctx.ParentClip.W, ctx.ParentClip.H
 
