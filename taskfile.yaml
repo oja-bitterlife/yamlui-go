@@ -1,7 +1,7 @@
 version: 3
 
 vars:
-  VERSION: v0.0.1
+  VERSION: v0.0.2
   BIN_DIR: "bin"
   ASSET_DIR: "assets"
   UI_SRC_YAML: "ui.yaml"
